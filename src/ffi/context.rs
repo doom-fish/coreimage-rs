@@ -8,6 +8,15 @@ unsafe extern "C" {
         priority_request_low: bool,
         allow_low_power: bool,
         output_premultiplied: bool,
+        high_quality_downsample: bool,
+        use_output_color_space: bool,
+        output_color_space_code: i32,
+        use_working_color_space: bool,
+        working_color_space_code: i32,
+        use_working_format: bool,
+        working_format_code: i32,
+        use_memory_limit: bool,
+        memory_limit: f64,
         name: *const c_char,
     ) -> *mut c_void;
     #[cfg(feature = "metal")]

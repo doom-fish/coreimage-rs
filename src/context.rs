@@ -11,9 +11,10 @@ use apple_cf::iosurface::IOSurface;
 use apple_metal::{CommandQueue, MetalDevice};
 
 use crate::ffi;
-use crate::image::CIImage;
 use crate::util::{path_to_cstring, status_result, string_to_cstring};
-use crate::CIError;
+use crate::{
+    CIColorSpace, CIError, CIFormat, CIImage, CIRenderDestination, CIRenderTask,
+};
 
 /// Common Core Image context options that don't require extra framework types.
 #[allow(clippy::struct_excessive_bools)]
@@ -23,6 +24,11 @@ pub struct CIContextOptions {
     pub priority_request_low: bool,
     pub allow_low_power: bool,
     pub output_premultiplied: bool,
+    pub high_quality_downsample: bool,
+    pub output_color_space: Option<CIColorSpace>,
+    pub working_color_space: Option<CIColorSpace>,
+    pub working_format: Option<CIFormat>,
+    pub memory_limit: Option<f64>,
     pub name: Option<String>,
 }
 
@@ -95,6 +101,15 @@ impl CIContext {
                     options.priority_request_low,
                     options.allow_low_power,
                     options.output_premultiplied,
+                    options.high_quality_downsample,
+                    options.output_color_space.is_some(),
+                    options.output_color_space.map_or(0, CIColorSpace::code),
+                    options.working_color_space.is_some(),
+                    options.working_color_space.map_or(0, CIColorSpace::code),
+                    options.working_format.is_some(),
+                    options.working_format.map_or(0, CIFormat::raw_value),
+                    options.memory_limit.is_some(),
+                    options.memory_limit.unwrap_or_default(),
                     name.as_ref().map_or(ptr::null(), |value| value.as_ptr()),
                 )
             },
@@ -122,6 +137,10 @@ impl CIContext {
 
     pub fn working_format(&self) -> i32 {
         unsafe { ffi::ci_context_working_format(self.ptr) }
+    }
+
+    pub fn working_pixel_format(&self) -> Option<CIFormat> {
+        CIFormat::from_raw(self.working_format())
     }
 
     pub fn render_to_cg_image(&self, image: &CIImage) -> Result<CGImage, CIError> {
@@ -163,6 +182,60 @@ impl CIContext {
             )
         };
         unsafe { status_result(status, error) }
+    }
+
+    pub fn start_render_task(
+        &self,
+        image: &CIImage,
+        destination: &CIRenderDestination,
+    ) -> Result<CIRenderTask, CIError> {
+        let mut task = ptr::null_mut();
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_context_start_render_task(
+                self.ptr,
+                image.as_ptr(),
+                destination.as_ptr(),
+                &mut task,
+                &mut error,
+            )
+        };
+        unsafe { status_result(status, error)? };
+        if task.is_null() {
+            Err(CIError::NullResult(
+                "CIContext.startTask(toRender:to:) returned nil".to_string(),
+            ))
+        } else {
+            Ok(unsafe { CIRenderTask::from_raw(task) })
+        }
+    }
+
+    pub fn prepare_render(
+        &self,
+        image: &CIImage,
+        destination: &CIRenderDestination,
+    ) -> Result<(), CIError> {
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_context_prepare_render(self.ptr, image.as_ptr(), destination.as_ptr(), &mut error)
+        };
+        unsafe { status_result(status, error) }
+    }
+
+    pub fn start_clear_task(&self, destination: &CIRenderDestination) -> Result<CIRenderTask, CIError> {
+        let mut task = ptr::null_mut();
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_context_start_clear_task(self.ptr, destination.as_ptr(), &mut task, &mut error)
+        };
+        unsafe { status_result(status, error)? };
+        if task.is_null() {
+            Err(CIError::NullResult(
+                "CIContext.startTask(toClear:) returned nil".to_string(),
+            ))
+        } else {
+            Ok(unsafe { CIRenderTask::from_raw(task) })
+        }
     }
 
     pub fn reclaim_resources(&self) {

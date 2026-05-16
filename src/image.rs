@@ -11,7 +11,7 @@ use crate::color::CIColor;
 use crate::ffi;
 use crate::filter::CIFilter;
 use crate::util::{path_to_cstring, status_result, string_to_cstring, take_owned_string};
-use crate::CIError;
+use crate::{CIColorSpace, CIError, CIFormat};
 
 /// An immutable Core Image image.
 pub struct CIImage {
@@ -119,6 +119,45 @@ impl CIImage {
         Self::from_color(&CIColor::named(color))
     }
 
+    pub fn from_bitmap(
+        data: &[u8],
+        width: usize,
+        height: usize,
+        bytes_per_row: usize,
+        format: CIFormat,
+        color_space: Option<CIColorSpace>,
+    ) -> Result<Self, CIError> {
+        let required_len = bytes_per_row
+            .checked_mul(height)
+            .ok_or_else(|| CIError::InvalidArgument("bitmap dimensions overflowed".to_string()))?;
+
+        if data.len() < required_len {
+            return Err(CIError::InvalidArgument(format!(
+                "expected at least {required_len} bytes for a {width}x{height} bitmap with {bytes_per_row} bytes per row, got {}",
+                data.len()
+            )));
+        }
+
+        let mut image = ptr::null_mut();
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_image_from_bitmap(
+                data.as_ptr(),
+                data.len(),
+                width,
+                height,
+                bytes_per_row,
+                format.raw_value(),
+                color_space.is_some(),
+                color_space.map_or(0, CIColorSpace::code),
+                &mut image,
+                &mut error,
+            )
+        };
+        unsafe { status_result(status, error)? };
+        Ok(Self::from_non_null(image, "CIImage(bitmapData:)") )
+    }
+
     pub fn from_bitmap_rgba8(data: &[u8], width: usize, height: usize) -> Result<Self, CIError> {
         let expected_len = width
             .checked_mul(height)
@@ -132,20 +171,14 @@ impl CIImage {
             )));
         }
 
-        let mut image = ptr::null_mut();
-        let mut error = ptr::null_mut();
-        let status = unsafe {
-            ffi::ci_image_from_bitmap_rgba8(
-                data.as_ptr(),
-                data.len(),
-                width,
-                height,
-                &mut image,
-                &mut error,
-            )
-        };
-        unsafe { status_result(status, error)? };
-        Ok(Self::from_non_null(image, "CIImage(bitmapData:)"))
+        Self::from_bitmap(
+            data,
+            width,
+            height,
+            width * 4,
+            CIFormat::Rgba8,
+            Some(CIColorSpace::Srgb),
+        )
     }
 
     pub fn extent(&self) -> CGRect {

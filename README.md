@@ -2,17 +2,17 @@
 
 Safe Rust bindings for Apple's [CoreImage](https://developer.apple.com/documentation/coreimage) framework — GPU-accelerated image processing, filtering, rendering, detection, and kernel work on macOS.
 
-> **Status:** v0.2.0 expands the crate across the major practical Core Image surfaces: `CIImage`, `CIFilter`, `CIContext`, `CIDetector`, `CIFeature`, `CIColor`, `CIVector`, `CIKernel`, `CIBarcodeDescriptor`, `CIImageProcessorKernel`, `CIFilterGenerator`, and `CISampler`, with examples and tests for each area.
+> **Status:** v0.2.1 raises the Core Image header audit to 339 verified public symbols (72.75%), adding typed builtin filter constructors, typed `CIFormat`/`CIColorSpace` constant families, `CIFilterShape`, `CIImageAccumulator`, `CIRAWFilter`, and bitmap-backed `CIRenderDestination` / `CIRenderTask` coverage.
 
 ## Highlights
 
-- `CIImage` constructors from file paths, encoded bytes, `CGImage`, `CVPixelBuffer`, `IOSurface`, colors, and RGBA bitmap buffers
-- `CIFilter` registry/localization helpers plus typed setters for images, numbers, strings, bytes, vectors, colors, and barcode descriptors
-- `CIContext` creation for default, CPU, and optional Metal backends, plus `CGImage` rendering and PNG/JPEG/HEIF/HEIF10/TIFF/OpenEXR export helpers
+- `CIImage` constructors from file paths, encoded bytes, `CGImage`, `CVPixelBuffer`, `IOSurface`, colors, and typed bitmap buffers via `CIFormat` / `CIColorSpace`
+- `CIFilter` registry/localization helpers plus typed setters, output inspection, and 149 typed `CIFilterBuiltins` constructors in `filters`
+- `CIContext` creation for default, CPU, and optional Metal backends, plus `CGImage` rendering, bitmap-backed `CIRenderDestination` / `CIRenderTask`, and PNG/JPEG/HEIF/HEIF10/TIFF/OpenEXR export helpers
+- `CIFilterShape`, `CIImageAccumulator`, and `CIRAWFilter` wrappers for shape math, incremental rendering, and RAW decoding workflows
 - Detector + feature inspection coverage for faces, rectangles, QR codes, and text via `CIDetector` / `CIFeature`
 - `CIColor`, `CIVector`, `CIBarcodeDescriptor`, `CISampler`, `CIFilterGenerator`, and `CIImageProcessor` wrappers for common graph-building workflows
-- `CIColorKernel`, `CIWarpKernel`, and `CIBlendKernel` support, plus the existing `filters` convenience module for common built-ins
-- Shared CoreFoundation/CoreGraphics/CoreVideo/IOSurface interop via [`apple-cf`](https://github.com/doom-fish/apple-cf-rs)
+- `CIColorKernel`, `CIWarpKernel`, and `CIBlendKernel` support, plus shared CoreFoundation/CoreGraphics/CoreVideo/IOSurface interop via [`apple-cf`](https://github.com/doom-fish/apple-cf-rs)
 
 ## Quick start
 
@@ -39,9 +39,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## Surface overview
 
-- `CIImage`: loading, color/bitmap creation, geometric transforms, compositing, blur, gain-map/headroom helpers, and region-of-interest inspection
-- `CIFilter`: filter discovery, localization, metadata, typed input setters, output image extraction, and barcode-descriptor inputs
-- `CIContext`: default/CPU/Metal contexts, rendering to `CGImage`/`CVPixelBuffer`/`IOSurface`, cache management, and file output helpers
+- `CIImage` + typed constants: loading, color/bitmap creation with `CIFormat` / `CIColorSpace`, geometric transforms, compositing, blur, gain-map/headroom helpers, and region-of-interest inspection
+- `CIFilter` + `filters`: filter discovery, localization, metadata, typed input setters, output image extraction, barcode-descriptor inputs, and typed constructors for 149 instantiable built-ins
+- `CIContext` + `CIRenderDestination` / `CIRenderTask`: default/CPU/Metal contexts, rendering to `CGImage`/`CVPixelBuffer`/`IOSurface`/bitmap destinations, cache management, async render-task helpers, and file output
+- `CIFilterShape` + `CIImageAccumulator`: shape transforms/intersections and incremental image accumulation
+- `CIRAWFilter`: supported camera-model/decoder discovery plus preview/output image access and common RAW adjustments
 - `CIDetector` + `CIFeature`: detector construction plus QR/face/rectangle/text feature inspection, message strings, symbol descriptors, and sub-features
 - `CIColor` + `CIVector`: structured value wrappers for graph inputs, geometry, and transform round-tripping
 - `CIBarcodeDescriptor`: QR/Aztec/PDF417/Data Matrix descriptor construction and inspection
@@ -66,6 +68,9 @@ The crate ships runnable examples for each major area:
 - `11_feature`
 - `12_filter_generator`
 - `13_sampler`
+- `14_accumulator`
+- `15_render_destination`
+- `16_raw_filter`
 
 Run them all with:
 
@@ -75,7 +80,7 @@ for ex in examples/*.rs; do cargo run --example "$(basename "$ex" .rs)"; done
 
 ## Coverage audit
 
-See [COVERAGE.md](COVERAGE.md) for the framework-header audit, implemented surfaces, and deferred areas such as plug-ins, RAW filters, render destinations/tasks, filter constructors, and image accumulators/providers.
+See [COVERAGE.md](COVERAGE.md) for the framework-header audit, current 339/499 symbol coverage (72.75%), implemented filter-shape/image-accumulator/raw/render-destination surfaces, and remaining gaps around plug-ins, filter constructors/providers, and deeper constant/kernel coverage.
 
 ## Roadmap
 
@@ -83,10 +88,10 @@ See [COVERAGE.md](COVERAGE.md) for the framework-header audit, implemented surfa
 - [x] `CIDetector`, `CIFeature`, QR feature/message inspection
 - [x] `CIBarcodeDescriptor`, `CISampler`, `CIFilterGenerator`, `CIImageProcessor`
 - [x] Core kernel coverage (`CIColorKernel`, `CIWarpKernel`, `CIBlendKernel`)
-- [x] Common built-in filter helpers (`filters` feature)
+- [x] Builtin filter constructors + typed constant families (`CIFormat`, `CIColorSpace`, context/image option keys)
+- [x] `CIFilterShape`, `CIImageAccumulator`, `CIRAWFilter`, `CIRenderDestination`, `CIRenderTask`
 - [ ] `CIPlugIn` / `CIPlugInInterface`
-- [ ] `CIFilterConstructor`, `CIFilterShape`, `CIImageAccumulator`, `CIImageProvider`
-- [ ] `CIRAWFilter`, `CIRenderDestination`, and related render-task APIs
+- [ ] `CIFilterConstructor`, `CIImageProvider`, `CIKernelMetalLib`
 
 ## License
 

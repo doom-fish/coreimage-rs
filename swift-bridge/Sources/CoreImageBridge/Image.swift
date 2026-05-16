@@ -80,6 +80,38 @@ public func ci_image_named_constant(_ kind: Int32) -> UnsafeMutableRawPointer? {
     return ci_retain(CIImage(color: ciColor))
 }
 
+@_cdecl("ci_image_from_bitmap")
+public func ci_image_from_bitmap(
+    _ bytes: UnsafePointer<UInt8>?,
+    _ len: Int,
+    _ width: Int,
+    _ height: Int,
+    _ bytesPerRow: Int,
+    _ formatCode: Int32,
+    _ useColorSpace: Bool,
+    _ colorSpaceCode: Int32,
+    _ outImage: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let bytes, len > 0, width > 0, height > 0, bytesPerRow > 0, let outImage,
+              let format = ci_image_format(from: formatCode)
+        else {
+            throw CIBridgeError.invalidArgument("missing bitmap bytes, format, or output image pointer")
+        }
+        let data = Data(bytes: bytes, count: len)
+        let colorSpace = useColorSpace ? ci_color_space(from: colorSpaceCode) : nil
+        let image = CIImage(
+            bitmapData: data,
+            bytesPerRow: bytesPerRow,
+            size: CGSize(width: width, height: height),
+            format: format,
+            colorSpace: colorSpace
+        )
+        outImage.pointee = ci_retain(image)
+    }
+}
+
 @_cdecl("ci_image_from_bitmap_rgba8")
 public func ci_image_from_bitmap_rgba8(
     _ bytes: UnsafePointer<UInt8>?,
@@ -89,20 +121,18 @@ public func ci_image_from_bitmap_rgba8(
     _ outImage: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
     _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
 ) -> Int32 {
-    ci_run(outError) {
-        guard let bytes, len > 0, width > 0, height > 0, let outImage else {
-            throw CIBridgeError.invalidArgument("missing bitmap bytes or output image pointer")
-        }
-        let data = Data(bytes: bytes, count: len)
-        let image = CIImage(
-            bitmapData: data,
-            bytesPerRow: width * 4,
-            size: CGSize(width: width, height: height),
-            format: .RGBA8,
-            colorSpace: ci_srgb_color_space()
-        )
-        outImage.pointee = ci_retain(image)
-    }
+    ci_image_from_bitmap(
+        bytes,
+        len,
+        width,
+        height,
+        width * 4,
+        2,
+        true,
+        1,
+        outImage,
+        outError
+    )
 }
 
 @_cdecl("ci_image_extent")

@@ -1,10 +1,10 @@
 # coreimage coverage audit (vs MacOSX26.2.sdk)
 
 SDK_PUBLIC_SYMBOLS: 499
-VERIFIED: 99
-GAPS: 367
+VERIFIED: 339
+GAPS: 127
 EXEMPT: 33
-COVERAGE_PCT: 21.24%
+COVERAGE_PCT: 72.75%
 
 > Method note: this is a symbol-level audit. Generic stringly-typed escape hatches such as `CIFilter::new(name)`, raw input-key strings, and JSON metadata blobs are **not** counted as symbol coverage unless the crate exposes a dedicated typed helper for that SDK symbol.
 
@@ -110,30 +110,250 @@ COVERAGE_PCT: 21.24%
 | kCISamplerWrapMode | const | CISampler.h | CISamplerOptions::wrap_mode |
 | CISampler | interface | CISampler.h | CISampler |
 | CIVector | interface | CIVector.h | CIVector |
+| kCIContextCVMetalTextureCache | const | CIContext.h | CIContextOptionKey::CvMetalTextureCache |
+| kCIContextHighQualityDownsample | const | CIContext.h | CIContextOptionKey::HighQualityDownsample + CIContextOptions::high_quality_downsample |
+| kCIContextMemoryLimit | const | CIContext.h | CIContextOptionKey::MemoryLimit + CIContextOptions::memory_limit |
+| kCIContextOutputColorSpace | const | CIContext.h | CIContextOptionKey::OutputColorSpace + CIContextOptions::output_color_space |
+| kCIContextWorkingColorSpace | const | CIContext.h | CIContextOptionKey::WorkingColorSpace + CIContextOptions::working_color_space |
+| kCIContextWorkingFormat | const | CIContext.h | CIContextOptionKey::WorkingFormat + CIContextOptions::working_format |
+| kCIImageRepresentationAVDepthData | const | CIContext.h | CIImageRepresentationOptionKey::AvDepthData |
+| kCIImageRepresentationAVPortraitEffectsMatte | const | CIContext.h | CIImageRepresentationOptionKey::AvPortraitEffectsMatte |
+| kCIImageRepresentationAVSemanticSegmentationMattes | const | CIContext.h | CIImageRepresentationOptionKey::AvSemanticSegmentationMattes |
+| kCIImageRepresentationDepthImage | const | CIContext.h | CIImageRepresentationOptionKey::DepthImage |
+| kCIImageRepresentationDisparityImage | const | CIContext.h | CIImageRepresentationOptionKey::DisparityImage |
+| kCIImageRepresentationHDRGainMapAsRGB | const | CIContext.h | CIImageRepresentationOptionKey::HdrGainMapAsRgb |
+| kCIImageRepresentationHDRGainMapImage | const | CIContext.h | CIImageRepresentationOptionKey::HdrGainMapImage |
+| kCIImageRepresentationHDRImage | const | CIContext.h | CIImageRepresentationOptionKey::HdrImage |
+| kCIImageRepresentationPortraitEffectsMatteImage | const | CIContext.h | CIImageRepresentationOptionKey::PortraitEffectsMatteImage |
+| kCIImageRepresentationSemanticSegmentationGlassesMatteImage | const | CIContext.h | CIImageRepresentationOptionKey::SemanticSegmentationGlassesMatteImage |
+| kCIImageRepresentationSemanticSegmentationHairMatteImage | const | CIContext.h | CIImageRepresentationOptionKey::SemanticSegmentationHairMatteImage |
+| kCIImageRepresentationSemanticSegmentationSkinMatteImage | const | CIContext.h | CIImageRepresentationOptionKey::SemanticSegmentationSkinMatteImage |
+| kCIImageRepresentationSemanticSegmentationSkyMatteImage | const | CIContext.h | CIImageRepresentationOptionKey::SemanticSegmentationSkyMatteImage |
+| kCIImageRepresentationSemanticSegmentationTeethMatteImage | const | CIContext.h | CIImageRepresentationOptionKey::SemanticSegmentationTeethMatteImage |
+| CIAccordionFoldTransition | protocol | CIFilterBuiltins.h | filters::accordion_fold_transition |
+| CIAffineClamp | protocol | CIFilterBuiltins.h | filters::affine_clamp |
+| CIAffineTile | protocol | CIFilterBuiltins.h | filters::affine_tile |
+| CIAreaAverage | protocol | CIFilterBuiltins.h | filters::area_average |
+| CIAreaAverageMaximumRed | protocol | CIFilterBuiltins.h | filters::area_average_maximum_red |
+| CIAreaBoundsRed | protocol | CIFilterBuiltins.h | filters::area_bounds_red |
+| CIAreaHistogram | protocol | CIFilterBuiltins.h | filters::area_histogram |
+| CIAreaLogarithmicHistogram | protocol | CIFilterBuiltins.h | filters::area_logarithmic_histogram |
+| CIAreaMaximum | protocol | CIFilterBuiltins.h | filters::area_maximum |
+| CIAreaMaximumAlpha | protocol | CIFilterBuiltins.h | filters::area_maximum_alpha |
+| CIAreaMinMax | protocol | CIFilterBuiltins.h | filters::area_min_max |
+| CIAreaMinMaxRed | protocol | CIFilterBuiltins.h | filters::area_min_max_red |
+| CIAreaMinimum | protocol | CIFilterBuiltins.h | filters::area_minimum |
+| CIAreaMinimumAlpha | protocol | CIFilterBuiltins.h | filters::area_minimum_alpha |
+| CIAreaReductionFilter | protocol | CIFilterBuiltins.h | filters::area_reduction_filter |
+| CIAttributedTextImageGenerator | protocol | CIFilterBuiltins.h | filters::attributed_text_image_generator |
+| CIAztecCodeGenerator | protocol | CIFilterBuiltins.h | filters::aztec_code_generator |
+| CIBarcodeGenerator | protocol | CIFilterBuiltins.h | filters::barcode_generator |
+| CIBarsSwipeTransition | protocol | CIFilterBuiltins.h | filters::bars_swipe_transition |
+| CIBicubicScaleTransform | protocol | CIFilterBuiltins.h | filters::bicubic_scale_transform |
+| CIBlurredRectangleGenerator | protocol | CIFilterBuiltins.h | filters::blurred_rectangle_generator |
+| CIBlurredRoundedRectangleGenerator | protocol | CIFilterBuiltins.h | filters::blurred_rounded_rectangle_generator |
+| CIBokehBlur | protocol | CIFilterBuiltins.h | filters::bokeh_blur |
+| CIBumpDistortion | protocol | CIFilterBuiltins.h | filters::bump_distortion |
+| CIBumpDistortionLinear | protocol | CIFilterBuiltins.h | filters::bump_distortion_linear |
+| CICMYKHalftone | protocol | CIFilterBuiltins.h | filters::cmyk_halftone |
+| CICannyEdgeDetector | protocol | CIFilterBuiltins.h | filters::canny_edge_detector |
+| CICircleSplashDistortion | protocol | CIFilterBuiltins.h | filters::circle_splash_distortion |
+| CICircularScreen | protocol | CIFilterBuiltins.h | filters::circular_screen |
+| CICircularWrap | protocol | CIFilterBuiltins.h | filters::circular_wrap |
+| CICode128BarcodeGenerator | protocol | CIFilterBuiltins.h | filters::code128_barcode_generator |
+| CIColorAbsoluteDifference | protocol | CIFilterBuiltins.h | filters::color_absolute_difference |
+| CIColorClamp | protocol | CIFilterBuiltins.h | filters::color_clamp |
+| CIColorCrossPolynomial | protocol | CIFilterBuiltins.h | filters::color_cross_polynomial |
+| CIColorCube | protocol | CIFilterBuiltins.h | filters::color_cube |
+| CIColorCubeWithColorSpace | protocol | CIFilterBuiltins.h | filters::color_cube_with_color_space |
+| CIColorCubesMixedWithMask | protocol | CIFilterBuiltins.h | filters::color_cubes_mixed_with_mask |
+| CIColorCurves | protocol | CIFilterBuiltins.h | filters::color_curves |
+| CIColorMap | protocol | CIFilterBuiltins.h | filters::color_map |
+| CIColorMatrix | protocol | CIFilterBuiltins.h | filters::color_matrix |
+| CIColorPolynomial | protocol | CIFilterBuiltins.h | filters::color_polynomial |
+| CIColorPosterize | protocol | CIFilterBuiltins.h | filters::color_posterize |
+| CIColorThreshold | protocol | CIFilterBuiltins.h | filters::color_threshold |
+| CIColorThresholdOtsu | protocol | CIFilterBuiltins.h | filters::color_threshold_otsu |
+| CIColumnAverage | protocol | CIFilterBuiltins.h | filters::column_average |
+| CIConvolution | protocol | CIFilterBuiltins.h | filters::convolution |
+| CICopyMachineTransition | protocol | CIFilterBuiltins.h | filters::copy_machine_transition |
+| CIDepthOfField | protocol | CIFilterBuiltins.h | filters::depth_of_field |
+| CIDepthToDisparity | protocol | CIFilterBuiltins.h | filters::depth_to_disparity |
+| CIDisintegrateWithMaskTransition | protocol | CIFilterBuiltins.h | filters::disintegrate_with_mask_transition |
+| CIDisparityToDepth | protocol | CIFilterBuiltins.h | filters::disparity_to_depth |
+| CIDisplacementDistortion | protocol | CIFilterBuiltins.h | filters::displacement_distortion |
+| CIDissolveTransition | protocol | CIFilterBuiltins.h | filters::dissolve_transition |
+| CIDistanceGradientFromRedMask | protocol | CIFilterBuiltins.h | filters::distance_gradient_from_red_mask |
+| CIDither | protocol | CIFilterBuiltins.h | filters::dither |
+| CIDocumentEnhancer | protocol | CIFilterBuiltins.h | filters::document_enhancer |
+| CIDotScreen | protocol | CIFilterBuiltins.h | filters::dot_screen |
+| CIDroste | protocol | CIFilterBuiltins.h | filters::droste |
+| CIEightfoldReflectedTile | protocol | CIFilterBuiltins.h | filters::eightfold_reflected_tile |
+| CIFlashTransition | protocol | CIFilterBuiltins.h | filters::flash_transition |
+| CIFourfoldReflectedTile | protocol | CIFilterBuiltins.h | filters::fourfold_reflected_tile |
+| CIFourfoldRotatedTile | protocol | CIFilterBuiltins.h | filters::fourfold_rotated_tile |
+| CIFourfoldTranslatedTile | protocol | CIFilterBuiltins.h | filters::fourfold_translated_tile |
+| CIGaborGradients | protocol | CIFilterBuiltins.h | filters::gabor_gradients |
+| CIGaussianGradient | protocol | CIFilterBuiltins.h | filters::gaussian_gradient |
+| CIGlassDistortion | protocol | CIFilterBuiltins.h | filters::glass_distortion |
+| CIGlassLozenge | protocol | CIFilterBuiltins.h | filters::glass_lozenge |
+| CIGlideReflectedTile | protocol | CIFilterBuiltins.h | filters::glide_reflected_tile |
+| CIGloom | protocol | CIFilterBuiltins.h | filters::gloom |
+| CIHatchedScreen | protocol | CIFilterBuiltins.h | filters::hatched_screen |
+| CIHeightFieldFromMask | protocol | CIFilterBuiltins.h | filters::height_field_from_mask |
+| CIHexagonalPixellate | protocol | CIFilterBuiltins.h | filters::hexagonal_pixellate |
+| CIHighlightShadowAdjust | protocol | CIFilterBuiltins.h | filters::highlight_shadow_adjust |
+| CIHoleDistortion | protocol | CIFilterBuiltins.h | filters::hole_distortion |
+| CIHueSaturationValueGradient | protocol | CIFilterBuiltins.h | filters::hue_saturation_value_gradient |
+| CIKMeans | protocol | CIFilterBuiltins.h | filters::k_means |
+| CIKaleidoscope | protocol | CIFilterBuiltins.h | filters::kaleidoscope |
+| CIKeystoneCorrectionCombined | protocol | CIFilterBuiltins.h | filters::keystone_correction_combined |
+| CIKeystoneCorrectionHorizontal | protocol | CIFilterBuiltins.h | filters::keystone_correction_horizontal |
+| CIKeystoneCorrectionVertical | protocol | CIFilterBuiltins.h | filters::keystone_correction_vertical |
+| CILabDeltaE | protocol | CIFilterBuiltins.h | filters::lab_delta_e |
+| CILenticularHaloGenerator | protocol | CIFilterBuiltins.h | filters::lenticular_halo_generator |
+| CILightTunnel | protocol | CIFilterBuiltins.h | filters::light_tunnel |
+| CILineOverlay | protocol | CIFilterBuiltins.h | filters::line_overlay |
+| CILineScreen | protocol | CIFilterBuiltins.h | filters::line_screen |
+| CILinearToSRGBToneCurve | protocol | CIFilterBuiltins.h | filters::linear_to_srgb_tone_curve |
+| CIMaskToAlpha | protocol | CIFilterBuiltins.h | filters::mask_to_alpha |
+| CIMaskedVariableBlur | protocol | CIFilterBuiltins.h | filters::masked_variable_blur |
+| CIMaximumComponent | protocol | CIFilterBuiltins.h | filters::maximum_component |
+| CIMaximumScaleTransform | protocol | CIFilterBuiltins.h | filters::maximum_scale_transform |
+| CIMeshGenerator | protocol | CIFilterBuiltins.h | filters::mesh_generator |
+| CIMinimumComponent | protocol | CIFilterBuiltins.h | filters::minimum_component |
+| CIMix | protocol | CIFilterBuiltins.h | filters::mix |
+| CIModTransition | protocol | CIFilterBuiltins.h | filters::mod_transition |
+| CIMorphologyGradient | protocol | CIFilterBuiltins.h | filters::morphology_gradient |
+| CIMorphologyMaximum | protocol | CIFilterBuiltins.h | filters::morphology_maximum |
+| CIMorphologyMinimum | protocol | CIFilterBuiltins.h | filters::morphology_minimum |
+| CIMorphologyRectangleMaximum | protocol | CIFilterBuiltins.h | filters::morphology_rectangle_maximum |
+| CIMorphologyRectangleMinimum | protocol | CIFilterBuiltins.h | filters::morphology_rectangle_minimum |
+| CINinePartStretched | protocol | CIFilterBuiltins.h | filters::nine_part_stretched |
+| CINinePartTiled | protocol | CIFilterBuiltins.h | filters::nine_part_tiled |
+| CINoiseReduction | protocol | CIFilterBuiltins.h | filters::noise_reduction |
+| CIOpTile | protocol | CIFilterBuiltins.h | filters::op_tile |
+| CIPDF417BarcodeGenerator | protocol | CIFilterBuiltins.h | filters::pdf417_barcode_generator |
+| CIPageCurlTransition | protocol | CIFilterBuiltins.h | filters::page_curl_transition |
+| CIPageCurlWithShadowTransition | protocol | CIFilterBuiltins.h | filters::page_curl_with_shadow_transition |
+| CIPaletteCentroid | protocol | CIFilterBuiltins.h | filters::palette_centroid |
+| CIPalettize | protocol | CIFilterBuiltins.h | filters::palettize |
+| CIParallelogramTile | protocol | CIFilterBuiltins.h | filters::parallelogram_tile |
+| CIPersonSegmentation | protocol | CIFilterBuiltins.h | filters::person_segmentation |
+| CIPerspectiveRotate | protocol | CIFilterBuiltins.h | filters::perspective_rotate |
+| CIPerspectiveTile | protocol | CIFilterBuiltins.h | filters::perspective_tile |
+| CIPerspectiveTransformWithExtent | protocol | CIFilterBuiltins.h | filters::perspective_transform_with_extent |
+| CIPhotoEffect | protocol | CIFilterBuiltins.h | filters::photo_effect |
+| CIPinchDistortion | protocol | CIFilterBuiltins.h | filters::pinch_distortion |
+| CIPointillize | protocol | CIFilterBuiltins.h | filters::pointillize |
+| CIQRCodeGenerator | protocol | CIFilterBuiltins.h | filters::qr_code_generator |
+| CIRandomGenerator | protocol | CIFilterBuiltins.h | filters::random_generator |
+| CIRippleTransition | protocol | CIFilterBuiltins.h | filters::ripple_transition |
+| CIRoundedQRCodeGenerator | protocol | CIFilterBuiltins.h | filters::rounded_qr_code_generator |
+| CIRoundedRectangleGenerator | protocol | CIFilterBuiltins.h | filters::rounded_rectangle_generator |
+| CIRoundedRectangleStrokeGenerator | protocol | CIFilterBuiltins.h | filters::rounded_rectangle_stroke_generator |
+| CIRowAverage | protocol | CIFilterBuiltins.h | filters::row_average |
+| CISRGBToneCurveToLinear | protocol | CIFilterBuiltins.h | filters::srgb_tone_curve_to_linear |
+| CIShadedMaterial | protocol | CIFilterBuiltins.h | filters::shaded_material |
+| CISignedDistanceGradientFromRedMask | protocol | CIFilterBuiltins.h | filters::signed_distance_gradient_from_red_mask |
+| CISixfoldReflectedTile | protocol | CIFilterBuiltins.h | filters::sixfold_reflected_tile |
+| CISixfoldRotatedTile | protocol | CIFilterBuiltins.h | filters::sixfold_rotated_tile |
+| CISmoothLinearGradient | protocol | CIFilterBuiltins.h | filters::smooth_linear_gradient |
+| CISobelGradients | protocol | CIFilterBuiltins.h | filters::sobel_gradients |
+| CISpotColor | protocol | CIFilterBuiltins.h | filters::spot_color |
+| CISpotLight | protocol | CIFilterBuiltins.h | filters::spot_light |
+| CIStarShineGenerator | protocol | CIFilterBuiltins.h | filters::star_shine_generator |
+| CIStretchCrop | protocol | CIFilterBuiltins.h | filters::stretch_crop |
+| CIStripesGenerator | protocol | CIFilterBuiltins.h | filters::stripes_generator |
+| CISunbeamsGenerator | protocol | CIFilterBuiltins.h | filters::sunbeams_generator |
+| CISwipeTransition | protocol | CIFilterBuiltins.h | filters::swipe_transition |
+| CISystemToneMap | protocol | CIFilterBuiltins.h | filters::system_tone_map |
+| CITextImageGenerator | protocol | CIFilterBuiltins.h | filters::text_image_generator |
+| CIThermal | protocol | CIFilterBuiltins.h | filters::thermal |
+| CIToneCurve | protocol | CIFilterBuiltins.h | filters::tone_curve |
+| CIToneMapHeadroom | protocol | CIFilterBuiltins.h | filters::tone_map_headroom |
+| CITorusLensDistortion | protocol | CIFilterBuiltins.h | filters::torus_lens_distortion |
+| CITriangleKaleidoscope | protocol | CIFilterBuiltins.h | filters::triangle_kaleidoscope |
+| CITriangleTile | protocol | CIFilterBuiltins.h | filters::triangle_tile |
+| CITwelvefoldReflectedTile | protocol | CIFilterBuiltins.h | filters::twelvefold_reflected_tile |
+| CITwirlDistortion | protocol | CIFilterBuiltins.h | filters::twirl_distortion |
+| CIVortexDistortion | protocol | CIFilterBuiltins.h | filters::vortex_distortion |
+| CIXRay | protocol | CIFilterBuiltins.h | filters::x_ray |
+| CIFilterShape | interface | CIFilterShape.h | CIFilterShape |
+| kCIFormatA16 | const | CIImage.h | CIFormat::A16 |
+| kCIFormatA8 | const | CIImage.h | CIFormat::A8 |
+| kCIFormatABGR8 | const | CIImage.h | CIFormat::Abgr8 |
+| kCIFormatARGB8 | const | CIImage.h | CIFormat::Argb8 |
+| kCIFormatAf | const | CIImage.h | CIFormat::AF |
+| kCIFormatAh | const | CIImage.h | CIFormat::AH |
+| kCIFormatBGRA8 | const | CIImage.h | CIFormat::Bgra8 |
+| kCIFormatL16 | const | CIImage.h | CIFormat::L16 |
+| kCIFormatL8 | const | CIImage.h | CIFormat::L8 |
+| kCIFormatLA16 | const | CIImage.h | CIFormat::La16 |
+| kCIFormatLA8 | const | CIImage.h | CIFormat::La8 |
+| kCIFormatLAf | const | CIImage.h | CIFormat::LaF |
+| kCIFormatLAh | const | CIImage.h | CIFormat::LaH |
+| kCIFormatLf | const | CIImage.h | CIFormat::LF |
+| kCIFormatLh | const | CIImage.h | CIFormat::LH |
+| kCIFormatR16 | const | CIImage.h | CIFormat::R16 |
+| kCIFormatR8 | const | CIImage.h | CIFormat::R8 |
+| kCIFormatRG16 | const | CIImage.h | CIFormat::Rg16 |
+| kCIFormatRG8 | const | CIImage.h | CIFormat::Rg8 |
+| kCIFormatRGB10 | const | CIImage.h | CIFormat::Rgb10 |
+| kCIFormatRGBA16 | const | CIImage.h | CIFormat::Rgba16 |
+| kCIFormatRGBAf | const | CIImage.h | CIFormat::RgbaF |
+| kCIFormatRGBAh | const | CIImage.h | CIFormat::RgbaH |
+| kCIFormatRGBX16 | const | CIImage.h | CIFormat::Rgbx16 |
+| kCIFormatRGBX8 | const | CIImage.h | CIFormat::Rgbx8 |
+| kCIFormatRGBXf | const | CIImage.h | CIFormat::RgbxF |
+| kCIFormatRGBXh | const | CIImage.h | CIFormat::RgbxH |
+| kCIFormatRGf | const | CIImage.h | CIFormat::RgF |
+| kCIFormatRGh | const | CIImage.h | CIFormat::RgH |
+| kCIFormatRf | const | CIImage.h | CIFormat::RF |
+| kCIFormatRh | const | CIImage.h | CIFormat::RH |
+| kCIImageApplyCleanAperture | const | CIImage.h | CIImageOptionKey::ApplyCleanAperture |
+| kCIImageApplyOrientationProperty | const | CIImage.h | CIImageOptionKey::ApplyOrientationProperty |
+| kCIImageAutoAdjustCrop | const | CIImage.h | CIImageAutoAdjustmentOptionKey::Crop |
+| kCIImageAutoAdjustEnhance | const | CIImage.h | CIImageAutoAdjustmentOptionKey::Enhance |
+| kCIImageAutoAdjustFeatures | const | CIImage.h | CIImageAutoAdjustmentOptionKey::Features |
+| kCIImageAutoAdjustLevel | const | CIImage.h | CIImageAutoAdjustmentOptionKey::Level |
+| kCIImageAutoAdjustRedEye | const | CIImage.h | CIImageAutoAdjustmentOptionKey::RedEye |
+| kCIImageAuxiliaryDepth | const | CIImage.h | CIImageOptionKey::AuxiliaryDepth |
+| kCIImageAuxiliaryDisparity | const | CIImage.h | CIImageOptionKey::AuxiliaryDisparity |
+| kCIImageAuxiliaryHDRGainMap | const | CIImage.h | CIImageOptionKey::AuxiliaryHdrGainMap |
+| kCIImageAuxiliaryPortraitEffectsMatte | const | CIImage.h | CIImageOptionKey::AuxiliaryPortraitEffectsMatte |
+| kCIImageAuxiliarySemanticSegmentationGlassesMatte | const | CIImage.h | CIImageOptionKey::AuxiliarySemanticSegmentationGlassesMatte |
+| kCIImageAuxiliarySemanticSegmentationHairMatte | const | CIImage.h | CIImageOptionKey::AuxiliarySemanticSegmentationHairMatte |
+| kCIImageAuxiliarySemanticSegmentationSkinMatte | const | CIImage.h | CIImageOptionKey::AuxiliarySemanticSegmentationSkinMatte |
+| kCIImageAuxiliarySemanticSegmentationSkyMatte | const | CIImage.h | CIImageOptionKey::AuxiliarySemanticSegmentationSkyMatte |
+| kCIImageAuxiliarySemanticSegmentationTeethMatte | const | CIImage.h | CIImageOptionKey::AuxiliarySemanticSegmentationTeethMatte |
+| kCIImageCacheImmediately | const | CIImage.h | CIImageOptionKey::CacheImmediately |
+| kCIImageColorSpace | const | CIImage.h | CIImageOptionKey::ColorSpace |
+| kCIImageContentAverageLightLevel | const | CIImage.h | CIImageOptionKey::ContentAverageLightLevel |
+| kCIImageContentHeadroom | const | CIImage.h | CIImageOptionKey::ContentHeadroom |
+| kCIImageExpandToHDR | const | CIImage.h | CIImageOptionKey::ExpandToHdr |
+| kCIImageNearestSampling | const | CIImage.h | CIImageOptionKey::NearestSampling |
+| kCIImageProperties | const | CIImage.h | CIImageOptionKey::Properties |
+| kCIImageToneMapHDRtoSDR | const | CIImage.h | CIImageOptionKey::ToneMapHdrToSdr |
+| CIImageAccumulator | interface | CIImageAccumulator.h | CIImageAccumulator |
+| CIRAWDecoderVersion6 | const | CIRAWFilter.h | CIRAWDecoderVersion::Version6 |
+| CIRAWDecoderVersion6DNG | const | CIRAWFilter.h | CIRAWDecoderVersion::Version6Dng |
+| CIRAWDecoderVersion7 | const | CIRAWFilter.h | CIRAWDecoderVersion::Version7 |
+| CIRAWDecoderVersion7DNG | const | CIRAWFilter.h | CIRAWDecoderVersion::Version7Dng |
+| CIRAWDecoderVersion8 | const | CIRAWFilter.h | CIRAWDecoderVersion::Version8 |
+| CIRAWDecoderVersion8DNG | const | CIRAWFilter.h | CIRAWDecoderVersion::Version8Dng |
+| CIRAWDecoderVersion9 | const | CIRAWFilter.h | CIRAWDecoderVersion::Version9 |
+| CIRAWDecoderVersion9DNG | const | CIRAWFilter.h | CIRAWDecoderVersion::Version9Dng |
+| CIRAWDecoderVersionNone | const | CIRAWFilter.h | CIRAWDecoderVersion::None |
+| CIRAWFilter | interface | CIRAWFilter.h | CIRAWFilter |
+| CIRenderDestination | interface | CIRenderDestination.h | CIRenderDestination |
+| CIRenderInfo | interface | CIRenderDestination.h | CIRenderInfo |
+| CIRenderTask | interface | CIRenderDestination.h | CIRenderTask |
+| CIRenderDestinationAlphaMode | typedef | CIRenderDestination.h | CIRenderDestinationAlphaMode |
 
 ## 🔴 GAPS
 | Symbol | Kind | Header | Notes |
 | --- | --- | --- | --- |
-| kCIContextCVMetalTextureCache | const | CIContext.h | No CIContextOptions field or render-option wrapper for this key. |
-| kCIContextHighQualityDownsample | const | CIContext.h | No CIContextOptions field or render-option wrapper for this key. |
-| kCIContextMemoryLimit | const | CIContext.h | No CIContextOptions field or render-option wrapper for this key. |
-| kCIContextOutputColorSpace | const | CIContext.h | No CIContextOptions field or render-option wrapper for this key. |
-| kCIContextWorkingColorSpace | const | CIContext.h | No CIContextOptions field or render-option wrapper for this key. |
-| kCIContextWorkingFormat | const | CIContext.h | CIContext::working_format returns a raw i32, but this option key is not exposed. |
-| kCIImageRepresentationAVDepthData | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationAVPortraitEffectsMatte | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationAVSemanticSegmentationMattes | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationDepthImage | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationDisparityImage | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationHDRGainMapAsRGB | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationHDRGainMapImage | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationHDRImage | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationPortraitEffectsMatteImage | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationSemanticSegmentationGlassesMatteImage | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationSemanticSegmentationHairMatteImage | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationSemanticSegmentationSkinMatteImage | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationSemanticSegmentationSkyMatteImage | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
-| kCIImageRepresentationSemanticSegmentationTeethMatteImage | const | CIContext.h | CIContext::write_* helpers do not expose CIImageRepresentation option dictionaries. |
 | kCIApplyOptionColorSpace | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
 | kCIApplyOptionDefinition | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
 | kCIApplyOptionExtent | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
@@ -240,225 +460,19 @@ COVERAGE_PCT: 21.24%
 | kCIUISetBasic | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
 | kCIUISetDevelopment | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
 | kCIUISetIntermediate | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| CIAccordionFoldTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAffineClamp | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAffineTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaAverage | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaAverageMaximumRed | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaBoundsRed | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaHistogram | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaLogarithmicHistogram | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaMaximum | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaMaximumAlpha | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaMinMax | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaMinMaxRed | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaMinimum | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaMinimumAlpha | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAreaReductionFilter | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAttributedTextImageGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIAztecCodeGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIBarcodeGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIBarsSwipeTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIBicubicScaleTransform | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIBlurredRectangleGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIBlurredRoundedRectangleGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIBokehBlur | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIBumpDistortion | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIBumpDistortionLinear | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CICMYKHalftone | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CICannyEdgeDetector | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CICircleSplashDistortion | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CICircularScreen | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CICircularWrap | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CICode128BarcodeGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorAbsoluteDifference | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorClamp | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorCrossPolynomial | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorCube | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorCubeWithColorSpace | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorCubesMixedWithMask | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorCurves | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorMap | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorMatrix | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorPolynomial | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorPosterize | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorThreshold | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColorThresholdOtsu | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIColumnAverage | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
 | CICompositeOperation | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
 | CIConvertLab | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIConvolution | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CICopyMachineTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
 | CICoreMLModel | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDepthOfField | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDepthToDisparity | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDisintegrateWithMaskTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDisparityToDepth | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDisplacementDistortion | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDissolveTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDistanceGradientFromRedMask | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDither | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDocumentEnhancer | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDotScreen | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIDroste | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
 | CIEdgePreserveUpsample | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIEightfoldReflectedTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIFlashTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
 | CIFourCoordinateGeometryFilter | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIFourfoldReflectedTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIFourfoldRotatedTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIFourfoldTranslatedTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIGaborGradients | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIGaussianGradient | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIGlassDistortion | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIGlassLozenge | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIGlideReflectedTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIGloom | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIHatchedScreen | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIHeightFieldFromMask | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIHexagonalPixellate | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIHighlightShadowAdjust | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
 | CIHistogramDisplay | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIHoleDistortion | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIHueSaturationValueGradient | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIKMeans | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIKaleidoscope | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIKeystoneCorrectionCombined | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIKeystoneCorrectionHorizontal | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIKeystoneCorrectionVertical | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CILabDeltaE | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CILenticularHaloGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CILightTunnel | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CILineOverlay | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CILineScreen | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CILinearToSRGBToneCurve | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMaskToAlpha | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMaskedVariableBlur | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMaximumComponent | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMaximumScaleTransform | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
 | CIMedian | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMeshGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMinimumComponent | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMix | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIModTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMorphologyGradient | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMorphologyMaximum | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMorphologyMinimum | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMorphologyRectangleMaximum | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMorphologyRectangleMinimum | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CINinePartStretched | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CINinePartTiled | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CINoiseReduction | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIOpTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPDF417BarcodeGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPageCurlTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPageCurlWithShadowTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPaletteCentroid | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPalettize | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIParallelogramTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPersonSegmentation | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPerspectiveRotate | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPerspectiveTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPerspectiveTransformWithExtent | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPhotoEffect | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPinchDistortion | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIPointillize | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIQRCodeGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIRandomGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIRippleTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIRoundedQRCodeGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIRoundedRectangleGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIRoundedRectangleStrokeGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIRowAverage | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISRGBToneCurveToLinear | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
 | CISaliencyMap | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIShadedMaterial | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISignedDistanceGradientFromRedMask | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISixfoldReflectedTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISixfoldRotatedTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISmoothLinearGradient | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISobelGradients | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISpotColor | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISpotLight | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIStarShineGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIStretchCrop | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIStripesGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISunbeamsGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISwipeTransition | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISystemToneMap | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CITextImageGenerator | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIThermal | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIToneCurve | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIToneMapHeadroom | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CITorusLensDistortion | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
 | CITransitionFilter | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CITriangleKaleidoscope | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CITriangleTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CITwelvefoldReflectedTile | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CITwirlDistortion | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIVortexDistortion | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIXRay | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
 | CIFilterConstructor | protocol | CIFilterConstructor.h | No Rust bridge for custom filter-constructor protocol. |
 | kCIFilterGeneratorExportedKey | const | CIFilterGenerator.h | CIFilterGenerator wrapper omits exported-key constants. |
 | kCIFilterGeneratorExportedKeyName | const | CIFilterGenerator.h | CIFilterGenerator wrapper omits exported-key constants. |
 | kCIFilterGeneratorExportedKeyTargetObject | const | CIFilterGenerator.h | CIFilterGenerator wrapper omits exported-key constants. |
-| CIFilterShape | interface | CIFilterShape.h | CIFilterShape is not wrapped. |
-| kCIFormatA16 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatA8 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatABGR8 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatARGB8 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatAf | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatAh | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatBGRA8 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatL16 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatL8 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatLA16 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatLA8 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatLAf | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatLAh | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatLf | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatLh | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatR16 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatR8 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRG16 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRG8 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRGB10 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRGBA16 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRGBAf | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRGBAh | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRGBX16 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRGBX8 | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRGBXf | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRGBXh | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRGf | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRGh | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRf | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIFormatRh | const | CIImage.h | Crate does not expose CIFormat constants beyond the RGBA8 helper. |
-| kCIImageApplyCleanAperture | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageApplyOrientationProperty | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageAutoAdjustCrop | const | CIImage.h | No auto-adjust option/filter wrapper. |
-| kCIImageAutoAdjustEnhance | const | CIImage.h | No auto-adjust option/filter wrapper. |
-| kCIImageAutoAdjustFeatures | const | CIImage.h | No auto-adjust option/filter wrapper. |
-| kCIImageAutoAdjustLevel | const | CIImage.h | No auto-adjust option/filter wrapper. |
-| kCIImageAutoAdjustRedEye | const | CIImage.h | No auto-adjust option/filter wrapper. |
-| kCIImageAuxiliaryDepth | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageAuxiliaryDisparity | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageAuxiliaryHDRGainMap | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageAuxiliaryPortraitEffectsMatte | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageAuxiliarySemanticSegmentationGlassesMatte | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageAuxiliarySemanticSegmentationHairMatte | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageAuxiliarySemanticSegmentationSkinMatte | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageAuxiliarySemanticSegmentationSkyMatte | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageAuxiliarySemanticSegmentationTeethMatte | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageCacheImmediately | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageColorSpace | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageContentAverageLightLevel | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageContentHeadroom | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageExpandToHDR | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageNearestSampling | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageProperties | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| kCIImageToneMapHDRtoSDR | const | CIImage.h | No CIImageOption wrapper for this symbol. |
-| CIImageAccumulator | interface | CIImageAccumulator.h | CIImageAccumulator is not wrapped. |
 | CIImageProcessorInput | protocol | CIImageProcessor.h | The passthrough CIImageProcessor helper does not surface these protocol objects. |
 | CIImageProcessorOutput | protocol | CIImageProcessor.h | The passthrough CIImageProcessor helper does not surface these protocol objects. |
 | kCIImageProviderTileSize | const | CIImageProvider.h | No public Rust wrapper. |
@@ -466,20 +480,6 @@ COVERAGE_PCT: 21.24%
 | CIKernel | interface | CIKernel.h | Only CIColorKernel/CIWarpKernel/CIBlendKernel wrappers are exposed. |
 | CIPlugIn | interface | CIPlugIn.h | Plug-in APIs are not wrapped. |
 | CIPlugInRegistration | protocol | CIPlugInInterface.h | Plug-in registration protocol is not wrapped. |
-| CIRAWDecoderVersion6 | const | CIRAWFilter.h | RAW filter APIs are not wrapped. |
-| CIRAWDecoderVersion6DNG | const | CIRAWFilter.h | RAW filter APIs are not wrapped. |
-| CIRAWDecoderVersion7 | const | CIRAWFilter.h | RAW filter APIs are not wrapped. |
-| CIRAWDecoderVersion7DNG | const | CIRAWFilter.h | RAW filter APIs are not wrapped. |
-| CIRAWDecoderVersion8 | const | CIRAWFilter.h | RAW filter APIs are not wrapped. |
-| CIRAWDecoderVersion8DNG | const | CIRAWFilter.h | RAW filter APIs are not wrapped. |
-| CIRAWDecoderVersion9 | const | CIRAWFilter.h | RAW filter APIs are not wrapped. |
-| CIRAWDecoderVersion9DNG | const | CIRAWFilter.h | RAW filter APIs are not wrapped. |
-| CIRAWDecoderVersionNone | const | CIRAWFilter.h | RAW filter APIs are not wrapped. |
-| CIRAWFilter | interface | CIRAWFilter.h | RAW filter APIs are not wrapped. |
-| CIRenderDestination | interface | CIRenderDestination.h | Render-destination/task APIs are not wrapped. |
-| CIRenderInfo | interface | CIRenderDestination.h | Render-destination/task APIs are not wrapped. |
-| CIRenderTask | interface | CIRenderDestination.h | Render-destination/task APIs are not wrapped. |
-| CIRenderDestinationAlphaMode | typedef | CIRenderDestination.h | Render-destination/task APIs are not wrapped. |
 | kCISamplerColorSpace | const | CISampler.h | No public Rust wrapper. |
 
 ## ⏭️ EXEMPT

@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.1] - 2026-05-16
+
+### Added
+
+- Added typed `CIFilterBuiltins` constructors for 149 instantiable built-in protocols, with regression coverage in `tests/filter_builtins.rs`.
+- Added typed Core Image constant families: `CIColorSpace`, `CIFormat`, `CIContextOptionKey`, `CIImageOptionKey`, `CIImageAutoAdjustmentOptionKey`, and `CIImageRepresentationOptionKey`.
+- Added safe wrappers for `CIFilterShape`, `CIImageAccumulator`, `CIRAWFilter`, `CIRAWDecoderVersion`, `CIRenderDestination`, `CIRenderTask`, `CIRenderInfo`, and `CIRenderDestinationAlphaMode`.
+- Added examples `14_accumulator`, `15_render_destination`, and `16_raw_filter`, plus integration tests for the new wrappers and constants.
+
+### Changed
+
+- Generalized `CIImage::from_bitmap(...)` to accept explicit `CIFormat`, `bytes_per_row`, and optional `CIColorSpace`, while keeping `from_bitmap_rgba8(...)` as a convenience helper.
+- Expanded `CIContextOptions` and `CIContext` with additional typed option coverage, working-format inspection, and bitmap-backed render-task helpers.
+- Updated `COVERAGE.md`, `README.md`, and `COVERAGE_AUDIT.md` to reflect the broader 0.2.1 surface and 339 verified public symbols (72.75%).
+
 ## [0.2.0] - 2026-05-16
 
 ### Added

@@ -33,15 +33,37 @@ public func ci_context_new_with_options(
     _ priorityRequestLow: Bool,
     _ allowLowPower: Bool,
     _ outputPremultiplied: Bool,
+    _ highQualityDownsample: Bool,
+    _ useOutputColorSpace: Bool,
+    _ outputColorSpaceCode: Int32,
+    _ useWorkingColorSpace: Bool,
+    _ workingColorSpaceCode: Int32,
+    _ useWorkingFormat: Bool,
+    _ workingFormatCode: Int32,
+    _ useMemoryLimit: Bool,
+    _ memoryLimit: Double,
     _ name: UnsafePointer<CChar>?
 ) -> UnsafeMutableRawPointer? {
     var options: [CIContextOption: Any] = [
         CIContextOption.cacheIntermediates: cacheIntermediates,
         CIContextOption.priorityRequestLow: priorityRequestLow,
         CIContextOption.outputPremultiplied: outputPremultiplied,
+        CIContextOption.highQualityDownsample: highQualityDownsample,
     ]
     if #available(macOS 10.12, *) {
         options[CIContextOption.allowLowPower] = allowLowPower
+    }
+    if useOutputColorSpace {
+        options[CIContextOption.outputColorSpace] = ci_color_space(from: outputColorSpaceCode) ?? NSNull()
+    }
+    if useWorkingColorSpace {
+        options[CIContextOption.workingColorSpace] = ci_color_space(from: workingColorSpaceCode) ?? NSNull()
+    }
+    if useWorkingFormat, let workingFormat = ci_image_format(from: workingFormatCode) {
+        options[CIContextOption.workingFormat] = workingFormat
+    }
+    if useMemoryLimit, #available(macOS 14.0, *) {
+        options[CIContextOption.memoryTarget] = memoryLimit
     }
     if let name {
         options[CIContextOption.name] = String(cString: name)
@@ -63,8 +85,8 @@ public func ci_context_new_metal_command_queue(_ queueHandle: UnsafeMutableRawPo
 
 @_cdecl("ci_context_working_format")
 public func ci_context_working_format(_ handle: UnsafeMutableRawPointer?) -> Int32 {
-    guard let _: CIContext = ci_borrow(handle) else { return 0 }
-    return 0
+    guard let context: CIContext = ci_borrow(handle) else { return 0 }
+    return context.workingFormat.rawValue
 }
 
 @_cdecl("ci_context_create_cg_image")

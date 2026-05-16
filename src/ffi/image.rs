@@ -17,6 +17,18 @@ unsafe extern "C" {
     pub fn ci_image_from_iosurface(surface: *mut c_void) -> *mut c_void;
     pub fn ci_image_from_color(color: *mut c_void) -> *mut c_void;
     pub fn ci_image_empty() -> *mut c_void;
+    pub fn ci_image_from_bitmap(
+        bytes: *const u8,
+        len: usize,
+        width: usize,
+        height: usize,
+        bytes_per_row: usize,
+        format_code: i32,
+        use_color_space: bool,
+        color_space_code: i32,
+        out_image: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
     pub fn ci_image_from_bitmap_rgba8(
         bytes: *const u8,
         len: usize,
