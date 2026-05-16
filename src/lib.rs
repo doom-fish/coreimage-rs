@@ -20,25 +20,46 @@
     clippy::return_self_not_must_use
 )]
 
+mod barcode_descriptor;
+mod color;
 mod context;
+mod detector;
 mod error;
+mod feature;
 mod ffi;
 mod filter;
+mod filter_generator;
 #[cfg(feature = "filters")]
 #[cfg_attr(docsrs, doc(cfg(feature = "filters")))]
 pub mod filters;
 mod image;
+mod image_processor;
+mod kernel;
+mod sampler;
 mod util;
-mod value;
+mod vector;
 
 pub use apple_cf::cg::{CGAffineTransform, CGImage, CGPoint, CGRect, CGSize};
 pub use apple_cf::cv::CVPixelBuffer;
 pub use apple_cf::iosurface::IOSurface;
-pub use context::CIContext;
+pub use barcode_descriptor::{
+    CIBarcodeDescriptor, CIBarcodeDescriptorKind, CIDataMatrixCodeECCVersion,
+    CIQRCodeErrorCorrectionLevel,
+};
+pub use color::{CIColor, CIColorName};
+pub use context::{CIContext, CIContextOptions};
+pub use detector::{
+    CIDetectionOptions, CIDetector, CIDetectorAccuracy, CIDetectorOptions, CIDetectorType,
+};
 pub use error::CIError;
+pub use feature::{CIFeature, CIFeatureKind};
 pub use filter::CIFilter;
+pub use filter_generator::CIFilterGenerator;
 pub use image::CIImage;
-pub use value::{CIColor, CIVector};
+pub use image_processor::CIImageProcessor;
+pub use kernel::{CIBlendKernel, CIBlendKernelKind, CIColorKernel, CIWarpKernel};
+pub use sampler::{CISampler, CISamplerFilterMode, CISamplerOptions, CISamplerWrapMode};
+pub use vector::CIVector;
 
 #[cfg(feature = "metal")]
 #[cfg_attr(docsrs, doc(cfg(feature = "metal")))]
@@ -53,7 +74,14 @@ pub mod prelude {
     #[cfg(feature = "metal")]
     pub use apple_metal::{CommandQueue, MetalDevice};
 
-    pub use crate::{CIColor, CIContext, CIError, CIFilter, CIImage, CIVector};
+    pub use crate::{
+        CIBarcodeDescriptor, CIBarcodeDescriptorKind, CIBlendKernel, CIBlendKernelKind, CIColor,
+        CIColorKernel, CIColorName, CIContext, CIContextOptions, CIDataMatrixCodeECCVersion,
+        CIDetectionOptions, CIDetector, CIDetectorAccuracy, CIDetectorOptions, CIDetectorType,
+        CIError, CIFeature, CIFeatureKind, CIFilter, CIFilterGenerator, CIImage, CIImageProcessor,
+        CIQRCodeErrorCorrectionLevel, CISampler, CISamplerFilterMode, CISamplerOptions,
+        CISamplerWrapMode, CIVector, CIWarpKernel,
+    };
 
     #[cfg(feature = "filters")]
     pub use crate::filters;

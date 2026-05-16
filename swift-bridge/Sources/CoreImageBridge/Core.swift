@@ -166,9 +166,10 @@ public func ci_normalize_json(_ value: Any) -> Any {
             "green": value.green,
             "blue": value.blue,
             "alpha": value.alpha,
+            "stringRepresentation": value.stringRepresentation,
         ]
     case let value as CIVector:
-        return (0..<value.count).map { Double(value.value(at: $0)) }
+        return (0 ..< value.count).map { Double(value.value(at: $0)) }
     case let value as CGRect:
         return [
             "x": value.origin.x,
@@ -231,4 +232,19 @@ public func ci_object_retain(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutabl
 @_cdecl("ci_object_release")
 public func ci_object_release(_ handle: UnsafeMutableRawPointer?) {
     ci_release(handle)
+}
+
+@_cdecl("ci_array_count")
+public func ci_array_count(_ handle: UnsafeMutableRawPointer?) -> Int {
+    guard let array: NSArray = ci_borrow(handle) else { return 0 }
+    return array.count
+}
+
+@_cdecl("ci_array_object_at")
+public func ci_array_object_at(_ handle: UnsafeMutableRawPointer?, _ index: Int) -> UnsafeMutableRawPointer? {
+    guard let array: NSArray = ci_borrow(handle), index >= 0, index < array.count else {
+        return nil
+    }
+    let object = array[index] as AnyObject
+    return ci_retain(object)
 }

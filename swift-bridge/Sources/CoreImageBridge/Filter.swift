@@ -1,52 +1,40 @@
 import CoreImage
 import Foundation
 
-extension CIFilter {
-    static func gaussianBlur() -> CIFilter? { CIFilter(name: "CIGaussianBlur") }
-    static func boxBlur() -> CIFilter? { CIFilter(name: "CIBoxBlur") }
-    static func discBlur() -> CIFilter? { CIFilter(name: "CIDiscBlur") }
-    static func motionBlur() -> CIFilter? { CIFilter(name: "CIMotionBlur") }
-    static func zoomBlur() -> CIFilter? { CIFilter(name: "CIZoomBlur") }
-    static func sharpenLuminance() -> CIFilter? { CIFilter(name: "CISharpenLuminance") }
-    static func unsharpMask() -> CIFilter? { CIFilter(name: "CIUnsharpMask") }
-    static func colorControls() -> CIFilter? { CIFilter(name: "CIColorControls") }
-    static func exposureAdjust() -> CIFilter? { CIFilter(name: "CIExposureAdjust") }
-    static func gammaAdjust() -> CIFilter? { CIFilter(name: "CIGammaAdjust") }
-    static func hueAdjust() -> CIFilter? { CIFilter(name: "CIHueAdjust") }
-    static func vibrance() -> CIFilter? { CIFilter(name: "CIVibrance") }
-    static func temperatureAndTint() -> CIFilter? { CIFilter(name: "CITemperatureAndTint") }
-    static func whitePointAdjust() -> CIFilter? { CIFilter(name: "CIWhitePointAdjust") }
-    static func sepiaTone() -> CIFilter? { CIFilter(name: "CISepiaTone") }
-    static func colorInvert() -> CIFilter? { CIFilter(name: "CIColorInvert") }
-    static func colorMonochrome() -> CIFilter? { CIFilter(name: "CIColorMonochrome") }
-    static func falseColor() -> CIFilter? { CIFilter(name: "CIFalseColor") }
-    static func vignette() -> CIFilter? { CIFilter(name: "CIVignette") }
-    static func vignetteEffect() -> CIFilter? { CIFilter(name: "CIVignetteEffect") }
-    static func edges() -> CIFilter? { CIFilter(name: "CIEdges") }
-    static func edgeWork() -> CIFilter? { CIFilter(name: "CIEdgeWork") }
-    static func bloom() -> CIFilter? { CIFilter(name: "CIBloom") }
-    static func pixellate() -> CIFilter? { CIFilter(name: "CIPixellate") }
-    static func comicEffect() -> CIFilter? { CIFilter(name: "CIComicEffect") }
-    static func crystallize() -> CIFilter? { CIFilter(name: "CICrystallize") }
-    static func straighten() -> CIFilter? { CIFilter(name: "CIStraightenFilter") }
-    static func lanczosScaleTransform() -> CIFilter? { CIFilter(name: "CILanczosScaleTransform") }
-    static func perspectiveCorrection() -> CIFilter? { CIFilter(name: "CIPerspectiveCorrection") }
-    static func perspectiveTransform() -> CIFilter? { CIFilter(name: "CIPerspectiveTransform") }
-    static func sourceOverCompositing() -> CIFilter? { CIFilter(name: "CISourceOverCompositing") }
-    static func multiplyCompositing() -> CIFilter? { CIFilter(name: "CIMultiplyCompositing") }
-    static func blendWithMask() -> CIFilter? { CIFilter(name: "CIBlendWithMask") }
-    static func constantColor() -> CIFilter? { CIFilter(name: "CIConstantColorGenerator") }
-    static func checkerboard() -> CIFilter? { CIFilter(name: "CICheckerboardGenerator") }
-    static func linearGradient() -> CIFilter? { CIFilter(name: "CILinearGradient") }
-    static func radialGradient() -> CIFilter? { CIFilter(name: "CIRadialGradient") }
-    static func qrCode() -> CIFilter? { CIFilter(name: "CIQRCodeGenerator") }
-    static func crop() -> CIFilter? { CIFilter(name: "CICrop") }
-}
-
 @_cdecl("ci_filter_new")
 public func ci_filter_new(_ name: UnsafePointer<CChar>?) -> UnsafeMutableRawPointer? {
     guard let name else { return nil }
     return CIFilter(name: String(cString: name)).map(ci_retain)
+}
+
+@_cdecl("ci_filter_name")
+public func ci_filter_name(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
+    guard let filter: CIFilter = ci_borrow(handle) else { return nil }
+    return ci_string(filter.name)
+}
+
+@_cdecl("ci_filter_set_name")
+public func ci_filter_set_name(_ handle: UnsafeMutableRawPointer?, _ name: UnsafePointer<CChar>?) {
+    guard let filter: CIFilter = ci_borrow(handle), let name else { return }
+    filter.name = String(cString: name)
+}
+
+@_cdecl("ci_filter_is_enabled")
+public func ci_filter_is_enabled(_ handle: UnsafeMutableRawPointer?) -> Bool {
+    guard let filter: CIFilter = ci_borrow(handle) else { return false }
+    return filter.isEnabled
+}
+
+@_cdecl("ci_filter_set_enabled")
+public func ci_filter_set_enabled(_ handle: UnsafeMutableRawPointer?, _ enabled: Bool) {
+    guard let filter: CIFilter = ci_borrow(handle) else { return }
+    filter.isEnabled = enabled
+}
+
+@_cdecl("ci_filter_set_defaults")
+public func ci_filter_set_defaults(_ handle: UnsafeMutableRawPointer?) {
+    guard let filter: CIFilter = ci_borrow(handle) else { return }
+    filter.setDefaults()
 }
 
 @_cdecl("ci_filter_names_lines")
@@ -76,6 +64,24 @@ public func ci_filter_output_keys_lines(_ handle: UnsafeMutableRawPointer?) -> U
 public func ci_filter_attributes_json(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutablePointer<CChar>? {
     guard let filter: CIFilter = ci_borrow(handle) else { return ci_string("{}") }
     return ci_string(ci_json_string(from: filter.attributes) ?? "{}")
+}
+
+@_cdecl("ci_filter_localized_name")
+public func ci_filter_localized_name(_ name: UnsafePointer<CChar>?) -> UnsafeMutablePointer<CChar>? {
+    guard let name else { return nil }
+    return ci_string(CIFilter.localizedName(forFilterName: String(cString: name)) ?? "")
+}
+
+@_cdecl("ci_filter_localized_description")
+public func ci_filter_localized_description(_ name: UnsafePointer<CChar>?) -> UnsafeMutablePointer<CChar>? {
+    guard let name else { return nil }
+    return ci_string(CIFilter.localizedDescription(forFilterName: String(cString: name)) ?? "")
+}
+
+@_cdecl("ci_filter_localized_reference_url")
+public func ci_filter_localized_reference_url(_ name: UnsafePointer<CChar>?) -> UnsafeMutablePointer<CChar>? {
+    guard let name else { return nil }
+    return ci_string(CIFilter.localizedReferenceDocumentation(forFilterName: String(cString: name))?.absoluteString ?? "")
 }
 
 @_cdecl("ci_filter_set_image")
@@ -113,6 +119,17 @@ public func ci_filter_set_string(
     filter.setValue(String(cString: value), forKey: String(cString: key))
 }
 
+@_cdecl("ci_filter_set_bytes")
+public func ci_filter_set_bytes(
+    _ handle: UnsafeMutableRawPointer?,
+    _ key: UnsafePointer<CChar>?,
+    _ bytes: UnsafePointer<UInt8>?,
+    _ len: Int
+) {
+    guard let filter: CIFilter = ci_borrow(handle), let key, let bytes, len >= 0 else { return }
+    filter.setValue(Data(bytes: bytes, count: len), forKey: String(cString: key))
+}
+
 @_cdecl("ci_filter_set_vector")
 public func ci_filter_set_vector(
     _ handle: UnsafeMutableRawPointer?,
@@ -143,6 +160,21 @@ public func ci_filter_set_color(
     filter.setValue(color, forKey: String(cString: key))
 }
 
+@_cdecl("ci_filter_set_barcode_descriptor")
+public func ci_filter_set_barcode_descriptor(
+    _ handle: UnsafeMutableRawPointer?,
+    _ key: UnsafePointer<CChar>?,
+    _ descriptorHandle: UnsafeMutableRawPointer?
+) {
+    guard let filter: CIFilter = ci_borrow(handle),
+          let key,
+          let descriptor: CIBarcodeDescriptor = ci_borrow(descriptorHandle)
+    else {
+        return
+    }
+    filter.setValue(descriptor, forKey: String(cString: key))
+}
+
 @_cdecl("ci_filter_output_image")
 public func ci_filter_output_image(_ handle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     guard let filter: CIFilter = ci_borrow(handle),
@@ -151,34 +183,4 @@ public func ci_filter_output_image(_ handle: UnsafeMutableRawPointer?) -> Unsafe
         return nil
     }
     return ci_retain(image)
-}
-
-@_cdecl("ci_vector_new2")
-public func ci_vector_new2(_ x: Double, _ y: Double) -> UnsafeMutableRawPointer? {
-    ci_retain(CIVector(x: x, y: y))
-}
-
-@_cdecl("ci_vector_new3")
-public func ci_vector_new3(_ x: Double, _ y: Double, _ z: Double) -> UnsafeMutableRawPointer? {
-    ci_retain(CIVector(x: x, y: y, z: z))
-}
-
-@_cdecl("ci_vector_new4")
-public func ci_vector_new4(
-    _ x: Double,
-    _ y: Double,
-    _ z: Double,
-    _ w: Double
-) -> UnsafeMutableRawPointer? {
-    ci_retain(CIVector(x: x, y: y, z: z, w: w))
-}
-
-@_cdecl("ci_color_new_rgba")
-public func ci_color_new_rgba(
-    _ red: Double,
-    _ green: Double,
-    _ blue: Double,
-    _ alpha: Double
-) -> UnsafeMutableRawPointer? {
-    ci_retain(CIColor(red: red, green: green, blue: blue, alpha: alpha))
 }

@@ -1,16 +1,17 @@
 # coreimage
 
-Safe Rust bindings for Apple's [CoreImage](https://developer.apple.com/documentation/coreimage) framework — GPU-accelerated image processing, filtering, and rendering on macOS.
+Safe Rust bindings for Apple's [CoreImage](https://developer.apple.com/documentation/coreimage) framework — GPU-accelerated image processing, filtering, rendering, detection, and kernel work on macOS.
 
-> **Status:** v0.1.0 ships the essential practical image-pipeline surface: `CIImage`, `CIFilter`, `CIContext`, `CIVector`, `CIColor`, plus ~30 common built-in filter helpers. Legacy `CIDetector` and `CIPlugIn` bindings are planned for v0.2.
+> **Status:** v0.2.0 expands the crate across the major practical Core Image surfaces: `CIImage`, `CIFilter`, `CIContext`, `CIDetector`, `CIFeature`, `CIColor`, `CIVector`, `CIKernel`, `CIBarcodeDescriptor`, `CIImageProcessorKernel`, `CIFilterGenerator`, and `CISampler`, with examples and tests for each area.
 
 ## Highlights
 
-- `CIImage` creation from file paths, encoded bytes, `CGImage`, `CVPixelBuffer`, `IOSurface`, and RGBA bitmap data
-- `CIFilter` registry + input/output key inspection + typed setters for numbers, strings, images, vectors, and colors
-- `filters` module with common built-ins: blur, sharpen, color adjust, edge detection, perspective correction, compositing, gradients, generators, and more
-- `CIContext` rendering to `CGImage`, `CVPixelBuffer`, `IOSurface`, PNG, JPEG, HEIF, and TIFF
-- Optional Metal-backed contexts via [`apple-metal`](https://github.com/doom-fish/apple-metal-rs)
+- `CIImage` constructors from file paths, encoded bytes, `CGImage`, `CVPixelBuffer`, `IOSurface`, colors, and RGBA bitmap buffers
+- `CIFilter` registry/localization helpers plus typed setters for images, numbers, strings, bytes, vectors, colors, and barcode descriptors
+- `CIContext` creation for default, CPU, and optional Metal backends, plus `CGImage` rendering and PNG/JPEG/HEIF/HEIF10/TIFF/OpenEXR export helpers
+- Detector + feature inspection coverage for faces, rectangles, QR codes, and text via `CIDetector` / `CIFeature`
+- `CIColor`, `CIVector`, `CIBarcodeDescriptor`, `CISampler`, `CIFilterGenerator`, and `CIImageProcessor` wrappers for common graph-building workflows
+- `CIColorKernel`, `CIWarpKernel`, and `CIBlendKernel` support, plus the existing `filters` convenience module for common built-ins
 - Shared CoreFoundation/CoreGraphics/CoreVideo/IOSurface interop via [`apple-cf`](https://github.com/doom-fish/apple-cf-rs)
 
 ## Quick start
@@ -38,46 +39,54 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## Surface overview
 
-### `CIImage`
+- `CIImage`: loading, color/bitmap creation, geometric transforms, compositing, blur, gain-map/headroom helpers, and region-of-interest inspection
+- `CIFilter`: filter discovery, localization, metadata, typed input setters, output image extraction, and barcode-descriptor inputs
+- `CIContext`: default/CPU/Metal contexts, rendering to `CGImage`/`CVPixelBuffer`/`IOSurface`, cache management, and file output helpers
+- `CIDetector` + `CIFeature`: detector construction plus QR/face/rectangle/text feature inspection, message strings, symbol descriptors, and sub-features
+- `CIColor` + `CIVector`: structured value wrappers for graph inputs, geometry, and transform round-tripping
+- `CIBarcodeDescriptor`: QR/Aztec/PDF417/Data Matrix descriptor construction and inspection
+- `CIColorKernel`, `CIWarpKernel`, `CIBlendKernel`: custom kernel compilation and built-in blend kernels
+- `CIImageProcessor`: passthrough processor bridge for exercising `CIImageProcessorKernel`
+- `CIFilterGenerator` + `CISampler`: graph composition/export helpers and sampler configuration
 
-- `from_path`, `from_encoded_data`, `from_cg_image`, `from_cv_pixel_buffer`, `from_iosurface`, `from_bitmap_rgba8`
-- `extent`, `properties_json`
-- `cropped_to`, `translated`, `scaled`, `transformed`, `applying_orientation`, `composited_over`
-- `apply_filter(&mut CIFilter)`
+## Examples
 
-### `CIFilter`
+The crate ships runnable examples for each major area:
 
-- `CIFilter::new(name)`
-- `CIFilter::all_names()` / `CIFilter::names_in_category(category)`
-- `input_keys`, `output_keys`, `attributes_json`
-- `set_input_image`, `set_input_image_for_key`, `set_input_number`, `set_input_string`, `set_input_vector`, `set_input_color`
-- `output_image`
+- `01_smoke`
+- `02_image`
+- `03_filter`
+- `04_context`
+- `05_detector`
+- `06_color`
+- `07_vector`
+- `08_kernel`
+- `09_barcode_descriptor`
+- `10_image_processor`
+- `11_feature`
+- `12_filter_generator`
+- `13_sampler`
 
-### `CIContext`
-
-- `CIContext::new_default()`
-- `CIContext::new_cpu()`
-- `CIContext::new_metal(&MetalDevice)` / `CIContext::new_command_queue(&CommandQueue)` (`metal` feature)
-- `render_to_cg_image`, `render_to_cv_pixel_buffer`, `render_to_iosurface`
-- `write_png`, `write_jpeg`, `write_heif`, `write_tiff`
-
-## Smoke example
-
-Run the end-to-end smoke test with:
+Run them all with:
 
 ```bash
-cargo run --all-features --example 01_smoke
+for ex in examples/*.rs; do cargo run --example "$(basename "$ex" .rs)"; done
 ```
 
-It generates a red 100×100 CoreImage image, applies Gaussian blur, renders the result to `CGImage`, writes `target/coreimage_smoke.png`, and prints `✅ coreimage smoke OK`.
+## Coverage audit
+
+See [COVERAGE.md](COVERAGE.md) for the framework-header audit, implemented surfaces, and deferred areas such as plug-ins, RAW filters, render destinations/tasks, filter constructors, and image accumulators/providers.
 
 ## Roadmap
 
 - [x] `CIImage`, `CIFilter`, `CIContext`, `CIVector`, `CIColor`
-- [x] Metal-backed `CIContext`
+- [x] `CIDetector`, `CIFeature`, QR feature/message inspection
+- [x] `CIBarcodeDescriptor`, `CISampler`, `CIFilterGenerator`, `CIImageProcessor`
+- [x] Core kernel coverage (`CIColorKernel`, `CIWarpKernel`, `CIBlendKernel`)
 - [x] Common built-in filter helpers (`filters` feature)
-- [ ] `CIDetector`, `CIFeature`, `CIFaceFeature`, `CIQRCodeFeature`
-- [ ] `CIPlugIn`
+- [ ] `CIPlugIn` / `CIPlugInInterface`
+- [ ] `CIFilterConstructor`, `CIFilterShape`, `CIImageAccumulator`, `CIImageProvider`
+- [ ] `CIRAWFilter`, `CIRenderDestination`, and related render-task APIs
 
 ## License
 

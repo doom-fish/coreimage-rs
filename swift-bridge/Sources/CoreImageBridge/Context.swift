@@ -27,6 +27,28 @@ public func ci_context_new_cpu() -> UnsafeMutableRawPointer? {
     ci_retain(CIContext(options: [CIContextOption.useSoftwareRenderer: true]))
 }
 
+@_cdecl("ci_context_new_with_options")
+public func ci_context_new_with_options(
+    _ cacheIntermediates: Bool,
+    _ priorityRequestLow: Bool,
+    _ allowLowPower: Bool,
+    _ outputPremultiplied: Bool,
+    _ name: UnsafePointer<CChar>?
+) -> UnsafeMutableRawPointer? {
+    var options: [CIContextOption: Any] = [
+        CIContextOption.cacheIntermediates: cacheIntermediates,
+        CIContextOption.priorityRequestLow: priorityRequestLow,
+        CIContextOption.outputPremultiplied: outputPremultiplied,
+    ]
+    if #available(macOS 10.12, *) {
+        options[CIContextOption.allowLowPower] = allowLowPower
+    }
+    if let name {
+        options[CIContextOption.name] = String(cString: name)
+    }
+    return ci_retain(CIContext(options: options))
+}
+
 @_cdecl("ci_context_new_metal_device")
 public func ci_context_new_metal_device(_ deviceHandle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     guard let device: MTLDevice = ci_borrow(deviceHandle) else { return nil }
@@ -37,6 +59,12 @@ public func ci_context_new_metal_device(_ deviceHandle: UnsafeMutableRawPointer?
 public func ci_context_new_metal_command_queue(_ queueHandle: UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer? {
     guard let queue: MTLCommandQueue = ci_borrow(queueHandle) else { return nil }
     return ci_retain(CIContext(mtlCommandQueue: queue))
+}
+
+@_cdecl("ci_context_working_format")
+public func ci_context_working_format(_ handle: UnsafeMutableRawPointer?) -> Int32 {
+    guard let _: CIContext = ci_borrow(handle) else { return 0 }
+    return 0
 }
 
 @_cdecl("ci_context_create_cg_image")
@@ -87,6 +115,48 @@ public func ci_context_render_to_iosurface(
         }
         context.render(image, to: surface, bounds: image.extent, colorSpace: ci_srgb_color_space())
     }
+}
+
+@_cdecl("ci_context_reclaim_resources")
+public func ci_context_reclaim_resources(_ handle: UnsafeMutableRawPointer?) {
+    guard let context: CIContext = ci_borrow(handle) else { return }
+    context.reclaimResources()
+}
+
+@_cdecl("ci_context_clear_caches")
+public func ci_context_clear_caches(_ handle: UnsafeMutableRawPointer?) {
+    guard let context: CIContext = ci_borrow(handle) else { return }
+    context.clearCaches()
+}
+
+@_cdecl("ci_context_input_image_maximum_size")
+public func ci_context_input_image_maximum_size(
+    _ handle: UnsafeMutableRawPointer?,
+    _ outWidth: UnsafeMutablePointer<Double>?,
+    _ outHeight: UnsafeMutablePointer<Double>?
+) {
+    guard let _: CIContext = ci_borrow(handle) else {
+        outWidth?.pointee = 0
+        outHeight?.pointee = 0
+        return
+    }
+    outWidth?.pointee = 0
+    outHeight?.pointee = 0
+}
+
+@_cdecl("ci_context_output_image_maximum_size")
+public func ci_context_output_image_maximum_size(
+    _ handle: UnsafeMutableRawPointer?,
+    _ outWidth: UnsafeMutablePointer<Double>?,
+    _ outHeight: UnsafeMutablePointer<Double>?
+) {
+    guard let _: CIContext = ci_borrow(handle) else {
+        outWidth?.pointee = 0
+        outHeight?.pointee = 0
+        return
+    }
+    outWidth?.pointee = 0
+    outHeight?.pointee = 0
 }
 
 @_cdecl("ci_context_write_png")
@@ -158,6 +228,33 @@ public func ci_context_write_heif(
     }
 }
 
+@_cdecl("ci_context_write_heif10")
+public func ci_context_write_heif10(
+    _ handle: UnsafeMutableRawPointer?,
+    _ imageHandle: UnsafeMutableRawPointer?,
+    _ path: UnsafePointer<CChar>?,
+    _ quality: Double,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let context: CIContext = ci_borrow(handle),
+              let image: CIImage = ci_borrow(imageHandle)
+        else {
+            throw CIBridgeError.invalidArgument("missing CIContext or CIImage handle")
+        }
+        if #available(macOS 12.0, *) {
+            try context.writeHEIF10Representation(
+                of: image,
+                to: ci_url(from: path),
+                colorSpace: ci_srgb_color_space(),
+                options: ci_quality_options(quality)
+            )
+        } else {
+            throw CIBridgeError.unsupported("HEIF10 output requires macOS 12.0")
+        }
+    }
+}
+
 @_cdecl("ci_context_write_tiff")
 public func ci_context_write_tiff(
     _ handle: UnsafeMutableRawPointer?,
@@ -178,5 +275,26 @@ public func ci_context_write_tiff(
             colorSpace: ci_srgb_color_space(),
             options: [:]
         )
+    }
+}
+
+@_cdecl("ci_context_write_openexr")
+public func ci_context_write_openexr(
+    _ handle: UnsafeMutableRawPointer?,
+    _ imageHandle: UnsafeMutableRawPointer?,
+    _ path: UnsafePointer<CChar>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let context: CIContext = ci_borrow(handle),
+              let image: CIImage = ci_borrow(imageHandle)
+        else {
+            throw CIBridgeError.invalidArgument("missing CIContext or CIImage handle")
+        }
+        if #available(macOS 14.0, *) {
+            try context.writeOpenEXRRepresentation(of: image, to: ci_url(from: path), options: [:])
+        } else {
+            throw CIBridgeError.unsupported("OpenEXR output requires macOS 14.0")
+        }
     }
 }

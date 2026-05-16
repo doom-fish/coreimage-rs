@@ -3,19 +3,30 @@ use core::fmt;
 use core::ptr;
 use std::path::Path;
 
-use apple_cf::cg::CGImage;
+use apple_cf::cg::{CGImage, CGSize};
 use apple_cf::cv::CVPixelBuffer;
 use apple_cf::iosurface::IOSurface;
-
-use crate::ffi;
-use crate::image::CIImage;
-use crate::util::{path_to_cstring, status_result};
-use crate::CIError;
 
 #[cfg(feature = "metal")]
 use apple_metal::{CommandQueue, MetalDevice};
 
-/// A CoreImage rendering context backed by the default renderer, CPU, or Metal.
+use crate::ffi;
+use crate::image::CIImage;
+use crate::util::{path_to_cstring, status_result, string_to_cstring};
+use crate::CIError;
+
+/// Common Core Image context options that don't require extra framework types.
+#[allow(clippy::struct_excessive_bools)]
+#[derive(Clone, Debug, Default)]
+pub struct CIContextOptions {
+    pub cache_intermediates: bool,
+    pub priority_request_low: bool,
+    pub allow_low_power: bool,
+    pub output_premultiplied: bool,
+    pub name: Option<String>,
+}
+
+/// A Core Image rendering context backed by the default renderer, CPU, or Metal.
 pub struct CIContext {
     ptr: *mut c_void,
 }
@@ -41,18 +52,19 @@ impl fmt::Debug for CIContext {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("CIContext")
             .field("ptr", &self.ptr)
+            .field("working_format", &self.working_format())
             .finish_non_exhaustive()
     }
 }
 
 impl CIContext {
-    const fn from_raw(ptr: *mut c_void) -> Self {
+    pub(crate) const unsafe fn from_raw(ptr: *mut c_void) -> Self {
         Self { ptr }
     }
 
     fn from_non_null(ptr: *mut c_void, kind: &str) -> Self {
         assert!(!ptr.is_null(), "{kind} returned nil");
-        Self::from_raw(ptr)
+        unsafe { Self::from_raw(ptr) }
     }
 
     pub const fn as_ptr(&self) -> *mut c_void {
@@ -68,6 +80,26 @@ impl CIContext {
             unsafe { ffi::ci_context_new_cpu() },
             "CIContext(useSoftwareRenderer:)",
         )
+    }
+
+    pub fn with_options(options: &CIContextOptions) -> Result<Self, CIError> {
+        let name = options
+            .name
+            .as_deref()
+            .map(|name| string_to_cstring(name, "context name"))
+            .transpose()?;
+        Ok(Self::from_non_null(
+            unsafe {
+                ffi::ci_context_new_with_options(
+                    options.cache_intermediates,
+                    options.priority_request_low,
+                    options.allow_low_power,
+                    options.output_premultiplied,
+                    name.as_ref().map_or(ptr::null(), |value| value.as_ptr()),
+                )
+            },
+            "CIContext(options:)",
+        ))
     }
 
     #[cfg(feature = "metal")]
@@ -86,6 +118,10 @@ impl CIContext {
             unsafe { ffi::ci_context_new_metal_command_queue(queue.as_ptr()) },
             "CIContext(mtlCommandQueue:)",
         )
+    }
+
+    pub fn working_format(&self) -> i32 {
+        unsafe { ffi::ci_context_working_format(self.ptr) }
     }
 
     pub fn render_to_cg_image(&self, image: &CIImage) -> Result<CGImage, CIError> {
@@ -129,6 +165,28 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
+    pub fn reclaim_resources(&self) {
+        unsafe { ffi::ci_context_reclaim_resources(self.ptr) };
+    }
+
+    pub fn clear_caches(&self) {
+        unsafe { ffi::ci_context_clear_caches(self.ptr) };
+    }
+
+    pub fn input_image_maximum_size(&self) -> CGSize {
+        let mut width = 0.0;
+        let mut height = 0.0;
+        unsafe { ffi::ci_context_input_image_maximum_size(self.ptr, &mut width, &mut height) };
+        CGSize::new(width, height)
+    }
+
+    pub fn output_image_maximum_size(&self) -> CGSize {
+        let mut width = 0.0;
+        let mut height = 0.0;
+        unsafe { ffi::ci_context_output_image_maximum_size(self.ptr, &mut width, &mut height) };
+        CGSize::new(width, height)
+    }
+
     pub fn write_png(&self, image: &CIImage, path: impl AsRef<Path>) -> Result<(), CIError> {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();
@@ -166,11 +224,40 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
+    pub fn write_heif10(
+        &self,
+        image: &CIImage,
+        path: impl AsRef<Path>,
+        quality: f64,
+    ) -> Result<(), CIError> {
+        let path = path_to_cstring(path.as_ref())?;
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_context_write_heif10(
+                self.ptr,
+                image.as_ptr(),
+                path.as_ptr(),
+                quality,
+                &mut error,
+            )
+        };
+        unsafe { status_result(status, error) }
+    }
+
     pub fn write_tiff(&self, image: &CIImage, path: impl AsRef<Path>) -> Result<(), CIError> {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();
         let status = unsafe {
             ffi::ci_context_write_tiff(self.ptr, image.as_ptr(), path.as_ptr(), &mut error)
+        };
+        unsafe { status_result(status, error) }
+    }
+
+    pub fn write_openexr(&self, image: &CIImage, path: impl AsRef<Path>) -> Result<(), CIError> {
+        let path = path_to_cstring(path.as_ref())?;
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_context_write_openexr(self.ptr, image.as_ptr(), path.as_ptr(), &mut error)
         };
         unsafe { status_result(status, error) }
     }
