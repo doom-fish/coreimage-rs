@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.2] - 2026-05-17
+
+### Added
+
+- Added typed `CIFilter` constant families for apply options, attribute keys/types, filter categories, dynamic-range values, input/output keys, and UI parameter sets.
+- Added typed constant coverage for `CIFilterGeneratorExportedKey`, `CIImageProviderOptionKey`, and `CISamplerOptionKey::ColorSpace`.
+- Added long-tail builtin coverage with 157 typed `CIFilterBuiltins` constructors plus family helpers for abstract protocols such as `CICompositeOperation`, `CIFourCoordinateGeometryFilter`, and `CITransitionFilter`.
+- Added safe wrappers for `CIFilterConstructor`, `CIPlugIn`, `CIPlugInRegistration`, and shared `CIKernel` handles.
+- Expanded `CIImageProcessor` with typed `CIImageProcessorInput` / `CIImageProcessorOutput` invocation snapshots.
+
+### Changed
+
+- `CIImageProcessor::apply_passthrough` now forces a render so invocation snapshots are populated deterministically for tests and examples.
+- Updated `README.md`, `COVERAGE.md`, and `COVERAGE_AUDIT.md` to reflect 466 audited non-exempt public symbols (100% coverage, 33 exempt).
+
 ## [0.2.1] - 2026-05-16
 
 ### Added

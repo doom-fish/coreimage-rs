@@ -18,8 +18,26 @@ fn typed_constant_families_expose_expected_values() -> Result<(), Box<dyn Error>
         "kCIImageAutoAdjustEnhance"
     );
     assert_eq!(CIRAWDecoderVersion::Version6Dng.as_str(), "6.dng");
+    assert_eq!(CIApplyOptionKey::ColorSpace.as_str(), "kCIApplyOptionColorSpace");
+    assert_eq!(CIAttributeKey::FilterName.as_str(), "kCIAttributeFilterName");
+    assert_eq!(CIAttributeType::Transform.as_str(), "kCIAttributeTypeTransform");
+    assert_eq!(CIFilterCategory::Blur.as_str(), "kCICategoryBlur");
+    assert_eq!(CIDynamicRange::ConstrainedHigh.as_str(), "kCIDynamicRangeConstrainedHigh");
+    assert_eq!(CIInputKey::Intensity.as_str(), "kCIInputIntensityKey");
+    assert_eq!(CIOutputKey::Image.as_str(), "kCIOutputImageKey");
+    assert_eq!(CIUIParameterSetKey::ParameterSet.as_str(), "kCIUIParameterSet");
+    assert_eq!(CIUIParameterSet::Advanced.as_str(), "kCIUISetAdvanced");
+    assert_eq!(
+        CIFilterGeneratorExportedKey::TargetObject.as_str(),
+        "kCIFilterGeneratorExportedKeyTargetObject"
+    );
+    assert_eq!(CIImageProviderOptionKey::TileSize.as_str(), "kCIImageProviderTileSize");
+    assert_eq!(CISamplerOptionKey::ColorSpace.as_str(), "kCISamplerColorSpace");
     assert_eq!(CIFormat::Rgba8.bytes_per_pixel(), 4);
     assert_eq!(CIFormat::from_raw(CIFormat::Rgba8.raw_value()), Some(CIFormat::Rgba8));
+    assert!(CIFilter::names_in_category_key(CIFilterCategory::Blur)
+        .iter()
+        .any(|name| name == "CIGaussianBlur"));
 
     let options = CIContextOptions {
         cache_intermediates: true,

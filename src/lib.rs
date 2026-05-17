@@ -29,6 +29,7 @@ mod error;
 mod feature;
 mod ffi;
 mod filter;
+mod filter_constructor;
 mod filter_generator;
 mod filter_shape;
 #[cfg(feature = "filters")]
@@ -38,6 +39,7 @@ mod image;
 mod image_accumulator;
 mod image_processor;
 mod kernel;
+mod plugin;
 mod raw_filter;
 mod render_destination;
 mod sampler;
@@ -53,8 +55,11 @@ pub use barcode_descriptor::{
 };
 pub use color::{CIColor, CIColorName};
 pub use constants::{
-    CIColorSpace, CIContextOptionKey, CIFormat, CIImageAutoAdjustmentOptionKey, CIImageOptionKey,
-    CIImageRepresentationOptionKey,
+    CIApplyOptionKey, CIAttributeKey, CIAttributeType, CIColorSpace, CIContextOptionKey,
+    CIDynamicRange, CIFilterCategory, CIFilterGeneratorExportedKey, CIFormat,
+    CIImageAutoAdjustmentOptionKey, CIImageOptionKey, CIImageProviderOptionKey,
+    CIImageRepresentationOptionKey, CIInputKey, CIOutputKey, CISamplerOptionKey,
+    CIUIParameterSet, CIUIParameterSetKey,
 };
 pub use context::{CIContext, CIContextOptions};
 pub use detector::{
@@ -63,12 +68,16 @@ pub use detector::{
 pub use error::CIError;
 pub use feature::{CIFeature, CIFeatureKind};
 pub use filter::CIFilter;
+pub use filter_constructor::CIFilterConstructor;
 pub use filter_generator::CIFilterGenerator;
 pub use filter_shape::CIFilterShape;
 pub use image::CIImage;
 pub use image_accumulator::CIImageAccumulator;
-pub use image_processor::CIImageProcessor;
-pub use kernel::{CIBlendKernel, CIBlendKernelKind, CIColorKernel, CIWarpKernel};
+pub use image_processor::{
+    CIImageProcessor, CIImageProcessorInput, CIImageProcessorInvocation, CIImageProcessorOutput,
+};
+pub use kernel::{CIBlendKernel, CIBlendKernelKind, CIColorKernel, CIKernel, CIWarpKernel};
+pub use plugin::{CIPlugIn, CIPlugInRegistration};
 pub use raw_filter::{CIRAWDecoderVersion, CIRAWFilter};
 pub use render_destination::{
     CIRenderDestination, CIRenderDestinationAlphaMode, CIRenderInfo, CIRenderTask,
@@ -91,15 +100,20 @@ pub mod prelude {
 
     pub use crate::{
         CIBarcodeDescriptor, CIBarcodeDescriptorKind, CIBlendKernel, CIBlendKernelKind, CIColor,
-        CIColorKernel, CIColorName, CIColorSpace, CIContext, CIContextOptionKey, CIContextOptions,
+        CIApplyOptionKey, CIAttributeKey, CIAttributeType, CIColorKernel, CIColorName,
+        CIColorSpace, CIContext, CIContextOptionKey, CIContextOptions,
         CIDataMatrixCodeECCVersion, CIDetectionOptions, CIDetector, CIDetectorAccuracy,
-        CIDetectorOptions, CIDetectorType, CIError, CIFeature, CIFeatureKind, CIFilter,
-        CIFilterGenerator, CIFilterShape, CIFormat, CIImage, CIImageAccumulator,
-        CIImageAutoAdjustmentOptionKey, CIImageOptionKey, CIImageProcessor,
-        CIImageRepresentationOptionKey, CIQRCodeErrorCorrectionLevel, CIRAWDecoderVersion,
-        CIRAWFilter, CIRenderDestination, CIRenderDestinationAlphaMode, CIRenderInfo,
-        CIRenderTask, CISampler, CISamplerFilterMode, CISamplerOptions, CISamplerWrapMode,
-        CIVector, CIWarpKernel,
+        CIDetectorOptions, CIDetectorType, CIDynamicRange, CIError, CIFeature,
+        CIFeatureKind, CIFilter, CIFilterCategory, CIFilterConstructor,
+        CIFilterGenerator, CIFilterGeneratorExportedKey, CIFilterShape, CIFormat, CIImage,
+        CIImageAccumulator, CIImageAutoAdjustmentOptionKey, CIImageOptionKey,
+        CIImageProcessor, CIImageProcessorInput, CIImageProcessorInvocation,
+        CIImageProcessorOutput, CIImageProviderOptionKey, CIImageRepresentationOptionKey,
+        CIInputKey, CIKernel, CIOutputKey, CIPlugIn, CIPlugInRegistration,
+        CIQRCodeErrorCorrectionLevel, CIRAWDecoderVersion, CIRAWFilter,
+        CIRenderDestination, CIRenderDestinationAlphaMode, CIRenderInfo, CIRenderTask,
+        CISampler, CISamplerFilterMode, CISamplerOptionKey, CISamplerOptions,
+        CISamplerWrapMode, CIUIParameterSet, CIUIParameterSetKey, CIVector, CIWarpKernel,
     };
 
     #[cfg(feature = "filters")]

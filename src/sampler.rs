@@ -6,6 +6,7 @@ use apple_cf::cg::{CGAffineTransform, CGRect};
 
 use crate::ffi;
 use crate::image::CIImage;
+use crate::CIColorSpace;
 
 /// Wrap behavior when sampling outside the image extent.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -47,6 +48,7 @@ pub struct CISamplerOptions {
     pub wrap_mode: CISamplerWrapMode,
     pub filter_mode: CISamplerFilterMode,
     pub affine_transform: Option<CGAffineTransform>,
+    pub color_space: Option<CIColorSpace>,
 }
 
 /// A Core Image sampler object.
@@ -111,6 +113,8 @@ impl CISampler {
                     transform.d,
                     transform.tx,
                     transform.ty,
+                    options.color_space.is_some(),
+                    options.color_space.map_or(0, CIColorSpace::code),
                 )
             },
             "CISampler",

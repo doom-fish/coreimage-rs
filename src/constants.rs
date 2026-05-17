@@ -46,6 +46,44 @@ macro_rules! string_key_enum {
             }
         }
     };
+    (
+        $(#[$meta:meta])*
+        pub enum $name:ident {
+            $($variant:ident),+ $(,)?
+        }
+        loader = $loader:path;
+    ) => {
+        $(#[$meta])*
+        #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+        #[repr(usize)]
+        pub enum $name {
+            $($variant),+
+        }
+
+        impl $name {
+            fn values() -> &'static Vec<String> {
+                static VALUES: OnceLock<Vec<String>> = OnceLock::new();
+                VALUES.get_or_init(|| {
+                    (0..string_key_enum!(@count $($variant),+))
+                        .map(|index| {
+                            let index = i32::try_from(index).expect("string key index fits in i32");
+                            unsafe { take_owned_string($loader(index)).unwrap_or_default() }
+                        })
+                        .collect()
+                })
+            }
+
+            pub fn as_str(self) -> &'static str {
+                Self::values()[self as usize].as_str()
+            }
+        }
+    };
+    (@count $($variant:ident),+ $(,)?) => {
+        <[()]>::len(&[$(string_key_enum!(@replace $variant ())),+])
+    };
+    (@replace $_variant:ident $sub:expr) => {
+        $sub
+    };
 }
 
 /// Common Core Image color-space selections for APIs that accept a destination or working space.
@@ -300,4 +338,250 @@ string_key_enum! {
     }
     loader = ffi::ci_image_representation_option_name;
     total = 14;
+}
+
+string_key_enum! {
+    /// Typed names for `CIFilter.apply(..., options:)` dictionary keys.
+    pub enum CIApplyOptionKey {
+        Extent,
+        Definition,
+        UserInfo,
+        ColorSpace,
+    }
+    loader = ffi::ci_apply_option_name;
+}
+
+string_key_enum! {
+    /// Typed names for `CIFilter.attributes` dictionary entries.
+    pub enum CIAttributeKey {
+        FilterName,
+        FilterDisplayName,
+        Description,
+        FilterAvailableMac,
+        FilterAvailableIos,
+        ReferenceDocumentation,
+        FilterCategories,
+        Class,
+        Type,
+        Min,
+        Max,
+        SliderMin,
+        SliderMax,
+        Default,
+        Identity,
+        Name,
+        DisplayName,
+    }
+    loader = ffi::ci_attribute_key_name;
+}
+
+string_key_enum! {
+    /// Typed `kCIAttributeType*` values found in filter metadata.
+    pub enum CIAttributeType {
+        Time,
+        Scalar,
+        Distance,
+        Angle,
+        Boolean,
+        Integer,
+        Count,
+        Position,
+        Offset,
+        Position3,
+        Rectangle,
+        OpaqueColor,
+        Color,
+        Gradient,
+        Image,
+        Transform,
+    }
+    loader = ffi::ci_attribute_type_name;
+}
+
+string_key_enum! {
+    /// Typed Core Image filter categories for discovery APIs.
+    pub enum CIFilterCategory {
+        DistortionEffect,
+        GeometryAdjustment,
+        CompositeOperation,
+        HalftoneEffect,
+        ColorAdjustment,
+        ColorEffect,
+        Transition,
+        TileEffect,
+        Generator,
+        Reduction,
+        Gradient,
+        Stylize,
+        Sharpen,
+        Blur,
+        Video,
+        StillImage,
+        Interlaced,
+        NonSquarePixels,
+        HighDynamicRange,
+        BuiltIn,
+        FilterGenerator,
+    }
+    loader = ffi::ci_filter_category_name;
+}
+
+impl CIFilterCategory {
+    pub fn value(self) -> &'static str {
+        static VALUES: OnceLock<Vec<String>> = OnceLock::new();
+        VALUES.get_or_init(|| {
+            (0_i32..21)
+                .map(|index| unsafe {
+                    take_owned_string(ffi::ci_filter_category_value(index)).unwrap_or_default()
+                })
+                .collect()
+        })[self as usize]
+            .as_str()
+    }
+}
+
+string_key_enum! {
+    /// Typed dynamic-range metadata values used by Core Image filters.
+    pub enum CIDynamicRange {
+        Standard,
+        High,
+        ConstrainedHigh,
+    }
+    loader = ffi::ci_dynamic_range_name;
+}
+
+string_key_enum! {
+    /// Common typed filter input keys.
+    pub enum CIInputKey {
+        BackgroundImage,
+        Image,
+        DepthImage,
+        DisparityImage,
+        Amount,
+        Count,
+        Threshold,
+        Time,
+        Transform,
+        Scale,
+        AspectRatio,
+        Center,
+        Radius,
+        Radius0,
+        Radius1,
+        Angle,
+        Refraction,
+        Width,
+        Sharpness,
+        Intensity,
+        Ev,
+        Saturation,
+        Color,
+        Color0,
+        Color1,
+        ColorSpace,
+        Brightness,
+        Contrast,
+        Extrapolate,
+        Perceptual,
+        Bias,
+        BiasVector,
+        GradientImage,
+        MaskImage,
+        MatteImage,
+        BacksideImage,
+        ShadingImage,
+        TargetImage,
+        PaletteImage,
+        Extent,
+        Version,
+        Point0,
+        Point1,
+        Weights,
+    }
+    loader = ffi::ci_input_key_name;
+}
+
+impl CIInputKey {
+    pub fn value(self) -> &'static str {
+        static VALUES: OnceLock<Vec<String>> = OnceLock::new();
+        VALUES.get_or_init(|| {
+            (0_i32..44)
+                .map(|index| unsafe {
+                    take_owned_string(ffi::ci_input_key_value(index)).unwrap_or_default()
+                })
+                .collect()
+        })[self as usize]
+            .as_str()
+    }
+}
+
+string_key_enum! {
+    /// Common typed filter output keys.
+    pub enum CIOutputKey {
+        Image,
+    }
+    loader = ffi::ci_output_key_name;
+}
+
+impl CIOutputKey {
+    pub fn value(self) -> &'static str {
+        static VALUES: OnceLock<Vec<String>> = OnceLock::new();
+        VALUES.get_or_init(|| {
+            (0_i32..1)
+                .map(|index| unsafe {
+                    take_owned_string(ffi::ci_output_key_value(index)).unwrap_or_default()
+                })
+                .collect()
+        })[self as usize]
+            .as_str()
+    }
+}
+
+string_key_enum! {
+    /// The metadata key used to select which UI parameter set a filter should expose.
+    pub enum CIUIParameterSetKey {
+        ParameterSet,
+    }
+    loader = ffi::ci_ui_parameter_set_key_name;
+}
+
+string_key_enum! {
+    /// Predefined UI parameter-set values for filter metadata.
+    pub enum CIUIParameterSet {
+        Basic,
+        Intermediate,
+        Advanced,
+        Development,
+    }
+    loader = ffi::ci_ui_parameter_set_name;
+}
+
+string_key_enum! {
+    /// Typed names for exported-key dictionaries in `CIFilterGenerator` graphs.
+    pub enum CIFilterGeneratorExportedKey {
+        Key,
+        Name,
+        TargetObject,
+    }
+    loader = ffi::ci_filter_generator_exported_key_name;
+}
+
+string_key_enum! {
+    /// Typed `CIImageOption` keys used with `CIImage` image-provider creation.
+    pub enum CIImageProviderOptionKey {
+        TileSize,
+        UserInfo,
+    }
+    loader = ffi::ci_image_provider_option_name;
+}
+
+string_key_enum! {
+    /// Typed keys accepted by `CISampler` option dictionaries.
+    pub enum CISamplerOptionKey {
+        AffineMatrix,
+        FilterMode,
+        WrapMode,
+        ColorSpace,
+    }
+    loader = ffi::ci_sampler_option_name;
 }

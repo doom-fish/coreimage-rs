@@ -359,6 +359,133 @@ fn builtin_filter(name: &str) -> Option<CIFilter> {
     CIFilter::new(name)
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CICompositeOperationKind {
+    Addition,
+    ColorBlendMode,
+    ColorBurnBlendMode,
+    ColorDodgeBlendMode,
+    DarkenBlendMode,
+    DifferenceBlendMode,
+    DivideBlendMode,
+    ExclusionBlendMode,
+    HardLightBlendMode,
+    HueBlendMode,
+    LightenBlendMode,
+    LinearBurnBlendMode,
+    LinearDodgeBlendMode,
+    LinearLightBlendMode,
+    LuminosityBlendMode,
+    MaximumCompositing,
+    MinimumCompositing,
+    MultiplyBlendMode,
+    MultiplyCompositing,
+    OverlayBlendMode,
+    PinLightBlendMode,
+    SaturationBlendMode,
+    ScreenBlendMode,
+    SoftLightBlendMode,
+    SourceAtopCompositing,
+    SourceInCompositing,
+    SourceOutCompositing,
+    SourceOverCompositing,
+    SubtractBlendMode,
+    VividLightBlendMode,
+}
+
+pub fn composite_operation(kind: CICompositeOperationKind) -> Option<CIFilter> {
+    builtin_filter(match kind {
+        CICompositeOperationKind::Addition => "CIAdditionCompositing",
+        CICompositeOperationKind::ColorBlendMode => "CIColorBlendMode",
+        CICompositeOperationKind::ColorBurnBlendMode => "CIColorBurnBlendMode",
+        CICompositeOperationKind::ColorDodgeBlendMode => "CIColorDodgeBlendMode",
+        CICompositeOperationKind::DarkenBlendMode => "CIDarkenBlendMode",
+        CICompositeOperationKind::DifferenceBlendMode => "CIDifferenceBlendMode",
+        CICompositeOperationKind::DivideBlendMode => "CIDivideBlendMode",
+        CICompositeOperationKind::ExclusionBlendMode => "CIExclusionBlendMode",
+        CICompositeOperationKind::HardLightBlendMode => "CIHardLightBlendMode",
+        CICompositeOperationKind::HueBlendMode => "CIHueBlendMode",
+        CICompositeOperationKind::LightenBlendMode => "CILightenBlendMode",
+        CICompositeOperationKind::LinearBurnBlendMode => "CILinearBurnBlendMode",
+        CICompositeOperationKind::LinearDodgeBlendMode => "CILinearDodgeBlendMode",
+        CICompositeOperationKind::LinearLightBlendMode => "CILinearLightBlendMode",
+        CICompositeOperationKind::LuminosityBlendMode => "CILuminosityBlendMode",
+        CICompositeOperationKind::MaximumCompositing => "CIMaximumCompositing",
+        CICompositeOperationKind::MinimumCompositing => "CIMinimumCompositing",
+        CICompositeOperationKind::MultiplyBlendMode => "CIMultiplyBlendMode",
+        CICompositeOperationKind::MultiplyCompositing => "CIMultiplyCompositing",
+        CICompositeOperationKind::OverlayBlendMode => "CIOverlayBlendMode",
+        CICompositeOperationKind::PinLightBlendMode => "CIPinLightBlendMode",
+        CICompositeOperationKind::SaturationBlendMode => "CISaturationBlendMode",
+        CICompositeOperationKind::ScreenBlendMode => "CIScreenBlendMode",
+        CICompositeOperationKind::SoftLightBlendMode => "CISoftLightBlendMode",
+        CICompositeOperationKind::SourceAtopCompositing => "CISourceAtopCompositing",
+        CICompositeOperationKind::SourceInCompositing => "CISourceInCompositing",
+        CICompositeOperationKind::SourceOutCompositing => "CISourceOutCompositing",
+        CICompositeOperationKind::SourceOverCompositing => "CISourceOverCompositing",
+        CICompositeOperationKind::SubtractBlendMode => "CISubtractBlendMode",
+        CICompositeOperationKind::VividLightBlendMode => "CIVividLightBlendMode",
+    })
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CIFourCoordinateGeometryFilterKind {
+    KeystoneCorrectionCombined,
+    KeystoneCorrectionHorizontal,
+    KeystoneCorrectionVertical,
+    PerspectiveCorrection,
+    PerspectiveTransform,
+    PerspectiveTransformWithExtent,
+}
+
+pub fn four_coordinate_geometry_filter(
+    kind: CIFourCoordinateGeometryFilterKind,
+) -> Option<CIFilter> {
+    builtin_filter(match kind {
+        CIFourCoordinateGeometryFilterKind::KeystoneCorrectionCombined =>
+            "CIKeystoneCorrectionCombined",
+        CIFourCoordinateGeometryFilterKind::KeystoneCorrectionHorizontal =>
+            "CIKeystoneCorrectionHorizontal",
+        CIFourCoordinateGeometryFilterKind::KeystoneCorrectionVertical =>
+            "CIKeystoneCorrectionVertical",
+        CIFourCoordinateGeometryFilterKind::PerspectiveCorrection => "CIPerspectiveCorrection",
+        CIFourCoordinateGeometryFilterKind::PerspectiveTransform => "CIPerspectiveTransform",
+        CIFourCoordinateGeometryFilterKind::PerspectiveTransformWithExtent =>
+            "CIPerspectiveTransformWithExtent",
+    })
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CITransitionFilterKind {
+    AccordionFold,
+    BarsSwipe,
+    CopyMachine,
+    DisintegrateWithMask,
+    Dissolve,
+    Flash,
+    Mod,
+    PageCurl,
+    PageCurlWithShadow,
+    Ripple,
+    Swipe,
+}
+
+pub fn transition_filter(kind: CITransitionFilterKind) -> Option<CIFilter> {
+    builtin_filter(match kind {
+        CITransitionFilterKind::AccordionFold => "CIAccordionFoldTransition",
+        CITransitionFilterKind::BarsSwipe => "CIBarsSwipeTransition",
+        CITransitionFilterKind::CopyMachine => "CICopyMachineTransition",
+        CITransitionFilterKind::DisintegrateWithMask => "CIDisintegrateWithMaskTransition",
+        CITransitionFilterKind::Dissolve => "CIDissolveTransition",
+        CITransitionFilterKind::Flash => "CIFlashTransition",
+        CITransitionFilterKind::Mod => "CIModTransition",
+        CITransitionFilterKind::PageCurl => "CIPageCurlTransition",
+        CITransitionFilterKind::PageCurlWithShadow => "CIPageCurlWithShadowTransition",
+        CITransitionFilterKind::Ripple => "CIRippleTransition",
+        CITransitionFilterKind::Swipe => "CISwipeTransition",
+    })
+}
+
 macro_rules! builtin_filter_constructors {
     ($(($function:ident, $name:literal)),+ $(,)?) => {
         $(
@@ -392,6 +519,8 @@ builtin_filter_constructors! {
     (bars_swipe_transition, "CIBarsSwipeTransition"),
     (bicubic_scale_transform, "CIBicubicScaleTransform"),
     (blurred_rectangle_generator, "CIBlurredRectangleGenerator"),
+    (convert_lab_to_rgb, "CIConvertLabToRGB"),
+    (convert_rgb_to_lab, "CIConvertRGBtoLab"),
     (blurred_rounded_rectangle_generator, "CIBlurredRoundedRectangleGenerator"),
     (bokeh_blur, "CIBokehBlur"),
     (bump_distortion, "CIBumpDistortion"),
@@ -418,7 +547,9 @@ builtin_filter_constructors! {
     (column_average, "CIColumnAverage"),
     (convolution, "CIConvolution"),
     (copy_machine_transition, "CICopyMachineTransition"),
+    (core_ml_model, "CICoreMLModelFilter"),
     (depth_of_field, "CIDepthOfField"),
+    (edge_preserve_upsample, "CIEdgePreserveUpsampleFilter"),
     (depth_to_disparity, "CIDepthToDisparity"),
     (disintegrate_with_mask_transition, "CIDisintegrateWithMaskTransition"),
     (disparity_to_depth, "CIDisparityToDepth"),
@@ -436,6 +567,7 @@ builtin_filter_constructors! {
     (fourfold_translated_tile, "CIFourfoldTranslatedTile"),
     (gabor_gradients, "CIGaborGradients"),
     (gaussian_gradient, "CIGaussianGradient"),
+    (histogram_display, "CIHistogramDisplayFilter"),
     (glass_distortion, "CIGlassDistortion"),
     (glass_lozenge, "CIGlassLozenge"),
     (glide_reflected_tile, "CIGlideReflectedTile"),
@@ -460,6 +592,7 @@ builtin_filter_constructors! {
     (mask_to_alpha, "CIMaskToAlpha"),
     (masked_variable_blur, "CIMaskedVariableBlur"),
     (maximum_component, "CIMaximumComponent"),
+    (median, "CIMedianFilter"),
     (maximum_scale_transform, "CIMaximumScaleTransform"),
     (mesh_generator, "CIMeshGenerator"),
     (minimum_component, "CIMinimumComponent"),
@@ -494,6 +627,7 @@ builtin_filter_constructors! {
     (rounded_rectangle_generator, "CIRoundedRectangleGenerator"),
     (rounded_rectangle_stroke_generator, "CIRoundedRectangleStrokeGenerator"),
     (row_average, "CIRowAverage"),
+    (saliency_map, "CISaliencyMapFilter"),
     (srgb_tone_curve_to_linear, "CISRGBToneCurveToLinear"),
     (shaded_material, "CIShadedMaterial"),
     (signed_distance_gradient_from_red_mask, "CISignedDistanceGradientFromRedMask"),

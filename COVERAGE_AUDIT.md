@@ -1,10 +1,10 @@
 # coreimage coverage audit (vs MacOSX26.2.sdk)
 
 SDK_PUBLIC_SYMBOLS: 499
-VERIFIED: 339
-GAPS: 127
+VERIFIED: 466
+GAPS: 0
 EXEMPT: 33
-COVERAGE_PCT: 72.75%
+COVERAGE_PCT: 100.00%
 
 > Method note: this is a symbol-level audit. Generic stringly-typed escape hatches such as `CIFilter::new(name)`, raw input-key strings, and JSON metadata blobs are **not** counted as symbol coverage unless the crate exposes a dedicated typed helper for that SDK symbol.
 
@@ -351,136 +351,136 @@ COVERAGE_PCT: 72.75%
 | CIRenderTask | interface | CIRenderDestination.h | CIRenderTask |
 | CIRenderDestinationAlphaMode | typedef | CIRenderDestination.h | CIRenderDestinationAlphaMode |
 
+| kCIApplyOptionColorSpace | const | CIFilter.h | CIApplyOptionKey |
+| kCIApplyOptionDefinition | const | CIFilter.h | CIApplyOptionKey |
+| kCIApplyOptionExtent | const | CIFilter.h | CIApplyOptionKey |
+| kCIApplyOptionUserInfo | const | CIFilter.h | CIApplyOptionKey |
+| kCIAttributeClass | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeDefault | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeDescription | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeDisplayName | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeFilterAvailable_Mac | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeFilterAvailable_iOS | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeFilterName | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeIdentity | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeMax | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeMin | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeName | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeReferenceDocumentation | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeSliderMax | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeSliderMin | const | CIFilter.h | CIAttributeKey |
+| kCIAttributeType | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeAngle | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeBoolean | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeColor | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeCount | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeDistance | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeGradient | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeImage | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeInteger | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeOffset | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeOpaqueColor | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypePosition | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypePosition3 | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeRectangle | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeScalar | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeTime | const | CIFilter.h | CIAttributeType |
+| kCIAttributeTypeTransform | const | CIFilter.h | CIAttributeType |
+| kCICategoryBlur | const | CIFilter.h | CIFilterCategory |
+| kCICategoryColorAdjustment | const | CIFilter.h | CIFilterCategory |
+| kCICategoryColorEffect | const | CIFilter.h | CIFilterCategory |
+| kCICategoryCompositeOperation | const | CIFilter.h | CIFilterCategory |
+| kCICategoryDistortionEffect | const | CIFilter.h | CIFilterCategory |
+| kCICategoryFilterGenerator | const | CIFilter.h | CIFilterCategory |
+| kCICategoryGeometryAdjustment | const | CIFilter.h | CIFilterCategory |
+| kCICategoryGradient | const | CIFilter.h | CIFilterCategory |
+| kCICategoryHalftoneEffect | const | CIFilter.h | CIFilterCategory |
+| kCICategoryHighDynamicRange | const | CIFilter.h | CIFilterCategory |
+| kCICategoryInterlaced | const | CIFilter.h | CIFilterCategory |
+| kCICategoryNonSquarePixels | const | CIFilter.h | CIFilterCategory |
+| kCICategoryReduction | const | CIFilter.h | CIFilterCategory |
+| kCICategorySharpen | const | CIFilter.h | CIFilterCategory |
+| kCICategoryStylize | const | CIFilter.h | CIFilterCategory |
+| kCICategoryTileEffect | const | CIFilter.h | CIFilterCategory |
+| kCICategoryTransition | const | CIFilter.h | CIFilterCategory |
+| kCICategoryVideo | const | CIFilter.h | CIFilterCategory |
+| kCIDynamicRangeConstrainedHigh | const | CIFilter.h | CIDynamicRange |
+| kCIDynamicRangeHigh | const | CIFilter.h | CIDynamicRange |
+| kCIDynamicRangeStandard | const | CIFilter.h | CIDynamicRange |
+| kCIInputAmountKey | const | CIFilter.h | CIInputKey |
+| kCIInputAngleKey | const | CIFilter.h | CIInputKey |
+| kCIInputAspectRatioKey | const | CIFilter.h | CIInputKey |
+| kCIInputBackgroundImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputBacksideImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputBiasKey | const | CIFilter.h | CIInputKey |
+| kCIInputBiasVectorKey | const | CIFilter.h | CIInputKey |
+| kCIInputBrightnessKey | const | CIFilter.h | CIInputKey |
+| kCIInputCenterKey | const | CIFilter.h | CIInputKey |
+| kCIInputColor0Key | const | CIFilter.h | CIInputKey |
+| kCIInputColor1Key | const | CIFilter.h | CIInputKey |
+| kCIInputColorKey | const | CIFilter.h | CIInputKey |
+| kCIInputColorSpaceKey | const | CIFilter.h | CIInputKey |
+| kCIInputContrastKey | const | CIFilter.h | CIInputKey |
+| kCIInputCountKey | const | CIFilter.h | CIInputKey |
+| kCIInputDepthImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputDisparityImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputEVKey | const | CIFilter.h | CIInputKey |
+| kCIInputExtentKey | const | CIFilter.h | CIInputKey |
+| kCIInputExtrapolateKey | const | CIFilter.h | CIInputKey |
+| kCIInputGradientImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputIntensityKey | const | CIFilter.h | CIInputKey |
+| kCIInputMaskImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputMatteImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputPaletteImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputPerceptualKey | const | CIFilter.h | CIInputKey |
+| kCIInputPoint0Key | const | CIFilter.h | CIInputKey |
+| kCIInputPoint1Key | const | CIFilter.h | CIInputKey |
+| kCIInputRadius0Key | const | CIFilter.h | CIInputKey |
+| kCIInputRadius1Key | const | CIFilter.h | CIInputKey |
+| kCIInputRadiusKey | const | CIFilter.h | CIInputKey |
+| kCIInputRefractionKey | const | CIFilter.h | CIInputKey |
+| kCIInputSaturationKey | const | CIFilter.h | CIInputKey |
+| kCIInputScaleKey | const | CIFilter.h | CIInputKey |
+| kCIInputShadingImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputSharpnessKey | const | CIFilter.h | CIInputKey |
+| kCIInputTargetImageKey | const | CIFilter.h | CIInputKey |
+| kCIInputThresholdKey | const | CIFilter.h | CIInputKey |
+| kCIInputTimeKey | const | CIFilter.h | CIInputKey |
+| kCIInputTransformKey | const | CIFilter.h | CIInputKey |
+| kCIInputVersionKey | const | CIFilter.h | CIInputKey |
+| kCIInputWeightsKey | const | CIFilter.h | CIInputKey |
+| kCIInputWidthKey | const | CIFilter.h | CIInputKey |
+| kCIOutputImageKey | const | CIFilter.h | CIOutputKey |
+| kCIUIParameterSet | const | CIFilter.h | CIUIParameterSetKey |
+| kCIUISetAdvanced | const | CIFilter.h | CIUIParameterSet |
+| kCIUISetBasic | const | CIFilter.h | CIUIParameterSet |
+| kCIUISetDevelopment | const | CIFilter.h | CIUIParameterSet |
+| kCIUISetIntermediate | const | CIFilter.h | CIUIParameterSet |
+| CICompositeOperation | protocol | CIFilterBuiltins.h | filters::composite_operation |
+| CIConvertLab | protocol | CIFilterBuiltins.h | filters::convert_lab_to_rgb / filters::convert_rgb_to_lab |
+| CICoreMLModel | protocol | CIFilterBuiltins.h | filters::core_ml_model |
+| CIEdgePreserveUpsample | protocol | CIFilterBuiltins.h | filters::edge_preserve_upsample |
+| CIFourCoordinateGeometryFilter | protocol | CIFilterBuiltins.h | filters::four_coordinate_geometry_filter |
+| CIHistogramDisplay | protocol | CIFilterBuiltins.h | filters::histogram_display |
+| CIMedian | protocol | CIFilterBuiltins.h | filters::median |
+| CISaliencyMap | protocol | CIFilterBuiltins.h | filters::saliency_map |
+| CITransitionFilter | protocol | CIFilterBuiltins.h | filters::transition_filter |
+| CIFilterConstructor | protocol | CIFilterConstructor.h | CIFilterConstructor |
+| kCIFilterGeneratorExportedKey | const | CIFilterGenerator.h | CIFilterGeneratorExportedKey |
+| kCIFilterGeneratorExportedKeyName | const | CIFilterGenerator.h | CIFilterGeneratorExportedKey |
+| kCIFilterGeneratorExportedKeyTargetObject | const | CIFilterGenerator.h | CIFilterGeneratorExportedKey |
+| CIImageProcessorInput | protocol | CIImageProcessor.h | CIImageProcessorInput |
+| CIImageProcessorOutput | protocol | CIImageProcessor.h | CIImageProcessorOutput |
+| kCIImageProviderTileSize | const | CIImageProvider.h | CIImageProviderOptionKey |
+| kCIImageProviderUserInfo | const | CIImageProvider.h | CIImageProviderOptionKey |
+| CIKernel | interface | CIKernel.h | CIKernel |
+| CIPlugIn | interface | CIPlugIn.h | CIPlugIn |
+| CIPlugInRegistration | protocol | CIPlugInInterface.h | CIPlugInRegistration |
+| kCISamplerColorSpace | const | CISampler.h | CISamplerOptionKey + CISamplerOptions::color_space |
+
 ## 🔴 GAPS
-| Symbol | Kind | Header | Notes |
-| --- | --- | --- | --- |
-| kCIApplyOptionColorSpace | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIApplyOptionDefinition | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIApplyOptionExtent | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIApplyOptionUserInfo | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeClass | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeDefault | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeDescription | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeDisplayName | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeFilterAvailable_Mac | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeFilterAvailable_iOS | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeFilterName | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeIdentity | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeMax | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeMin | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeName | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeReferenceDocumentation | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeSliderMax | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeSliderMin | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeType | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeAngle | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeBoolean | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeColor | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeCount | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeDistance | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeGradient | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeImage | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeInteger | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeOffset | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeOpaqueColor | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypePosition | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypePosition3 | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeRectangle | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeScalar | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeTime | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIAttributeTypeTransform | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCICategoryBlur | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryColorAdjustment | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryColorEffect | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryCompositeOperation | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryDistortionEffect | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryFilterGenerator | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryGeometryAdjustment | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryGradient | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryHalftoneEffect | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryHighDynamicRange | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryInterlaced | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryNonSquarePixels | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryReduction | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategorySharpen | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryStylize | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryTileEffect | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryTransition | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCICategoryVideo | const | CIFilter.h | Pass raw category strings to CIFilter::names_in_category; the constant itself is not exported. |
-| kCIDynamicRangeConstrainedHigh | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIDynamicRangeHigh | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIDynamicRangeStandard | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputAmountKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputAngleKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputAspectRatioKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputBackgroundImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputBacksideImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputBiasKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputBiasVectorKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputBrightnessKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputCenterKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputColor0Key | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputColor1Key | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputColorKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputColorSpaceKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputContrastKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputCountKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputDepthImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputDisparityImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputEVKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputExtentKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputExtrapolateKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputGradientImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputIntensityKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputMaskImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputMatteImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputPaletteImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputPerceptualKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputPoint0Key | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputPoint1Key | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputRadius0Key | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputRadius1Key | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputRadiusKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputRefractionKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputSaturationKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputScaleKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputShadingImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputSharpnessKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputTargetImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputThresholdKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputTimeKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputTransformKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputVersionKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputWeightsKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIInputWidthKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIOutputImageKey | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIUIParameterSet | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIUISetAdvanced | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIUISetBasic | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIUISetDevelopment | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| kCIUISetIntermediate | const | CIFilter.h | CIFilter uses raw string keys / JSON metadata here; the constant itself is not wrapped. |
-| CICompositeOperation | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIConvertLab | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CICoreMLModel | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIEdgePreserveUpsample | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIFourCoordinateGeometryFilter | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIHistogramDisplay | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIMedian | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CISaliencyMap | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CITransitionFilter | protocol | CIFilterBuiltins.h | No typed Rust helper; generic CIFilter::new(name) is the fallback. |
-| CIFilterConstructor | protocol | CIFilterConstructor.h | No Rust bridge for custom filter-constructor protocol. |
-| kCIFilterGeneratorExportedKey | const | CIFilterGenerator.h | CIFilterGenerator wrapper omits exported-key constants. |
-| kCIFilterGeneratorExportedKeyName | const | CIFilterGenerator.h | CIFilterGenerator wrapper omits exported-key constants. |
-| kCIFilterGeneratorExportedKeyTargetObject | const | CIFilterGenerator.h | CIFilterGenerator wrapper omits exported-key constants. |
-| CIImageProcessorInput | protocol | CIImageProcessor.h | The passthrough CIImageProcessor helper does not surface these protocol objects. |
-| CIImageProcessorOutput | protocol | CIImageProcessor.h | The passthrough CIImageProcessor helper does not surface these protocol objects. |
-| kCIImageProviderTileSize | const | CIImageProvider.h | No public Rust wrapper. |
-| kCIImageProviderUserInfo | const | CIImageProvider.h | No public Rust wrapper. |
-| CIKernel | interface | CIKernel.h | Only CIColorKernel/CIWarpKernel/CIBlendKernel wrappers are exposed. |
-| CIPlugIn | interface | CIPlugIn.h | Plug-in APIs are not wrapped. |
-| CIPlugInRegistration | protocol | CIPlugInInterface.h | Plug-in registration protocol is not wrapped. |
-| kCISamplerColorSpace | const | CISampler.h | No public Rust wrapper. |
+No remaining non-exempt public-symbol gaps.
 
 ## ⏭️ EXEMPT
 | Symbol | Kind | Header | Reason | SDK attribute |

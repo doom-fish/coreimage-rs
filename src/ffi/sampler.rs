@@ -12,6 +12,8 @@ unsafe extern "C" {
         d: f64,
         tx: f64,
         ty: f64,
+        use_color_space: bool,
+        color_space: i32,
     ) -> *mut c_void;
     pub fn ci_sampler_extent(
         handle: *mut c_void,

@@ -105,6 +105,11 @@ impl CIBlendKernelKind {
     }
 }
 
+/// A generic Core Image kernel handle.
+pub struct CIKernel {
+    ptr: *mut c_void,
+}
+
 /// A Core Image color kernel compiled from source.
 pub struct CIColorKernel {
     ptr: *mut c_void,
@@ -153,6 +158,7 @@ macro_rules! impl_kernel_handle {
                 Self { ptr }
             }
 
+            #[allow(dead_code)]
             fn from_non_null(ptr: *mut c_void, kind: &str) -> Self {
                 assert!(!ptr.is_null(), "{kind} returned nil");
                 unsafe { Self::from_raw(ptr) }
@@ -169,11 +175,34 @@ macro_rules! impl_kernel_handle {
     };
 }
 
+impl_kernel_handle!(CIKernel);
 impl_kernel_handle!(CIColorKernel);
 impl_kernel_handle!(CIWarpKernel);
 impl_kernel_handle!(CIBlendKernel);
 
+impl From<&CIColorKernel> for CIKernel {
+    fn from(kernel: &CIColorKernel) -> Self {
+        unsafe { Self::from_raw(ffi::ci_object_retain(kernel.as_ptr())) }
+    }
+}
+
+impl From<&CIWarpKernel> for CIKernel {
+    fn from(kernel: &CIWarpKernel) -> Self {
+        unsafe { Self::from_raw(ffi::ci_object_retain(kernel.as_ptr())) }
+    }
+}
+
+impl From<&CIBlendKernel> for CIKernel {
+    fn from(kernel: &CIBlendKernel) -> Self {
+        unsafe { Self::from_raw(ffi::ci_object_retain(kernel.as_ptr())) }
+    }
+}
+
 impl CIColorKernel {
+    pub fn as_kernel(&self) -> CIKernel {
+        CIKernel::from(self)
+    }
+
     pub fn from_source(source: &str) -> Result<Self, CIError> {
         let source = string_to_cstring(source, "kernel source")?;
         let mut kernel = ptr::null_mut();
@@ -264,6 +293,10 @@ impl CIColorKernel {
 }
 
 impl CIWarpKernel {
+    pub fn as_kernel(&self) -> CIKernel {
+        CIKernel::from(self)
+    }
+
     pub fn from_source(source: &str) -> Result<Self, CIError> {
         let source = string_to_cstring(source, "kernel source")?;
         let mut kernel = ptr::null_mut();
@@ -302,6 +335,10 @@ impl CIWarpKernel {
 }
 
 impl CIBlendKernel {
+    pub fn as_kernel(&self) -> CIKernel {
+        CIKernel::from(self)
+    }
+
     pub fn built_in(kind: CIBlendKernelKind) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_blend_kernel_builtin(kind.code()) },

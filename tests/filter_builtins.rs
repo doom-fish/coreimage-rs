@@ -5,7 +5,7 @@ type BuiltinConstructor = fn() -> Option<CIFilter>;
 #[allow(clippy::too_many_lines)]
 #[test]
 fn builtin_filter_constructors_return_named_filters() {
-    let constructors: [(&str, BuiltinConstructor); 149] = [
+    let constructors: &[(&str, BuiltinConstructor)] = &[
         ("CIAccordionFoldTransition", filters::accordion_fold_transition as BuiltinConstructor),
         ("CIAffineClamp", filters::affine_clamp as BuiltinConstructor),
         ("CIAffineTile", filters::affine_tile as BuiltinConstructor),
@@ -26,6 +26,8 @@ fn builtin_filter_constructors_return_named_filters() {
         ("CIBarcodeGenerator", filters::barcode_generator as BuiltinConstructor),
         ("CIBarsSwipeTransition", filters::bars_swipe_transition as BuiltinConstructor),
         ("CIBicubicScaleTransform", filters::bicubic_scale_transform as BuiltinConstructor),
+        ("CIConvertLabToRGB", filters::convert_lab_to_rgb as BuiltinConstructor),
+        ("CIConvertRGBtoLab", filters::convert_rgb_to_lab as BuiltinConstructor),
         ("CIBlurredRectangleGenerator", filters::blurred_rectangle_generator as BuiltinConstructor),
         ("CIBlurredRoundedRectangleGenerator", filters::blurred_rounded_rectangle_generator as BuiltinConstructor),
         ("CIBokehBlur", filters::bokeh_blur as BuiltinConstructor),
@@ -53,7 +55,9 @@ fn builtin_filter_constructors_return_named_filters() {
         ("CIColumnAverage", filters::column_average as BuiltinConstructor),
         ("CIConvolution", filters::convolution as BuiltinConstructor),
         ("CICopyMachineTransition", filters::copy_machine_transition as BuiltinConstructor),
+        ("CICoreMLModelFilter", filters::core_ml_model as BuiltinConstructor),
         ("CIDepthOfField", filters::depth_of_field as BuiltinConstructor),
+        ("CIEdgePreserveUpsampleFilter", filters::edge_preserve_upsample as BuiltinConstructor),
         ("CIDepthToDisparity", filters::depth_to_disparity as BuiltinConstructor),
         ("CIDisintegrateWithMaskTransition", filters::disintegrate_with_mask_transition as BuiltinConstructor),
         ("CIDisparityToDepth", filters::disparity_to_depth as BuiltinConstructor),
@@ -71,6 +75,7 @@ fn builtin_filter_constructors_return_named_filters() {
         ("CIFourfoldTranslatedTile", filters::fourfold_translated_tile as BuiltinConstructor),
         ("CIGaborGradients", filters::gabor_gradients as BuiltinConstructor),
         ("CIGaussianGradient", filters::gaussian_gradient as BuiltinConstructor),
+        ("CIHistogramDisplayFilter", filters::histogram_display as BuiltinConstructor),
         ("CIGlassDistortion", filters::glass_distortion as BuiltinConstructor),
         ("CIGlassLozenge", filters::glass_lozenge as BuiltinConstructor),
         ("CIGlideReflectedTile", filters::glide_reflected_tile as BuiltinConstructor),
@@ -95,6 +100,7 @@ fn builtin_filter_constructors_return_named_filters() {
         ("CIMaskToAlpha", filters::mask_to_alpha as BuiltinConstructor),
         ("CIMaskedVariableBlur", filters::masked_variable_blur as BuiltinConstructor),
         ("CIMaximumComponent", filters::maximum_component as BuiltinConstructor),
+        ("CIMedianFilter", filters::median as BuiltinConstructor),
         ("CIMaximumScaleTransform", filters::maximum_scale_transform as BuiltinConstructor),
         ("CIMeshGenerator", filters::mesh_generator as BuiltinConstructor),
         ("CIMinimumComponent", filters::minimum_component as BuiltinConstructor),
@@ -129,6 +135,7 @@ fn builtin_filter_constructors_return_named_filters() {
         ("CIRoundedRectangleGenerator", filters::rounded_rectangle_generator as BuiltinConstructor),
         ("CIRoundedRectangleStrokeGenerator", filters::rounded_rectangle_stroke_generator as BuiltinConstructor),
         ("CIRowAverage", filters::row_average as BuiltinConstructor),
+        ("CISaliencyMapFilter", filters::saliency_map as BuiltinConstructor),
         ("CISRGBToneCurveToLinear", filters::srgb_tone_curve_to_linear as BuiltinConstructor),
         ("CIShadedMaterial", filters::shaded_material as BuiltinConstructor),
         ("CISignedDistanceGradientFromRedMask", filters::signed_distance_gradient_from_red_mask as BuiltinConstructor),
@@ -159,6 +166,23 @@ fn builtin_filter_constructors_return_named_filters() {
 
     for (name, constructor) in constructors {
         let filter = constructor().unwrap_or_else(|| panic!("{name} should be available"));
-        assert_eq!(filter.name(), name);
+        assert_eq!(filter.name(), *name);
     }
+}
+
+#[test]
+fn builtin_filter_family_helpers_cover_abstract_protocols() {
+    let composite = filters::composite_operation(filters::CICompositeOperationKind::ScreenBlendMode)
+        .expect("CICompositeOperation family should create screen blend mode");
+    assert_eq!(composite.name(), "CIScreenBlendMode");
+
+    let geometry = filters::four_coordinate_geometry_filter(
+        filters::CIFourCoordinateGeometryFilterKind::PerspectiveTransformWithExtent,
+    )
+    .expect("CIFourCoordinateGeometryFilter family should create perspective transform");
+    assert_eq!(geometry.name(), "CIPerspectiveTransformWithExtent");
+
+    let transition = filters::transition_filter(filters::CITransitionFilterKind::PageCurl)
+        .expect("CITransitionFilter family should create page curl transition");
+    assert_eq!(transition.name(), "CIPageCurlTransition");
 }

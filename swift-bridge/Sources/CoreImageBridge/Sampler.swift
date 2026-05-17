@@ -11,13 +11,18 @@ private func ci_sampler_options(
     c: Double,
     d: Double,
     tx: Double,
-    ty: Double
+    ty: Double,
+    useColorSpace: Bool,
+    colorSpace: Int32
 ) -> [String: Any] {
     var options: [String: Any] = [:]
     options[kCISamplerWrapMode] = wrapMode == 1 ? kCISamplerWrapClamp : kCISamplerWrapBlack
     options[kCISamplerFilterMode] = filterMode == 1 ? kCISamplerFilterNearest : kCISamplerFilterLinear
     if useTransform {
         options[kCISamplerAffineMatrix] = CIVector(cgAffineTransform: CGAffineTransform(a: a, b: b, c: c, d: d, tx: tx, ty: ty))
+    }
+    if useColorSpace {
+        options[kCISamplerColorSpace] = ci_color_space(from: colorSpace)
     }
     return options
 }
@@ -33,7 +38,9 @@ public func ci_sampler_new(
     _ c: Double,
     _ d: Double,
     _ tx: Double,
-    _ ty: Double
+    _ ty: Double,
+    _ useColorSpace: Bool,
+    _ colorSpace: Int32
 ) -> UnsafeMutableRawPointer? {
     guard let image: CIImage = ci_borrow(imageHandle) else { return nil }
     let options = ci_sampler_options(
@@ -45,7 +52,9 @@ public func ci_sampler_new(
         c: c,
         d: d,
         tx: tx,
-        ty: ty
+        ty: ty,
+        useColorSpace: useColorSpace,
+        colorSpace: colorSpace
     )
     return ci_retain(CISampler(image: image, options: options))
 }

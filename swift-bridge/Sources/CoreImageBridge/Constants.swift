@@ -23,6 +23,15 @@ public func ci_image_format(from code: Int32) -> CIFormat? {
     CIFormat(rawValue: code)
 }
 
+@inline(__always)
+private func ci_named_string(_ code: Int32, values: [String]) -> UnsafeMutablePointer<CChar>? {
+    let index = Int(code)
+    guard values.indices.contains(index) else {
+        return ci_string("")
+    }
+    return ci_string(values[index])
+}
+
 @_cdecl("ci_image_format_value")
 public func ci_image_format_value(_ code: Int32) -> Int32 {
     switch code {
@@ -146,6 +155,276 @@ public func ci_image_representation_option_name(_ code: Int32) -> UnsafeMutableP
     default: value = ""
     }
     return ci_string(value)
+}
+
+@_cdecl("ci_apply_option_name")
+public func ci_apply_option_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "kCIApplyOptionExtent",
+        "kCIApplyOptionDefinition",
+        "kCIApplyOptionUserInfo",
+        "kCIApplyOptionColorSpace",
+    ])
+}
+
+@_cdecl("ci_attribute_key_name")
+public func ci_attribute_key_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "kCIAttributeFilterName",
+        "kCIAttributeFilterDisplayName",
+        "kCIAttributeDescription",
+        "kCIAttributeFilterAvailable_Mac",
+        "kCIAttributeFilterAvailable_iOS",
+        "kCIAttributeReferenceDocumentation",
+        "kCIAttributeFilterCategories",
+        "kCIAttributeClass",
+        "kCIAttributeType",
+        "kCIAttributeMin",
+        "kCIAttributeMax",
+        "kCIAttributeSliderMin",
+        "kCIAttributeSliderMax",
+        "kCIAttributeDefault",
+        "kCIAttributeIdentity",
+        "kCIAttributeName",
+        "kCIAttributeDisplayName",
+    ])
+}
+
+@_cdecl("ci_attribute_type_name")
+public func ci_attribute_type_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "kCIAttributeTypeTime",
+        "kCIAttributeTypeScalar",
+        "kCIAttributeTypeDistance",
+        "kCIAttributeTypeAngle",
+        "kCIAttributeTypeBoolean",
+        "kCIAttributeTypeInteger",
+        "kCIAttributeTypeCount",
+        "kCIAttributeTypePosition",
+        "kCIAttributeTypeOffset",
+        "kCIAttributeTypePosition3",
+        "kCIAttributeTypeRectangle",
+        "kCIAttributeTypeOpaqueColor",
+        "kCIAttributeTypeColor",
+        "kCIAttributeTypeGradient",
+        "kCIAttributeTypeImage",
+        "kCIAttributeTypeTransform",
+    ])
+}
+
+@_cdecl("ci_filter_category_name")
+public func ci_filter_category_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "kCICategoryDistortionEffect",
+        "kCICategoryGeometryAdjustment",
+        "kCICategoryCompositeOperation",
+        "kCICategoryHalftoneEffect",
+        "kCICategoryColorAdjustment",
+        "kCICategoryColorEffect",
+        "kCICategoryTransition",
+        "kCICategoryTileEffect",
+        "kCICategoryGenerator",
+        "kCICategoryReduction",
+        "kCICategoryGradient",
+        "kCICategoryStylize",
+        "kCICategorySharpen",
+        "kCICategoryBlur",
+        "kCICategoryVideo",
+        "kCICategoryStillImage",
+        "kCICategoryInterlaced",
+        "kCICategoryNonSquarePixels",
+        "kCICategoryHighDynamicRange",
+        "kCICategoryBuiltIn",
+        "kCICategoryFilterGenerator",
+    ])
+}
+
+@_cdecl("ci_filter_category_value")
+public func ci_filter_category_value(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "CICategoryDistortionEffect",
+        "CICategoryGeometryAdjustment",
+        "CICategoryCompositeOperation",
+        "CICategoryHalftoneEffect",
+        "CICategoryColorAdjustment",
+        "CICategoryColorEffect",
+        "CICategoryTransition",
+        "CICategoryTileEffect",
+        "CICategoryGenerator",
+        "CICategoryReduction",
+        "CICategoryGradient",
+        "CICategoryStylize",
+        "CICategorySharpen",
+        "CICategoryBlur",
+        "CICategoryVideo",
+        "CICategoryStillImage",
+        "CICategoryInterlaced",
+        "CICategoryNonSquarePixels",
+        "CICategoryHighDynamicRange",
+        "CICategoryBuiltIn",
+        "CICategoryFilterGenerator",
+    ])
+}
+
+@_cdecl("ci_dynamic_range_name")
+public func ci_dynamic_range_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "kCIDynamicRangeStandard",
+        "kCIDynamicRangeHigh",
+        "kCIDynamicRangeConstrainedHigh",
+    ])
+}
+
+@_cdecl("ci_input_key_name")
+public func ci_input_key_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "kCIInputBackgroundImageKey",
+        "kCIInputImageKey",
+        "kCIInputDepthImageKey",
+        "kCIInputDisparityImageKey",
+        "kCIInputAmountKey",
+        "kCIInputCountKey",
+        "kCIInputThresholdKey",
+        "kCIInputTimeKey",
+        "kCIInputTransformKey",
+        "kCIInputScaleKey",
+        "kCIInputAspectRatioKey",
+        "kCIInputCenterKey",
+        "kCIInputRadiusKey",
+        "kCIInputRadius0Key",
+        "kCIInputRadius1Key",
+        "kCIInputAngleKey",
+        "kCIInputRefractionKey",
+        "kCIInputWidthKey",
+        "kCIInputSharpnessKey",
+        "kCIInputIntensityKey",
+        "kCIInputEVKey",
+        "kCIInputSaturationKey",
+        "kCIInputColorKey",
+        "kCIInputColor0Key",
+        "kCIInputColor1Key",
+        "kCIInputColorSpaceKey",
+        "kCIInputBrightnessKey",
+        "kCIInputContrastKey",
+        "kCIInputExtrapolateKey",
+        "kCIInputPerceptualKey",
+        "kCIInputBiasKey",
+        "kCIInputBiasVectorKey",
+        "kCIInputGradientImageKey",
+        "kCIInputMaskImageKey",
+        "kCIInputMatteImageKey",
+        "kCIInputBacksideImageKey",
+        "kCIInputShadingImageKey",
+        "kCIInputTargetImageKey",
+        "kCIInputPaletteImageKey",
+        "kCIInputExtentKey",
+        "kCIInputVersionKey",
+        "kCIInputPoint0Key",
+        "kCIInputPoint1Key",
+        "kCIInputWeightsKey",
+    ])
+}
+
+@_cdecl("ci_input_key_value")
+public func ci_input_key_value(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "inputBackgroundImage",
+        "inputImage",
+        "inputDepthImage",
+        "inputDisparityImage",
+        "inputAmount",
+        "inputCount",
+        "inputThreshold",
+        "inputTime",
+        "inputTransform",
+        "inputScale",
+        "inputAspectRatio",
+        "inputCenter",
+        "inputRadius",
+        "inputRadius0",
+        "inputRadius1",
+        "inputAngle",
+        "inputRefraction",
+        "inputWidth",
+        "inputSharpness",
+        "inputIntensity",
+        "inputEV",
+        "inputSaturation",
+        "inputColor",
+        "inputColor0",
+        "inputColor1",
+        "inputColorSpace",
+        "inputBrightness",
+        "inputContrast",
+        "inputExtrapolate",
+        "inputPerceptual",
+        "inputBias",
+        "inputBiasVector",
+        "inputGradientImage",
+        "inputMaskImage",
+        "inputMatteImage",
+        "inputBacksideImage",
+        "inputShadingImage",
+        "inputTargetImage",
+        "inputPaletteImage",
+        "inputExtent",
+        "inputVersion",
+        "inputPoint0",
+        "inputPoint1",
+        "inputWeights",
+    ])
+}
+
+@_cdecl("ci_output_key_name")
+public func ci_output_key_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: ["kCIOutputImageKey"])
+}
+
+@_cdecl("ci_output_key_value")
+public func ci_output_key_value(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: ["outputImage"])
+}
+
+@_cdecl("ci_ui_parameter_set_key_name")
+public func ci_ui_parameter_set_key_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: ["kCIUIParameterSet"])
+}
+
+@_cdecl("ci_ui_parameter_set_name")
+public func ci_ui_parameter_set_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "kCIUISetBasic",
+        "kCIUISetIntermediate",
+        "kCIUISetAdvanced",
+        "kCIUISetDevelopment",
+    ])
+}
+
+@_cdecl("ci_filter_generator_exported_key_name")
+public func ci_filter_generator_exported_key_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "kCIFilterGeneratorExportedKey",
+        "kCIFilterGeneratorExportedKeyName",
+        "kCIFilterGeneratorExportedKeyTargetObject",
+    ])
+}
+
+@_cdecl("ci_image_provider_option_name")
+public func ci_image_provider_option_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "kCIImageProviderTileSize",
+        "kCIImageProviderUserInfo",
+    ])
+}
+
+@_cdecl("ci_sampler_option_name")
+public func ci_sampler_option_name(_ code: Int32) -> UnsafeMutablePointer<CChar>? {
+    ci_named_string(code, values: [
+        "kCISamplerAffineMatrix",
+        "kCISamplerFilterMode",
+        "kCISamplerWrapMode",
+        "kCISamplerColorSpace",
+    ])
 }
 
 @_cdecl("ci_raw_decoder_version_name")
