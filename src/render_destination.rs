@@ -117,7 +117,9 @@ impl CIRenderDestination {
     }
 
     pub fn alpha_mode(&self) -> CIRenderDestinationAlphaMode {
-        CIRenderDestinationAlphaMode::from_code(unsafe { ffi::ci_render_destination_alpha_mode(self.ptr) })
+        CIRenderDestinationAlphaMode::from_code(unsafe {
+            ffi::ci_render_destination_alpha_mode(self.ptr)
+        })
     }
 
     pub fn set_alpha_mode(&mut self, alpha_mode: CIRenderDestinationAlphaMode) {
@@ -242,7 +244,8 @@ impl CIRenderTask {
     pub fn wait_until_completed(self) -> Result<CIRenderInfo, CIError> {
         let mut info = ptr::null_mut();
         let mut error = ptr::null_mut();
-        let status = unsafe { ffi::ci_render_task_wait_until_completed(self.ptr, &mut info, &mut error) };
+        let status =
+            unsafe { ffi::ci_render_task_wait_until_completed(self.ptr, &mut info, &mut error) };
         unsafe { crate::util::status_result(status, error)? };
         if info.is_null() {
             Err(CIError::NullResult(

@@ -12,7 +12,9 @@ fn image_accumulator_tracks_image_contents() {
     accumulator.set_image(&image);
     accumulator.set_image_dirty_rect(&image, extent);
 
-    let snapshot = accumulator.image().expect("accumulator should produce an image");
+    let snapshot = accumulator
+        .image()
+        .expect("accumulator should produce an image");
     let snapshot_extent = snapshot.extent();
     assert!((snapshot_extent.width - 64.0).abs() < f64::EPSILON);
     assert!((snapshot_extent.height - 64.0).abs() < f64::EPSILON);

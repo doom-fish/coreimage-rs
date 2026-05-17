@@ -15,7 +15,11 @@ unsafe extern "C" {
         out_error_message: *mut *mut c_char,
     ) -> i32;
     pub fn ci_raw_filter_supported_decoder_versions_lines(handle: *mut c_void) -> *mut c_char;
-    pub fn ci_raw_filter_native_size(handle: *mut c_void, out_width: *mut f64, out_height: *mut f64);
+    pub fn ci_raw_filter_native_size(
+        handle: *mut c_void,
+        out_width: *mut f64,
+        out_height: *mut f64,
+    );
     pub fn ci_raw_filter_properties_json(handle: *mut c_void) -> *mut c_char;
     pub fn ci_raw_filter_orientation(handle: *mut c_void) -> u32;
     pub fn ci_raw_filter_set_orientation(handle: *mut c_void, orientation: u32);

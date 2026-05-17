@@ -442,16 +442,20 @@ pub fn four_coordinate_geometry_filter(
     kind: CIFourCoordinateGeometryFilterKind,
 ) -> Option<CIFilter> {
     builtin_filter(match kind {
-        CIFourCoordinateGeometryFilterKind::KeystoneCorrectionCombined =>
-            "CIKeystoneCorrectionCombined",
-        CIFourCoordinateGeometryFilterKind::KeystoneCorrectionHorizontal =>
-            "CIKeystoneCorrectionHorizontal",
-        CIFourCoordinateGeometryFilterKind::KeystoneCorrectionVertical =>
-            "CIKeystoneCorrectionVertical",
+        CIFourCoordinateGeometryFilterKind::KeystoneCorrectionCombined => {
+            "CIKeystoneCorrectionCombined"
+        }
+        CIFourCoordinateGeometryFilterKind::KeystoneCorrectionHorizontal => {
+            "CIKeystoneCorrectionHorizontal"
+        }
+        CIFourCoordinateGeometryFilterKind::KeystoneCorrectionVertical => {
+            "CIKeystoneCorrectionVertical"
+        }
         CIFourCoordinateGeometryFilterKind::PerspectiveCorrection => "CIPerspectiveCorrection",
         CIFourCoordinateGeometryFilterKind::PerspectiveTransform => "CIPerspectiveTransform",
-        CIFourCoordinateGeometryFilterKind::PerspectiveTransformWithExtent =>
-            "CIPerspectiveTransformWithExtent",
+        CIFourCoordinateGeometryFilterKind::PerspectiveTransformWithExtent => {
+            "CIPerspectiveTransformWithExtent"
+        }
     })
 }
 

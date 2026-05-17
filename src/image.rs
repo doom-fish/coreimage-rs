@@ -155,7 +155,7 @@ impl CIImage {
             )
         };
         unsafe { status_result(status, error)? };
-        Ok(Self::from_non_null(image, "CIImage(bitmapData:)") )
+        Ok(Self::from_non_null(image, "CIImage(bitmapData:)"))
     }
 
     pub fn from_bitmap_rgba8(data: &[u8], width: usize, height: usize) -> Result<Self, CIError> {

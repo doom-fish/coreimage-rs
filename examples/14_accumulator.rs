@@ -13,7 +13,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut accumulator =
         CIImageAccumulator::new(extent, CIFormat::Rgba8).ok_or("failed to create accumulator")?;
     accumulator.set_image(&solid_image());
-    let snapshot = accumulator.image().ok_or("accumulator should yield an image")?;
+    let snapshot = accumulator
+        .image()
+        .ok_or("accumulator should yield an image")?;
 
     println!(
         "shape {:?} accumulator {}x{}",

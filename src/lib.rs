@@ -58,8 +58,8 @@ pub use constants::{
     CIApplyOptionKey, CIAttributeKey, CIAttributeType, CIColorSpace, CIContextOptionKey,
     CIDynamicRange, CIFilterCategory, CIFilterGeneratorExportedKey, CIFormat,
     CIImageAutoAdjustmentOptionKey, CIImageOptionKey, CIImageProviderOptionKey,
-    CIImageRepresentationOptionKey, CIInputKey, CIOutputKey, CISamplerOptionKey,
-    CIUIParameterSet, CIUIParameterSetKey,
+    CIImageRepresentationOptionKey, CIInputKey, CIOutputKey, CISamplerOptionKey, CIUIParameterSet,
+    CIUIParameterSetKey,
 };
 pub use context::{CIContext, CIContextOptions};
 pub use detector::{
@@ -99,21 +99,20 @@ pub mod prelude {
     pub use apple_metal::{CommandQueue, MetalDevice};
 
     pub use crate::{
-        CIBarcodeDescriptor, CIBarcodeDescriptorKind, CIBlendKernel, CIBlendKernelKind, CIColor,
-        CIApplyOptionKey, CIAttributeKey, CIAttributeType, CIColorKernel, CIColorName,
-        CIColorSpace, CIContext, CIContextOptionKey, CIContextOptions,
+        CIApplyOptionKey, CIAttributeKey, CIAttributeType, CIBarcodeDescriptor,
+        CIBarcodeDescriptorKind, CIBlendKernel, CIBlendKernelKind, CIColor, CIColorKernel,
+        CIColorName, CIColorSpace, CIContext, CIContextOptionKey, CIContextOptions,
         CIDataMatrixCodeECCVersion, CIDetectionOptions, CIDetector, CIDetectorAccuracy,
-        CIDetectorOptions, CIDetectorType, CIDynamicRange, CIError, CIFeature,
-        CIFeatureKind, CIFilter, CIFilterCategory, CIFilterConstructor,
-        CIFilterGenerator, CIFilterGeneratorExportedKey, CIFilterShape, CIFormat, CIImage,
-        CIImageAccumulator, CIImageAutoAdjustmentOptionKey, CIImageOptionKey,
-        CIImageProcessor, CIImageProcessorInput, CIImageProcessorInvocation,
-        CIImageProcessorOutput, CIImageProviderOptionKey, CIImageRepresentationOptionKey,
-        CIInputKey, CIKernel, CIOutputKey, CIPlugIn, CIPlugInRegistration,
-        CIQRCodeErrorCorrectionLevel, CIRAWDecoderVersion, CIRAWFilter,
-        CIRenderDestination, CIRenderDestinationAlphaMode, CIRenderInfo, CIRenderTask,
-        CISampler, CISamplerFilterMode, CISamplerOptionKey, CISamplerOptions,
-        CISamplerWrapMode, CIUIParameterSet, CIUIParameterSetKey, CIVector, CIWarpKernel,
+        CIDetectorOptions, CIDetectorType, CIDynamicRange, CIError, CIFeature, CIFeatureKind,
+        CIFilter, CIFilterCategory, CIFilterConstructor, CIFilterGenerator,
+        CIFilterGeneratorExportedKey, CIFilterShape, CIFormat, CIImage, CIImageAccumulator,
+        CIImageAutoAdjustmentOptionKey, CIImageOptionKey, CIImageProcessor, CIImageProcessorInput,
+        CIImageProcessorInvocation, CIImageProcessorOutput, CIImageProviderOptionKey,
+        CIImageRepresentationOptionKey, CIInputKey, CIKernel, CIOutputKey, CIPlugIn,
+        CIPlugInRegistration, CIQRCodeErrorCorrectionLevel, CIRAWDecoderVersion, CIRAWFilter,
+        CIRenderDestination, CIRenderDestinationAlphaMode, CIRenderInfo, CIRenderTask, CISampler,
+        CISamplerFilterMode, CISamplerOptionKey, CISamplerOptions, CISamplerWrapMode,
+        CIUIParameterSet, CIUIParameterSetKey, CIVector, CIWarpKernel,
     };
 
     #[cfg(feature = "filters")]

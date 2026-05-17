@@ -52,11 +52,19 @@ impl CIImageAccumulator {
         Self::new_inner(extent, format, None)
     }
 
-    pub fn with_color_space(extent: CGRect, format: CIFormat, color_space: CIColorSpace) -> Option<Self> {
+    pub fn with_color_space(
+        extent: CGRect,
+        format: CIFormat,
+        color_space: CIColorSpace,
+    ) -> Option<Self> {
         Self::new_inner(extent, format, Some(color_space))
     }
 
-    fn new_inner(extent: CGRect, format: CIFormat, color_space: Option<CIColorSpace>) -> Option<Self> {
+    fn new_inner(
+        extent: CGRect,
+        format: CIFormat,
+        color_space: Option<CIColorSpace>,
+    ) -> Option<Self> {
         let handle = unsafe {
             ffi::ci_image_accumulator_new(
                 extent.x,

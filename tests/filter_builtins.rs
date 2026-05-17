@@ -6,161 +6,524 @@ type BuiltinConstructor = fn() -> Option<CIFilter>;
 #[test]
 fn builtin_filter_constructors_return_named_filters() {
     let constructors: &[(&str, BuiltinConstructor)] = &[
-        ("CIAccordionFoldTransition", filters::accordion_fold_transition as BuiltinConstructor),
+        (
+            "CIAccordionFoldTransition",
+            filters::accordion_fold_transition as BuiltinConstructor,
+        ),
         ("CIAffineClamp", filters::affine_clamp as BuiltinConstructor),
         ("CIAffineTile", filters::affine_tile as BuiltinConstructor),
         ("CIAreaAverage", filters::area_average as BuiltinConstructor),
-        ("CIAreaAverageMaximumRed", filters::area_average_maximum_red as BuiltinConstructor),
-        ("CIAreaBoundsRed", filters::area_bounds_red as BuiltinConstructor),
-        ("CIAreaHistogram", filters::area_histogram as BuiltinConstructor),
-        ("CIAreaLogarithmicHistogram", filters::area_logarithmic_histogram as BuiltinConstructor),
+        (
+            "CIAreaAverageMaximumRed",
+            filters::area_average_maximum_red as BuiltinConstructor,
+        ),
+        (
+            "CIAreaBoundsRed",
+            filters::area_bounds_red as BuiltinConstructor,
+        ),
+        (
+            "CIAreaHistogram",
+            filters::area_histogram as BuiltinConstructor,
+        ),
+        (
+            "CIAreaLogarithmicHistogram",
+            filters::area_logarithmic_histogram as BuiltinConstructor,
+        ),
         ("CIAreaMaximum", filters::area_maximum as BuiltinConstructor),
-        ("CIAreaMaximumAlpha", filters::area_maximum_alpha as BuiltinConstructor),
+        (
+            "CIAreaMaximumAlpha",
+            filters::area_maximum_alpha as BuiltinConstructor,
+        ),
         ("CIAreaMinMax", filters::area_min_max as BuiltinConstructor),
-        ("CIAreaMinMaxRed", filters::area_min_max_red as BuiltinConstructor),
+        (
+            "CIAreaMinMaxRed",
+            filters::area_min_max_red as BuiltinConstructor,
+        ),
         ("CIAreaMinimum", filters::area_minimum as BuiltinConstructor),
-        ("CIAreaMinimumAlpha", filters::area_minimum_alpha as BuiltinConstructor),
-        ("CIAreaReductionFilter", filters::area_reduction_filter as BuiltinConstructor),
-        ("CIAttributedTextImageGenerator", filters::attributed_text_image_generator as BuiltinConstructor),
-        ("CIAztecCodeGenerator", filters::aztec_code_generator as BuiltinConstructor),
-        ("CIBarcodeGenerator", filters::barcode_generator as BuiltinConstructor),
-        ("CIBarsSwipeTransition", filters::bars_swipe_transition as BuiltinConstructor),
-        ("CIBicubicScaleTransform", filters::bicubic_scale_transform as BuiltinConstructor),
-        ("CIConvertLabToRGB", filters::convert_lab_to_rgb as BuiltinConstructor),
-        ("CIConvertRGBtoLab", filters::convert_rgb_to_lab as BuiltinConstructor),
-        ("CIBlurredRectangleGenerator", filters::blurred_rectangle_generator as BuiltinConstructor),
-        ("CIBlurredRoundedRectangleGenerator", filters::blurred_rounded_rectangle_generator as BuiltinConstructor),
+        (
+            "CIAreaMinimumAlpha",
+            filters::area_minimum_alpha as BuiltinConstructor,
+        ),
+        (
+            "CIAreaReductionFilter",
+            filters::area_reduction_filter as BuiltinConstructor,
+        ),
+        (
+            "CIAttributedTextImageGenerator",
+            filters::attributed_text_image_generator as BuiltinConstructor,
+        ),
+        (
+            "CIAztecCodeGenerator",
+            filters::aztec_code_generator as BuiltinConstructor,
+        ),
+        (
+            "CIBarcodeGenerator",
+            filters::barcode_generator as BuiltinConstructor,
+        ),
+        (
+            "CIBarsSwipeTransition",
+            filters::bars_swipe_transition as BuiltinConstructor,
+        ),
+        (
+            "CIBicubicScaleTransform",
+            filters::bicubic_scale_transform as BuiltinConstructor,
+        ),
+        (
+            "CIConvertLabToRGB",
+            filters::convert_lab_to_rgb as BuiltinConstructor,
+        ),
+        (
+            "CIConvertRGBtoLab",
+            filters::convert_rgb_to_lab as BuiltinConstructor,
+        ),
+        (
+            "CIBlurredRectangleGenerator",
+            filters::blurred_rectangle_generator as BuiltinConstructor,
+        ),
+        (
+            "CIBlurredRoundedRectangleGenerator",
+            filters::blurred_rounded_rectangle_generator as BuiltinConstructor,
+        ),
         ("CIBokehBlur", filters::bokeh_blur as BuiltinConstructor),
-        ("CIBumpDistortion", filters::bump_distortion as BuiltinConstructor),
-        ("CIBumpDistortionLinear", filters::bump_distortion_linear as BuiltinConstructor),
-        ("CICMYKHalftone", filters::cmyk_halftone as BuiltinConstructor),
-        ("CICannyEdgeDetector", filters::canny_edge_detector as BuiltinConstructor),
-        ("CICircleSplashDistortion", filters::circle_splash_distortion as BuiltinConstructor),
-        ("CICircularScreen", filters::circular_screen as BuiltinConstructor),
-        ("CICircularWrap", filters::circular_wrap as BuiltinConstructor),
-        ("CICode128BarcodeGenerator", filters::code128_barcode_generator as BuiltinConstructor),
-        ("CIColorAbsoluteDifference", filters::color_absolute_difference as BuiltinConstructor),
+        (
+            "CIBumpDistortion",
+            filters::bump_distortion as BuiltinConstructor,
+        ),
+        (
+            "CIBumpDistortionLinear",
+            filters::bump_distortion_linear as BuiltinConstructor,
+        ),
+        (
+            "CICMYKHalftone",
+            filters::cmyk_halftone as BuiltinConstructor,
+        ),
+        (
+            "CICannyEdgeDetector",
+            filters::canny_edge_detector as BuiltinConstructor,
+        ),
+        (
+            "CICircleSplashDistortion",
+            filters::circle_splash_distortion as BuiltinConstructor,
+        ),
+        (
+            "CICircularScreen",
+            filters::circular_screen as BuiltinConstructor,
+        ),
+        (
+            "CICircularWrap",
+            filters::circular_wrap as BuiltinConstructor,
+        ),
+        (
+            "CICode128BarcodeGenerator",
+            filters::code128_barcode_generator as BuiltinConstructor,
+        ),
+        (
+            "CIColorAbsoluteDifference",
+            filters::color_absolute_difference as BuiltinConstructor,
+        ),
         ("CIColorClamp", filters::color_clamp as BuiltinConstructor),
-        ("CIColorCrossPolynomial", filters::color_cross_polynomial as BuiltinConstructor),
+        (
+            "CIColorCrossPolynomial",
+            filters::color_cross_polynomial as BuiltinConstructor,
+        ),
         ("CIColorCube", filters::color_cube as BuiltinConstructor),
-        ("CIColorCubeWithColorSpace", filters::color_cube_with_color_space as BuiltinConstructor),
-        ("CIColorCubesMixedWithMask", filters::color_cubes_mixed_with_mask as BuiltinConstructor),
+        (
+            "CIColorCubeWithColorSpace",
+            filters::color_cube_with_color_space as BuiltinConstructor,
+        ),
+        (
+            "CIColorCubesMixedWithMask",
+            filters::color_cubes_mixed_with_mask as BuiltinConstructor,
+        ),
         ("CIColorCurves", filters::color_curves as BuiltinConstructor),
         ("CIColorMap", filters::color_map as BuiltinConstructor),
         ("CIColorMatrix", filters::color_matrix as BuiltinConstructor),
-        ("CIColorPolynomial", filters::color_polynomial as BuiltinConstructor),
-        ("CIColorPosterize", filters::color_posterize as BuiltinConstructor),
-        ("CIColorThreshold", filters::color_threshold as BuiltinConstructor),
-        ("CIColorThresholdOtsu", filters::color_threshold_otsu as BuiltinConstructor),
-        ("CIColumnAverage", filters::column_average as BuiltinConstructor),
+        (
+            "CIColorPolynomial",
+            filters::color_polynomial as BuiltinConstructor,
+        ),
+        (
+            "CIColorPosterize",
+            filters::color_posterize as BuiltinConstructor,
+        ),
+        (
+            "CIColorThreshold",
+            filters::color_threshold as BuiltinConstructor,
+        ),
+        (
+            "CIColorThresholdOtsu",
+            filters::color_threshold_otsu as BuiltinConstructor,
+        ),
+        (
+            "CIColumnAverage",
+            filters::column_average as BuiltinConstructor,
+        ),
         ("CIConvolution", filters::convolution as BuiltinConstructor),
-        ("CICopyMachineTransition", filters::copy_machine_transition as BuiltinConstructor),
-        ("CICoreMLModelFilter", filters::core_ml_model as BuiltinConstructor),
-        ("CIDepthOfField", filters::depth_of_field as BuiltinConstructor),
-        ("CIEdgePreserveUpsampleFilter", filters::edge_preserve_upsample as BuiltinConstructor),
-        ("CIDepthToDisparity", filters::depth_to_disparity as BuiltinConstructor),
-        ("CIDisintegrateWithMaskTransition", filters::disintegrate_with_mask_transition as BuiltinConstructor),
-        ("CIDisparityToDepth", filters::disparity_to_depth as BuiltinConstructor),
-        ("CIDisplacementDistortion", filters::displacement_distortion as BuiltinConstructor),
-        ("CIDissolveTransition", filters::dissolve_transition as BuiltinConstructor),
-        ("CIDistanceGradientFromRedMask", filters::distance_gradient_from_red_mask as BuiltinConstructor),
+        (
+            "CICopyMachineTransition",
+            filters::copy_machine_transition as BuiltinConstructor,
+        ),
+        (
+            "CICoreMLModelFilter",
+            filters::core_ml_model as BuiltinConstructor,
+        ),
+        (
+            "CIDepthOfField",
+            filters::depth_of_field as BuiltinConstructor,
+        ),
+        (
+            "CIEdgePreserveUpsampleFilter",
+            filters::edge_preserve_upsample as BuiltinConstructor,
+        ),
+        (
+            "CIDepthToDisparity",
+            filters::depth_to_disparity as BuiltinConstructor,
+        ),
+        (
+            "CIDisintegrateWithMaskTransition",
+            filters::disintegrate_with_mask_transition as BuiltinConstructor,
+        ),
+        (
+            "CIDisparityToDepth",
+            filters::disparity_to_depth as BuiltinConstructor,
+        ),
+        (
+            "CIDisplacementDistortion",
+            filters::displacement_distortion as BuiltinConstructor,
+        ),
+        (
+            "CIDissolveTransition",
+            filters::dissolve_transition as BuiltinConstructor,
+        ),
+        (
+            "CIDistanceGradientFromRedMask",
+            filters::distance_gradient_from_red_mask as BuiltinConstructor,
+        ),
         ("CIDither", filters::dither as BuiltinConstructor),
-        ("CIDocumentEnhancer", filters::document_enhancer as BuiltinConstructor),
+        (
+            "CIDocumentEnhancer",
+            filters::document_enhancer as BuiltinConstructor,
+        ),
         ("CIDotScreen", filters::dot_screen as BuiltinConstructor),
         ("CIDroste", filters::droste as BuiltinConstructor),
-        ("CIEightfoldReflectedTile", filters::eightfold_reflected_tile as BuiltinConstructor),
-        ("CIFlashTransition", filters::flash_transition as BuiltinConstructor),
-        ("CIFourfoldReflectedTile", filters::fourfold_reflected_tile as BuiltinConstructor),
-        ("CIFourfoldRotatedTile", filters::fourfold_rotated_tile as BuiltinConstructor),
-        ("CIFourfoldTranslatedTile", filters::fourfold_translated_tile as BuiltinConstructor),
-        ("CIGaborGradients", filters::gabor_gradients as BuiltinConstructor),
-        ("CIGaussianGradient", filters::gaussian_gradient as BuiltinConstructor),
-        ("CIHistogramDisplayFilter", filters::histogram_display as BuiltinConstructor),
-        ("CIGlassDistortion", filters::glass_distortion as BuiltinConstructor),
-        ("CIGlassLozenge", filters::glass_lozenge as BuiltinConstructor),
-        ("CIGlideReflectedTile", filters::glide_reflected_tile as BuiltinConstructor),
+        (
+            "CIEightfoldReflectedTile",
+            filters::eightfold_reflected_tile as BuiltinConstructor,
+        ),
+        (
+            "CIFlashTransition",
+            filters::flash_transition as BuiltinConstructor,
+        ),
+        (
+            "CIFourfoldReflectedTile",
+            filters::fourfold_reflected_tile as BuiltinConstructor,
+        ),
+        (
+            "CIFourfoldRotatedTile",
+            filters::fourfold_rotated_tile as BuiltinConstructor,
+        ),
+        (
+            "CIFourfoldTranslatedTile",
+            filters::fourfold_translated_tile as BuiltinConstructor,
+        ),
+        (
+            "CIGaborGradients",
+            filters::gabor_gradients as BuiltinConstructor,
+        ),
+        (
+            "CIGaussianGradient",
+            filters::gaussian_gradient as BuiltinConstructor,
+        ),
+        (
+            "CIHistogramDisplayFilter",
+            filters::histogram_display as BuiltinConstructor,
+        ),
+        (
+            "CIGlassDistortion",
+            filters::glass_distortion as BuiltinConstructor,
+        ),
+        (
+            "CIGlassLozenge",
+            filters::glass_lozenge as BuiltinConstructor,
+        ),
+        (
+            "CIGlideReflectedTile",
+            filters::glide_reflected_tile as BuiltinConstructor,
+        ),
         ("CIGloom", filters::gloom as BuiltinConstructor),
-        ("CIHatchedScreen", filters::hatched_screen as BuiltinConstructor),
-        ("CIHeightFieldFromMask", filters::height_field_from_mask as BuiltinConstructor),
-        ("CIHexagonalPixellate", filters::hexagonal_pixellate as BuiltinConstructor),
-        ("CIHighlightShadowAdjust", filters::highlight_shadow_adjust as BuiltinConstructor),
-        ("CIHoleDistortion", filters::hole_distortion as BuiltinConstructor),
-        ("CIHueSaturationValueGradient", filters::hue_saturation_value_gradient as BuiltinConstructor),
+        (
+            "CIHatchedScreen",
+            filters::hatched_screen as BuiltinConstructor,
+        ),
+        (
+            "CIHeightFieldFromMask",
+            filters::height_field_from_mask as BuiltinConstructor,
+        ),
+        (
+            "CIHexagonalPixellate",
+            filters::hexagonal_pixellate as BuiltinConstructor,
+        ),
+        (
+            "CIHighlightShadowAdjust",
+            filters::highlight_shadow_adjust as BuiltinConstructor,
+        ),
+        (
+            "CIHoleDistortion",
+            filters::hole_distortion as BuiltinConstructor,
+        ),
+        (
+            "CIHueSaturationValueGradient",
+            filters::hue_saturation_value_gradient as BuiltinConstructor,
+        ),
         ("CIKMeans", filters::k_means as BuiltinConstructor),
-        ("CIKaleidoscope", filters::kaleidoscope as BuiltinConstructor),
-        ("CIKeystoneCorrectionCombined", filters::keystone_correction_combined as BuiltinConstructor),
-        ("CIKeystoneCorrectionHorizontal", filters::keystone_correction_horizontal as BuiltinConstructor),
-        ("CIKeystoneCorrectionVertical", filters::keystone_correction_vertical as BuiltinConstructor),
+        (
+            "CIKaleidoscope",
+            filters::kaleidoscope as BuiltinConstructor,
+        ),
+        (
+            "CIKeystoneCorrectionCombined",
+            filters::keystone_correction_combined as BuiltinConstructor,
+        ),
+        (
+            "CIKeystoneCorrectionHorizontal",
+            filters::keystone_correction_horizontal as BuiltinConstructor,
+        ),
+        (
+            "CIKeystoneCorrectionVertical",
+            filters::keystone_correction_vertical as BuiltinConstructor,
+        ),
         ("CILabDeltaE", filters::lab_delta_e as BuiltinConstructor),
-        ("CILenticularHaloGenerator", filters::lenticular_halo_generator as BuiltinConstructor),
+        (
+            "CILenticularHaloGenerator",
+            filters::lenticular_halo_generator as BuiltinConstructor,
+        ),
         ("CILightTunnel", filters::light_tunnel as BuiltinConstructor),
         ("CILineOverlay", filters::line_overlay as BuiltinConstructor),
         ("CILineScreen", filters::line_screen as BuiltinConstructor),
-        ("CILinearToSRGBToneCurve", filters::linear_to_srgb_tone_curve as BuiltinConstructor),
-        ("CIMaskToAlpha", filters::mask_to_alpha as BuiltinConstructor),
-        ("CIMaskedVariableBlur", filters::masked_variable_blur as BuiltinConstructor),
-        ("CIMaximumComponent", filters::maximum_component as BuiltinConstructor),
+        (
+            "CILinearToSRGBToneCurve",
+            filters::linear_to_srgb_tone_curve as BuiltinConstructor,
+        ),
+        (
+            "CIMaskToAlpha",
+            filters::mask_to_alpha as BuiltinConstructor,
+        ),
+        (
+            "CIMaskedVariableBlur",
+            filters::masked_variable_blur as BuiltinConstructor,
+        ),
+        (
+            "CIMaximumComponent",
+            filters::maximum_component as BuiltinConstructor,
+        ),
         ("CIMedianFilter", filters::median as BuiltinConstructor),
-        ("CIMaximumScaleTransform", filters::maximum_scale_transform as BuiltinConstructor),
-        ("CIMeshGenerator", filters::mesh_generator as BuiltinConstructor),
-        ("CIMinimumComponent", filters::minimum_component as BuiltinConstructor),
+        (
+            "CIMaximumScaleTransform",
+            filters::maximum_scale_transform as BuiltinConstructor,
+        ),
+        (
+            "CIMeshGenerator",
+            filters::mesh_generator as BuiltinConstructor,
+        ),
+        (
+            "CIMinimumComponent",
+            filters::minimum_component as BuiltinConstructor,
+        ),
         ("CIMix", filters::mix as BuiltinConstructor),
-        ("CIModTransition", filters::mod_transition as BuiltinConstructor),
-        ("CIMorphologyGradient", filters::morphology_gradient as BuiltinConstructor),
-        ("CIMorphologyMaximum", filters::morphology_maximum as BuiltinConstructor),
-        ("CIMorphologyMinimum", filters::morphology_minimum as BuiltinConstructor),
-        ("CIMorphologyRectangleMaximum", filters::morphology_rectangle_maximum as BuiltinConstructor),
-        ("CIMorphologyRectangleMinimum", filters::morphology_rectangle_minimum as BuiltinConstructor),
-        ("CINinePartStretched", filters::nine_part_stretched as BuiltinConstructor),
-        ("CINinePartTiled", filters::nine_part_tiled as BuiltinConstructor),
-        ("CINoiseReduction", filters::noise_reduction as BuiltinConstructor),
+        (
+            "CIModTransition",
+            filters::mod_transition as BuiltinConstructor,
+        ),
+        (
+            "CIMorphologyGradient",
+            filters::morphology_gradient as BuiltinConstructor,
+        ),
+        (
+            "CIMorphologyMaximum",
+            filters::morphology_maximum as BuiltinConstructor,
+        ),
+        (
+            "CIMorphologyMinimum",
+            filters::morphology_minimum as BuiltinConstructor,
+        ),
+        (
+            "CIMorphologyRectangleMaximum",
+            filters::morphology_rectangle_maximum as BuiltinConstructor,
+        ),
+        (
+            "CIMorphologyRectangleMinimum",
+            filters::morphology_rectangle_minimum as BuiltinConstructor,
+        ),
+        (
+            "CINinePartStretched",
+            filters::nine_part_stretched as BuiltinConstructor,
+        ),
+        (
+            "CINinePartTiled",
+            filters::nine_part_tiled as BuiltinConstructor,
+        ),
+        (
+            "CINoiseReduction",
+            filters::noise_reduction as BuiltinConstructor,
+        ),
         ("CIOpTile", filters::op_tile as BuiltinConstructor),
-        ("CIPDF417BarcodeGenerator", filters::pdf417_barcode_generator as BuiltinConstructor),
-        ("CIPageCurlTransition", filters::page_curl_transition as BuiltinConstructor),
-        ("CIPageCurlWithShadowTransition", filters::page_curl_with_shadow_transition as BuiltinConstructor),
-        ("CIPaletteCentroid", filters::palette_centroid as BuiltinConstructor),
+        (
+            "CIPDF417BarcodeGenerator",
+            filters::pdf417_barcode_generator as BuiltinConstructor,
+        ),
+        (
+            "CIPageCurlTransition",
+            filters::page_curl_transition as BuiltinConstructor,
+        ),
+        (
+            "CIPageCurlWithShadowTransition",
+            filters::page_curl_with_shadow_transition as BuiltinConstructor,
+        ),
+        (
+            "CIPaletteCentroid",
+            filters::palette_centroid as BuiltinConstructor,
+        ),
         ("CIPalettize", filters::palettize as BuiltinConstructor),
-        ("CIParallelogramTile", filters::parallelogram_tile as BuiltinConstructor),
-        ("CIPersonSegmentation", filters::person_segmentation as BuiltinConstructor),
-        ("CIPerspectiveRotate", filters::perspective_rotate as BuiltinConstructor),
-        ("CIPerspectiveTile", filters::perspective_tile as BuiltinConstructor),
-        ("CIPerspectiveTransformWithExtent", filters::perspective_transform_with_extent as BuiltinConstructor),
+        (
+            "CIParallelogramTile",
+            filters::parallelogram_tile as BuiltinConstructor,
+        ),
+        (
+            "CIPersonSegmentation",
+            filters::person_segmentation as BuiltinConstructor,
+        ),
+        (
+            "CIPerspectiveRotate",
+            filters::perspective_rotate as BuiltinConstructor,
+        ),
+        (
+            "CIPerspectiveTile",
+            filters::perspective_tile as BuiltinConstructor,
+        ),
+        (
+            "CIPerspectiveTransformWithExtent",
+            filters::perspective_transform_with_extent as BuiltinConstructor,
+        ),
         ("CIPhotoEffect", filters::photo_effect as BuiltinConstructor),
-        ("CIPinchDistortion", filters::pinch_distortion as BuiltinConstructor),
+        (
+            "CIPinchDistortion",
+            filters::pinch_distortion as BuiltinConstructor,
+        ),
         ("CIPointillize", filters::pointillize as BuiltinConstructor),
-        ("CIQRCodeGenerator", filters::qr_code_generator as BuiltinConstructor),
-        ("CIRandomGenerator", filters::random_generator as BuiltinConstructor),
-        ("CIRippleTransition", filters::ripple_transition as BuiltinConstructor),
-        ("CIRoundedQRCodeGenerator", filters::rounded_qr_code_generator as BuiltinConstructor),
-        ("CIRoundedRectangleGenerator", filters::rounded_rectangle_generator as BuiltinConstructor),
-        ("CIRoundedRectangleStrokeGenerator", filters::rounded_rectangle_stroke_generator as BuiltinConstructor),
+        (
+            "CIQRCodeGenerator",
+            filters::qr_code_generator as BuiltinConstructor,
+        ),
+        (
+            "CIRandomGenerator",
+            filters::random_generator as BuiltinConstructor,
+        ),
+        (
+            "CIRippleTransition",
+            filters::ripple_transition as BuiltinConstructor,
+        ),
+        (
+            "CIRoundedQRCodeGenerator",
+            filters::rounded_qr_code_generator as BuiltinConstructor,
+        ),
+        (
+            "CIRoundedRectangleGenerator",
+            filters::rounded_rectangle_generator as BuiltinConstructor,
+        ),
+        (
+            "CIRoundedRectangleStrokeGenerator",
+            filters::rounded_rectangle_stroke_generator as BuiltinConstructor,
+        ),
         ("CIRowAverage", filters::row_average as BuiltinConstructor),
-        ("CISaliencyMapFilter", filters::saliency_map as BuiltinConstructor),
-        ("CISRGBToneCurveToLinear", filters::srgb_tone_curve_to_linear as BuiltinConstructor),
-        ("CIShadedMaterial", filters::shaded_material as BuiltinConstructor),
-        ("CISignedDistanceGradientFromRedMask", filters::signed_distance_gradient_from_red_mask as BuiltinConstructor),
-        ("CISixfoldReflectedTile", filters::sixfold_reflected_tile as BuiltinConstructor),
-        ("CISixfoldRotatedTile", filters::sixfold_rotated_tile as BuiltinConstructor),
-        ("CISmoothLinearGradient", filters::smooth_linear_gradient as BuiltinConstructor),
-        ("CISobelGradients", filters::sobel_gradients as BuiltinConstructor),
+        (
+            "CISaliencyMapFilter",
+            filters::saliency_map as BuiltinConstructor,
+        ),
+        (
+            "CISRGBToneCurveToLinear",
+            filters::srgb_tone_curve_to_linear as BuiltinConstructor,
+        ),
+        (
+            "CIShadedMaterial",
+            filters::shaded_material as BuiltinConstructor,
+        ),
+        (
+            "CISignedDistanceGradientFromRedMask",
+            filters::signed_distance_gradient_from_red_mask as BuiltinConstructor,
+        ),
+        (
+            "CISixfoldReflectedTile",
+            filters::sixfold_reflected_tile as BuiltinConstructor,
+        ),
+        (
+            "CISixfoldRotatedTile",
+            filters::sixfold_rotated_tile as BuiltinConstructor,
+        ),
+        (
+            "CISmoothLinearGradient",
+            filters::smooth_linear_gradient as BuiltinConstructor,
+        ),
+        (
+            "CISobelGradients",
+            filters::sobel_gradients as BuiltinConstructor,
+        ),
         ("CISpotColor", filters::spot_color as BuiltinConstructor),
         ("CISpotLight", filters::spot_light as BuiltinConstructor),
-        ("CIStarShineGenerator", filters::star_shine_generator as BuiltinConstructor),
+        (
+            "CIStarShineGenerator",
+            filters::star_shine_generator as BuiltinConstructor,
+        ),
         ("CIStretchCrop", filters::stretch_crop as BuiltinConstructor),
-        ("CIStripesGenerator", filters::stripes_generator as BuiltinConstructor),
-        ("CISunbeamsGenerator", filters::sunbeams_generator as BuiltinConstructor),
-        ("CISwipeTransition", filters::swipe_transition as BuiltinConstructor),
-        ("CISystemToneMap", filters::system_tone_map as BuiltinConstructor),
-        ("CITextImageGenerator", filters::text_image_generator as BuiltinConstructor),
+        (
+            "CIStripesGenerator",
+            filters::stripes_generator as BuiltinConstructor,
+        ),
+        (
+            "CISunbeamsGenerator",
+            filters::sunbeams_generator as BuiltinConstructor,
+        ),
+        (
+            "CISwipeTransition",
+            filters::swipe_transition as BuiltinConstructor,
+        ),
+        (
+            "CISystemToneMap",
+            filters::system_tone_map as BuiltinConstructor,
+        ),
+        (
+            "CITextImageGenerator",
+            filters::text_image_generator as BuiltinConstructor,
+        ),
         ("CIThermal", filters::thermal as BuiltinConstructor),
         ("CIToneCurve", filters::tone_curve as BuiltinConstructor),
-        ("CIToneMapHeadroom", filters::tone_map_headroom as BuiltinConstructor),
-        ("CITorusLensDistortion", filters::torus_lens_distortion as BuiltinConstructor),
-        ("CITriangleKaleidoscope", filters::triangle_kaleidoscope as BuiltinConstructor),
-        ("CITriangleTile", filters::triangle_tile as BuiltinConstructor),
-        ("CITwelvefoldReflectedTile", filters::twelvefold_reflected_tile as BuiltinConstructor),
-        ("CITwirlDistortion", filters::twirl_distortion as BuiltinConstructor),
-        ("CIVortexDistortion", filters::vortex_distortion as BuiltinConstructor),
+        (
+            "CIToneMapHeadroom",
+            filters::tone_map_headroom as BuiltinConstructor,
+        ),
+        (
+            "CITorusLensDistortion",
+            filters::torus_lens_distortion as BuiltinConstructor,
+        ),
+        (
+            "CITriangleKaleidoscope",
+            filters::triangle_kaleidoscope as BuiltinConstructor,
+        ),
+        (
+            "CITriangleTile",
+            filters::triangle_tile as BuiltinConstructor,
+        ),
+        (
+            "CITwelvefoldReflectedTile",
+            filters::twelvefold_reflected_tile as BuiltinConstructor,
+        ),
+        (
+            "CITwirlDistortion",
+            filters::twirl_distortion as BuiltinConstructor,
+        ),
+        (
+            "CIVortexDistortion",
+            filters::vortex_distortion as BuiltinConstructor,
+        ),
         ("CIXRay", filters::x_ray as BuiltinConstructor),
     ];
 
@@ -172,8 +535,9 @@ fn builtin_filter_constructors_return_named_filters() {
 
 #[test]
 fn builtin_filter_family_helpers_cover_abstract_protocols() {
-    let composite = filters::composite_operation(filters::CICompositeOperationKind::ScreenBlendMode)
-        .expect("CICompositeOperation family should create screen blend mode");
+    let composite =
+        filters::composite_operation(filters::CICompositeOperationKind::ScreenBlendMode)
+            .expect("CICompositeOperation family should create screen blend mode");
     assert_eq!(composite.name(), "CIScreenBlendMode");
 
     let geometry = filters::four_coordinate_geometry_filter(

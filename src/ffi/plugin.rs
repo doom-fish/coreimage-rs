@@ -2,8 +2,7 @@ use core::ffi::{c_char, c_void};
 
 pub type RustPlugInRegistrationCallback =
     Option<unsafe extern "C" fn(context: *mut c_void, host: *mut c_void) -> bool>;
-pub type RustPlugInRegistrationReleaseCallback =
-    Option<unsafe extern "C" fn(context: *mut c_void)>;
+pub type RustPlugInRegistrationReleaseCallback = Option<unsafe extern "C" fn(context: *mut c_void)>;
 
 unsafe extern "C" {
     pub fn ci_plugin_registration_new(

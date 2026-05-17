@@ -11,7 +11,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let context = CIContext::new_default();
     let image = solid_image();
     let destination = CIRenderDestination::bitmap_rgba8(64, 64)?;
-    let info = context.start_render_task(&image, &destination)?.wait_until_completed()?;
+    let info = context
+        .start_render_task(&image, &destination)?
+        .wait_until_completed()?;
 
     println!(
         "rendered {} pixels in {} passes ({} bytes)",

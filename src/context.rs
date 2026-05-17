@@ -12,9 +12,7 @@ use apple_metal::{CommandQueue, MetalDevice};
 
 use crate::ffi;
 use crate::util::{path_to_cstring, status_result, string_to_cstring};
-use crate::{
-    CIColorSpace, CIError, CIFormat, CIImage, CIRenderDestination, CIRenderTask,
-};
+use crate::{CIColorSpace, CIError, CIFormat, CIImage, CIRenderDestination, CIRenderTask};
 
 /// Common Core Image context options that don't require extra framework types.
 #[allow(clippy::struct_excessive_bools)]
@@ -217,12 +215,20 @@ impl CIContext {
     ) -> Result<(), CIError> {
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_context_prepare_render(self.ptr, image.as_ptr(), destination.as_ptr(), &mut error)
+            ffi::ci_context_prepare_render(
+                self.ptr,
+                image.as_ptr(),
+                destination.as_ptr(),
+                &mut error,
+            )
         };
         unsafe { status_result(status, error) }
     }
 
-    pub fn start_clear_task(&self, destination: &CIRenderDestination) -> Result<CIRenderTask, CIError> {
+    pub fn start_clear_task(
+        &self,
+        destination: &CIRenderDestination,
+    ) -> Result<CIRenderTask, CIError> {
         let mut task = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status = unsafe {

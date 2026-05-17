@@ -238,7 +238,14 @@ impl CIFormat {
     pub const fn bytes_per_pixel(self) -> usize {
         match self {
             Self::A8 | Self::R8 | Self::L8 => 1,
-            Self::A16 | Self::AH | Self::R16 | Self::RH | Self::L16 | Self::LH | Self::Rg8 | Self::La8 => 2,
+            Self::A16
+            | Self::AH
+            | Self::R16
+            | Self::RH
+            | Self::L16
+            | Self::LH
+            | Self::Rg8
+            | Self::La8 => 2,
             Self::Argb8
             | Self::Bgra8
             | Self::Rgba8

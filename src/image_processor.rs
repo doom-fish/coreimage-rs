@@ -1,8 +1,8 @@
-use apple_cf::cg::CGRect;
 use crate::ffi;
 use crate::image::CIImage;
 use crate::util::{status_result, take_owned_string};
 use crate::{CIError, CIFormat};
+use apple_cf::cg::CGRect;
 use core::ptr;
 
 #[derive(Clone, Debug)]
@@ -116,9 +116,7 @@ impl CIImageProcessorInvocation {
     }
 }
 
-fn read_region(
-    read: unsafe extern "C" fn(*mut f64, *mut f64, *mut f64, *mut f64),
-) -> CGRect {
+fn read_region(read: unsafe extern "C" fn(*mut f64, *mut f64, *mut f64, *mut f64)) -> CGRect {
     let mut x = 0.0;
     let mut y = 0.0;
     let mut width = 0.0;

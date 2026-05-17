@@ -13,10 +13,7 @@ struct PlugInRegistrationCallback {
     callback: Box<PlugInRegistrationFn>,
 }
 
-unsafe extern "C" fn plugin_registration_invoke(
-    context: *mut c_void,
-    host: *mut c_void,
-) -> bool {
+unsafe extern "C" fn plugin_registration_invoke(context: *mut c_void, host: *mut c_void) -> bool {
     if context.is_null() {
         return false;
     }
@@ -112,10 +109,7 @@ impl CIPlugIn {
         unsafe { ffi::ci_plugin_load_non_executable_plugins() };
     }
 
-    pub fn load_plugin(
-        path: impl AsRef<Path>,
-        allow_executable_code: bool,
-    ) -> Result<(), CIError> {
+    pub fn load_plugin(path: impl AsRef<Path>, allow_executable_code: bool) -> Result<(), CIError> {
         let path = path_to_cstring(path.as_ref())?;
         unsafe { ffi::ci_plugin_load_plugin(path.as_ptr(), allow_executable_code) };
         Ok(())

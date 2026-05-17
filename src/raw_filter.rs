@@ -29,7 +29,9 @@ impl CIRAWDecoderVersion {
         static VALUES: OnceLock<Vec<String>> = OnceLock::new();
         VALUES.get_or_init(|| {
             (0..9)
-                .map(|index| unsafe { take_owned_string(ffi::ci_raw_decoder_version_name(index)).unwrap_or_default() })
+                .map(|index| unsafe {
+                    take_owned_string(ffi::ci_raw_decoder_version_name(index)).unwrap_or_default()
+                })
                 .collect()
         })
     }
@@ -100,7 +102,8 @@ impl CIRAWFilter {
     }
 
     pub fn supported_camera_models() -> Vec<String> {
-        let joined = unsafe { take_owned_string(ffi::ci_raw_filter_supported_camera_models_lines()) };
+        let joined =
+            unsafe { take_owned_string(ffi::ci_raw_filter_supported_camera_models_lines()) };
         joined.map_or_else(Vec::new, |text| split_lines(&text))
     }
 
@@ -108,7 +111,8 @@ impl CIRAWFilter {
         let path = crate::util::path_to_cstring(path.as_ref())?;
         let mut filter = ptr::null_mut();
         let mut error = ptr::null_mut();
-        let status = unsafe { ffi::ci_raw_filter_new_from_path(path.as_ptr(), &mut filter, &mut error) };
+        let status =
+            unsafe { ffi::ci_raw_filter_new_from_path(path.as_ptr(), &mut filter, &mut error) };
         unsafe { status_result(status, error)? };
         Ok(Self::from_non_null(filter, "CIRAWFilter(imageURL:)"))
     }
@@ -128,7 +132,9 @@ impl CIRAWFilter {
             ffi::ci_raw_filter_new_from_data(
                 data.as_ptr(),
                 data.len(),
-                identifier_hint.as_ref().map_or(ptr::null(), |value| value.as_ptr()),
+                identifier_hint
+                    .as_ref()
+                    .map_or(ptr::null(), |value| value.as_ptr()),
                 &mut filter,
                 &mut error,
             )
@@ -141,7 +147,11 @@ impl CIRAWFilter {
     }
 
     pub fn supported_decoder_versions(&self) -> Vec<String> {
-        let joined = unsafe { take_owned_string(ffi::ci_raw_filter_supported_decoder_versions_lines(self.ptr)) };
+        let joined = unsafe {
+            take_owned_string(ffi::ci_raw_filter_supported_decoder_versions_lines(
+                self.ptr,
+            ))
+        };
         joined.map_or_else(Vec::new, |text| split_lines(&text))
     }
 
@@ -174,7 +184,8 @@ impl CIRAWFilter {
     }
 
     pub fn decoder_version(&self) -> String {
-        unsafe { take_owned_string(ffi::ci_raw_filter_decoder_version(self.ptr)) }.unwrap_or_default()
+        unsafe { take_owned_string(ffi::ci_raw_filter_decoder_version(self.ptr)) }
+            .unwrap_or_default()
     }
 
     pub fn set_decoder_version(&mut self, version: CIRAWDecoderVersion) {
