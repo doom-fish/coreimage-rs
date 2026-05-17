@@ -17,6 +17,8 @@ pub(crate) fn string_to_cstring(value: &str, name: &str) -> Result<CString, CIEr
 }
 
 pub(crate) unsafe fn status_result(status: i32, error_str: *mut c_char) -> Result<(), CIError> {
+    // SAFETY: Caller must guarantee `error_str` is either null or a valid C string allocated
+    // by the FFI layer that must be freed exactly once.
     if status == ffi::status::OK {
         if !error_str.is_null() {
             libc::free(error_str.cast());
@@ -28,6 +30,8 @@ pub(crate) unsafe fn status_result(status: i32, error_str: *mut c_char) -> Resul
 }
 
 pub(crate) unsafe fn take_owned_string(ptr: *mut c_char) -> Option<String> {
+    // SAFETY: Caller must guarantee `ptr` is either null or a valid C string allocated
+    // by the FFI layer. This function takes ownership and frees it exactly once.
     if ptr.is_null() {
         None
     } else {
@@ -38,6 +42,8 @@ pub(crate) unsafe fn take_owned_string(ptr: *mut c_char) -> Option<String> {
 }
 
 pub(crate) unsafe fn take_array_objects(array_handle: *mut c_void) -> Vec<*mut c_void> {
+    // SAFETY: Caller must guarantee `array_handle` is either null or a valid Objective-C array
+    // handle allocated by the FFI layer. This function takes ownership and releases it exactly once.
     if array_handle.is_null() {
         return Vec::new();
     }

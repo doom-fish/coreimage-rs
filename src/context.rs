@@ -38,6 +38,8 @@ pub struct CIContext {
 impl Drop for CIContext {
     fn drop(&mut self) {
         if !self.ptr.is_null() {
+            // SAFETY: `self.ptr` is a valid Objective-C handle. `ci_object_release` decrements
+            // the retain count exactly once and is called exactly once (guaranteed by Drop semantics).
             unsafe { ffi::ci_object_release(self.ptr) };
             self.ptr = ptr::null_mut();
         }
@@ -47,6 +49,8 @@ impl Drop for CIContext {
 impl Clone for CIContext {
     fn clone(&self) -> Self {
         Self {
+            // SAFETY: `self.ptr` is a valid Objective-C handle. `ci_object_retain` is thread-safe
+            // and increments the retain count. Each clone gets independent ownership.
             ptr: unsafe { ffi::ci_object_retain(self.ptr) },
         }
     }
@@ -76,7 +80,11 @@ impl CIContext {
     }
 
     pub fn new_default() -> Self {
-        Self::from_non_null(unsafe { ffi::ci_context_new_default() }, "CIContext()")
+        Self::from_non_null(
+            // SAFETY: `ci_context_new_default` returns a valid Objective-C context handle.
+            unsafe { ffi::ci_context_new_default() },
+            "CIContext()"
+        )
     }
 
     pub fn new_cpu() -> Self {

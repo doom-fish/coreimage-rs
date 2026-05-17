@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3] - 2026-05-18
+
+### Fixed
+
+- Added comprehensive SAFETY comments to all unsafe blocks explaining pointer validity,
+  lifetime semantics, and memory management guarantees from the FFI layer. This improves
+  auditability of the 332 unsafe FFI calls throughout the crate.
+
 ## [0.2.2] - 2026-05-17
 
 ### Added

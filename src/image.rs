@@ -21,6 +21,9 @@ pub struct CIImage {
 impl Drop for CIImage {
     fn drop(&mut self) {
         if !self.ptr.is_null() {
+            // SAFETY: `self.ptr` is a valid Objective-C handle returned by the FFI layer.
+            // `ci_object_release` decrements the retain count exactly once and is called
+            // exactly once (guaranteed by Drop semantics and the null check above).
             unsafe { ffi::ci_object_release(self.ptr) };
             self.ptr = ptr::null_mut();
         }
@@ -30,6 +33,9 @@ impl Drop for CIImage {
 impl Clone for CIImage {
     fn clone(&self) -> Self {
         Self {
+            // SAFETY: `self.ptr` is a valid Objective-C handle returned by the FFI layer.
+            // `ci_object_retain` increments the retain count and is thread-safe. Each clone
+            // gets its own independent ownership of the object (managed by Drop).
             ptr: unsafe { ffi::ci_object_retain(self.ptr) },
         }
     }
@@ -63,7 +69,11 @@ impl CIImage {
         let path = path_to_cstring(path.as_ref())?;
         let mut image = ptr::null_mut();
         let mut error = ptr::null_mut();
+        // SAFETY: `path.as_ptr()` is a valid nul-terminated C string from CString.
+        // The FFI function populates `image` with a valid Objective-C handle (or null on error).
         let status = unsafe { ffi::ci_image_from_path(path.as_ptr(), &mut image, &mut error) };
+        // SAFETY: `error` is either null or a valid C string pointer allocated by the FFI layer.
+        // `status_result` takes ownership and frees the error if necessary.
         unsafe { status_result(status, error)? };
         Ok(Self::from_non_null(image, "CIImage(contentsOf:)"))
     }
@@ -76,15 +86,20 @@ impl CIImage {
         }
         let mut image = ptr::null_mut();
         let mut error = ptr::null_mut();
+        // SAFETY: `data.as_ptr()` is a valid byte slice pointer. `data.len()` is the correct length.
+        // The FFI function populates `image` with a valid handle (or null on error).
         let status = unsafe {
             ffi::ci_image_from_encoded_data(data.as_ptr(), data.len(), &mut image, &mut error)
         };
+        // SAFETY: `error` is either null or a valid C string allocated by the FFI layer.
         unsafe { status_result(status, error)? };
         Ok(Self::from_non_null(image, "CIImage(data:)"))
     }
 
     pub fn from_cg_image(image: &CGImage) -> Self {
         Self::from_non_null(
+            // SAFETY: `image.as_ptr()` is a valid CoreGraphics handle. The FFI function wraps it
+            // in a CIImage and returns a valid Objective-C handle.
             unsafe { ffi::ci_image_from_cg_image(image.as_ptr()) },
             "CIImage(cgImage:)",
         )
@@ -92,6 +107,8 @@ impl CIImage {
 
     pub fn from_cv_pixel_buffer(buffer: &CVPixelBuffer) -> Self {
         Self::from_non_null(
+            // SAFETY: `buffer.as_ptr()` is a valid CoreVideo handle. The FFI function wraps it
+            // in a CIImage and returns a valid Objective-C handle.
             unsafe { ffi::ci_image_from_cv_pixel_buffer(buffer.as_ptr()) },
             "CIImage(cvPixelBuffer:)",
         )
@@ -99,6 +116,8 @@ impl CIImage {
 
     pub fn from_iosurface(surface: &IOSurface) -> Self {
         Self::from_non_null(
+            // SAFETY: `surface.as_ptr()` is a valid IOSurface handle. The FFI function wraps it
+            // in a CIImage and returns a valid Objective-C handle.
             unsafe { ffi::ci_image_from_iosurface(surface.as_ptr()) },
             "CIImage(ioSurface:)",
         )
@@ -106,13 +125,19 @@ impl CIImage {
 
     pub fn from_color(color: &CIColor) -> Self {
         Self::from_non_null(
+            // SAFETY: `color.as_ptr()` is a valid CIColor handle. The FFI function returns
+            // a valid Objective-C handle.
             unsafe { ffi::ci_image_from_color(color.as_ptr()) },
             "CIImage(color:)",
         )
     }
 
     pub fn empty() -> Self {
-        Self::from_non_null(unsafe { ffi::ci_image_empty() }, "CIImage.emptyImage")
+        Self::from_non_null(
+            // SAFETY: `ci_image_empty` returns a valid Objective-C image handle.
+            unsafe { ffi::ci_image_empty() },
+            "CIImage.emptyImage"
+        )
     }
 
     pub fn named_color(color: crate::color::CIColorName) -> Self {
@@ -140,6 +165,9 @@ impl CIImage {
 
         let mut image = ptr::null_mut();
         let mut error = ptr::null_mut();
+        // SAFETY: `data.as_ptr()` is valid and points to `data.len()` bytes.
+        // `bytes_per_row` is validated to safely multiply with height. The FFI function
+        // returns a valid handle (or null on error).
         let status = unsafe {
             ffi::ci_image_from_bitmap(
                 data.as_ptr(),
@@ -154,6 +182,7 @@ impl CIImage {
                 &mut error,
             )
         };
+        // SAFETY: `error` is either null or a valid C string allocated by the FFI layer.
         unsafe { status_result(status, error)? };
         Ok(Self::from_non_null(image, "CIImage(bitmapData:)"))
     }
@@ -186,6 +215,8 @@ impl CIImage {
         let mut y = 0.0;
         let mut width = 0.0;
         let mut height = 0.0;
+        // SAFETY: `self.ptr` is a valid CIImage handle. The FFI function writes to the provided
+        // mutable references, which are stack-allocated and valid.
         unsafe { ffi::ci_image_extent(self.ptr, &mut x, &mut y, &mut width, &mut height) };
         CGRect::new(x, y, width, height)
     }
