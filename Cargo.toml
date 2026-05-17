@@ -42,8 +42,8 @@ filters = []
 metal = ["dep:apple-metal"]
 
 [dependencies]
-apple-cf = { version = ">=0.4.0, <0.6", default-features = false, features = ["cv", "cg", "iosurface"] }
-apple-metal = { version = ">=0.5.0, <0.6", optional = true }
+apple-cf = { version = ">=0.4, <0.8", default-features = false, features = ["cv", "cg", "iosurface"] }
+apple-metal = { version = ">=0.5, <0.8", optional = true }
 libc = "0.2"
 
 [package.metadata.docs.rs]
