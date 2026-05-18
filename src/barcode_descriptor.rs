@@ -9,19 +9,28 @@ use crate::CIError;
 /// Barcode descriptor kinds supported by Core Image.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CIBarcodeDescriptorKind {
+/// Mirrors the `CoreImage` framework case `QrCode`.
     QrCode,
+/// Mirrors the `CoreImage` framework case `Aztec`.
     Aztec,
+/// Mirrors the `CoreImage` framework case `Pdf417`.
     Pdf417,
+/// Mirrors the `CoreImage` framework case `DataMatrix`.
     DataMatrix,
+/// Mirrors the `CoreImage` framework case `Unknown`.
     Unknown,
 }
 
 /// QR code error-correction levels.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CIQRCodeErrorCorrectionLevel {
+/// Mirrors the `CoreImage` framework case `L`.
     L,
+/// Mirrors the `CoreImage` framework case `M`.
     M,
+/// Mirrors the `CoreImage` framework case `Q`.
     Q,
+/// Mirrors the `CoreImage` framework case `H`.
     H,
 }
 
@@ -39,11 +48,17 @@ impl CIQRCodeErrorCorrectionLevel {
 /// Data Matrix ECC versions.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CIDataMatrixCodeECCVersion {
+/// Mirrors the `CoreImage` framework case `V000`.
     V000,
+/// Mirrors the `CoreImage` framework case `V050`.
     V050,
+/// Mirrors the `CoreImage` framework case `V080`.
     V080,
+/// Mirrors the `CoreImage` framework case `V100`.
     V100,
+/// Mirrors the `CoreImage` framework case `V140`.
     V140,
+/// Mirrors the `CoreImage` framework case `V200`.
     V200,
 }
 
@@ -101,10 +116,12 @@ impl CIBarcodeDescriptor {
         unsafe { Self::from_raw(ptr) }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `qr_code`.
     pub fn qr_code(
         payload: &[u8],
         symbol_version: isize,
@@ -128,6 +145,7 @@ impl CIBarcodeDescriptor {
         Ok(Self::from_non_null(descriptor, "CIQRCodeDescriptor"))
     }
 
+/// Calls the `CoreImage` framework counterpart for `aztec_code`.
     pub fn aztec_code(
         payload: &[u8],
         is_compact: bool,
@@ -151,6 +169,7 @@ impl CIBarcodeDescriptor {
         Ok(Self::from_non_null(descriptor, "CIAztecCodeDescriptor"))
     }
 
+/// Calls the `CoreImage` framework counterpart for `pdf417_code`.
     pub fn pdf417_code(
         payload: &[u8],
         is_compact: bool,
@@ -174,6 +193,7 @@ impl CIBarcodeDescriptor {
         Ok(Self::from_non_null(descriptor, "CIPDF417CodeDescriptor"))
     }
 
+/// Calls the `CoreImage` framework counterpart for `data_matrix_code`.
     pub fn data_matrix_code(
         payload: &[u8],
         row_count: isize,
@@ -200,6 +220,7 @@ impl CIBarcodeDescriptor {
         ))
     }
 
+/// Calls the `CoreImage` framework counterpart for `kind`.
     pub fn kind(&self) -> CIBarcodeDescriptorKind {
         match unsafe { ffi::ci_barcode_descriptor_kind(self.ptr) } {
             0 => CIBarcodeDescriptorKind::QrCode,
@@ -210,11 +231,13 @@ impl CIBarcodeDescriptor {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `payload_base64`.
     pub fn payload_base64(&self) -> String {
         unsafe { take_owned_string(ffi::ci_barcode_descriptor_payload_base64(self.ptr)) }
             .unwrap_or_default()
     }
 
+/// Calls the `CoreImage` framework counterpart for `details_json`.
     pub fn details_json(&self) -> String {
         unsafe { take_owned_string(ffi::ci_barcode_descriptor_details_json(self.ptr)) }
             .unwrap_or_else(|| "{}".to_string())

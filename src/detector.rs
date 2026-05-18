@@ -17,9 +17,13 @@ pub struct CIDetector {
 /// Built-in detector kinds.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CIDetectorType {
+/// Mirrors the `CoreImage` framework case `Face`.
     Face,
+/// Mirrors the `CoreImage` framework case `Rectangle`.
     Rectangle,
+/// Mirrors the `CoreImage` framework case `QrCode`.
     QrCode,
+/// Mirrors the `CoreImage` framework case `Text`.
     Text,
 }
 
@@ -37,9 +41,12 @@ impl CIDetectorType {
 /// Accuracy / performance trade-offs for detector construction.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum CIDetectorAccuracy {
+/// Mirrors the `CoreImage` framework case `Default`.
     #[default]
     Default,
+/// Mirrors the `CoreImage` framework case `Low`.
     Low,
+/// Mirrors the `CoreImage` framework case `High`.
     High,
 }
 
@@ -56,21 +63,32 @@ impl CIDetectorAccuracy {
 /// Configuration for `CIDetector` creation.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct CIDetectorOptions {
+/// Mirrors the `CoreImage` framework property for `accuracy`.
     pub accuracy: CIDetectorAccuracy,
+/// Mirrors the `CoreImage` framework property for `tracking`.
     pub tracking: bool,
+/// Mirrors the `CoreImage` framework property for `min_feature_size`.
     pub min_feature_size: Option<f64>,
+/// Mirrors the `CoreImage` framework property for `max_feature_count`.
     pub max_feature_count: Option<u32>,
+/// Mirrors the `CoreImage` framework property for `number_of_angles`.
     pub number_of_angles: Option<u32>,
 }
 
 /// Options for a single feature-detection request.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct CIDetectionOptions {
+/// Mirrors the `CoreImage` framework property for `image_orientation`.
     pub image_orientation: Option<u32>,
+/// Mirrors the `CoreImage` framework property for `eye_blink`.
     pub eye_blink: bool,
+/// Mirrors the `CoreImage` framework property for `smile`.
     pub smile: bool,
+/// Mirrors the `CoreImage` framework property for `focal_length`.
     pub focal_length: Option<f64>,
+/// Mirrors the `CoreImage` framework property for `aspect_ratio`.
     pub aspect_ratio: Option<f64>,
+/// Mirrors the `CoreImage` framework property for `return_sub_features`.
     pub return_sub_features: bool,
 }
 
@@ -109,10 +127,12 @@ impl CIDetector {
         unsafe { Self::from_raw(ptr) }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `new`.
     pub fn new(
         detector_type: CIDetectorType,
         context: Option<&CIContext>,
@@ -141,6 +161,7 @@ impl CIDetector {
         Ok(Self::from_non_null(detector, "CIDetector"))
     }
 
+/// Calls the `CoreImage` framework counterpart for `features_in_image`.
     pub fn features_in_image(
         &self,
         image: &CIImage,

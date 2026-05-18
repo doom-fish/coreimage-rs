@@ -8,9 +8,12 @@ use crate::{CIColorSpace, CIError, CIFormat};
 /// Alpha handling for a `CIRenderDestination`.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum CIRenderDestinationAlphaMode {
+/// Mirrors the `CoreImage` framework case `None`.
     #[default]
     None,
+/// Mirrors the `CoreImage` framework case `Premultiplied`.
     Premultiplied,
+/// Mirrors the `CoreImage` framework case `Unpremultiplied`.
     Unpremultiplied,
 }
 
@@ -61,10 +64,12 @@ impl fmt::Debug for CIRenderDestination {
 }
 
 impl CIRenderDestination {
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `bitmap`.
     pub fn bitmap(
         width: usize,
         height: usize,
@@ -104,64 +109,79 @@ impl CIRenderDestination {
         })
     }
 
+/// Calls the `CoreImage` framework counterpart for `bitmap_rgba8`.
     pub fn bitmap_rgba8(width: usize, height: usize) -> Result<Self, CIError> {
         Self::bitmap(width, height, CIFormat::Rgba8, Some(CIColorSpace::Srgb))
     }
 
+/// Calls the `CoreImage` framework counterpart for `width`.
     pub fn width(&self) -> usize {
         unsafe { ffi::ci_render_destination_width(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `height`.
     pub fn height(&self) -> usize {
         unsafe { ffi::ci_render_destination_height(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `alpha_mode`.
     pub fn alpha_mode(&self) -> CIRenderDestinationAlphaMode {
         CIRenderDestinationAlphaMode::from_code(unsafe {
             ffi::ci_render_destination_alpha_mode(self.ptr)
         })
     }
 
+/// Calls the `CoreImage` framework counterpart for `set_alpha_mode`.
     pub fn set_alpha_mode(&mut self, alpha_mode: CIRenderDestinationAlphaMode) {
         unsafe { ffi::ci_render_destination_set_alpha_mode(self.ptr, alpha_mode.code()) };
     }
 
+/// Calls the `CoreImage` framework counterpart for `is_flipped`.
     pub fn is_flipped(&self) -> bool {
         unsafe { ffi::ci_render_destination_is_flipped(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `set_flipped`.
     pub fn set_flipped(&mut self, flipped: bool) {
         unsafe { ffi::ci_render_destination_set_flipped(self.ptr, flipped) };
     }
 
+/// Calls the `CoreImage` framework counterpart for `is_dithered`.
     pub fn is_dithered(&self) -> bool {
         unsafe { ffi::ci_render_destination_is_dithered(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `set_dithered`.
     pub fn set_dithered(&mut self, dithered: bool) {
         unsafe { ffi::ci_render_destination_set_dithered(self.ptr, dithered) };
     }
 
+/// Calls the `CoreImage` framework counterpart for `is_clamped`.
     pub fn is_clamped(&self) -> bool {
         unsafe { ffi::ci_render_destination_is_clamped(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `set_clamped`.
     pub fn set_clamped(&mut self, clamped: bool) {
         unsafe { ffi::ci_render_destination_set_clamped(self.ptr, clamped) };
     }
 
+/// Calls the `CoreImage` framework counterpart for `bitmap_data`.
     pub fn bitmap_data(&self) -> &[u8] {
         self.bytes.as_slice()
     }
 
+/// Calls the `CoreImage` framework counterpart for `bitmap_data_mut`.
     pub fn bitmap_data_mut(&mut self) -> &mut [u8] {
         self.bytes.as_mut_slice()
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn bytes_per_row(&self) -> usize {
         self.bytes_per_row
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn format(&self) -> CIFormat {
         self.format
     }
@@ -197,18 +217,22 @@ impl CIRenderInfo {
         Self { ptr }
     }
 
+/// Calls the `CoreImage` framework counterpart for `kernel_execution_time`.
     pub fn kernel_execution_time(&self) -> f64 {
         unsafe { ffi::ci_render_info_kernel_execution_time(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `kernel_compile_time`.
     pub fn kernel_compile_time(&self) -> f64 {
         unsafe { ffi::ci_render_info_kernel_compile_time(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `pass_count`.
     pub fn pass_count(&self) -> usize {
         unsafe { ffi::ci_render_info_pass_count(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `pixels_processed`.
     pub fn pixels_processed(&self) -> usize {
         unsafe { ffi::ci_render_info_pixels_processed(self.ptr) }
     }
@@ -241,6 +265,7 @@ impl CIRenderTask {
         Self { ptr }
     }
 
+/// Calls the `CoreImage` framework counterpart for `wait_until_completed`.
     pub fn wait_until_completed(self) -> Result<CIRenderInfo, CIError> {
         let mut info = ptr::null_mut();
         let mut error = ptr::null_mut();

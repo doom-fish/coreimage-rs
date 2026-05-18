@@ -47,10 +47,12 @@ impl CIFilterShape {
         unsafe { Self::from_raw(ptr) }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `new`.
     pub fn new(rect: CGRect) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_filter_shape_new(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height) },
@@ -58,6 +60,7 @@ impl CIFilterShape {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `extent`.
     pub fn extent(&self) -> CGRect {
         let mut x = 0.0;
         let mut y = 0.0;
@@ -67,6 +70,7 @@ impl CIFilterShape {
         CGRect::new(x, y, width, height)
     }
 
+/// Calls the `CoreImage` framework counterpart for `transform`.
     pub fn transform(&self, transform: CGAffineTransform, interior: bool) -> Self {
         Self::from_non_null(
             unsafe {
@@ -85,6 +89,7 @@ impl CIFilterShape {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `inset`.
     pub fn inset(&self, dx: i32, dy: i32) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_filter_shape_inset(self.ptr, dx, dy) },
@@ -92,6 +97,7 @@ impl CIFilterShape {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `union`.
     pub fn union(&self, other: &Self) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_filter_shape_union(self.ptr, other.ptr) },
@@ -99,6 +105,7 @@ impl CIFilterShape {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `union_rect`.
     pub fn union_rect(&self, rect: CGRect) -> Self {
         Self::from_non_null(
             unsafe {
@@ -108,6 +115,7 @@ impl CIFilterShape {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `intersection`.
     pub fn intersection(&self, other: &Self) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_filter_shape_intersect(self.ptr, other.ptr) },
@@ -115,6 +123,7 @@ impl CIFilterShape {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `intersection_rect`.
     pub fn intersection_rect(&self, rect: CGRect) -> Self {
         Self::from_non_null(
             unsafe {

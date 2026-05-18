@@ -1,6 +1,7 @@
 use core::ffi::c_void;
 
 unsafe extern "C" {
+/// Calls the `CoreImage` framework counterpart for `ci_sampler_new`.
     pub fn ci_sampler_new(
         image: *mut c_void,
         wrap_mode: i32,
@@ -15,6 +16,7 @@ unsafe extern "C" {
         use_color_space: bool,
         color_space: i32,
     ) -> *mut c_void;
+/// Calls the `CoreImage` framework counterpart for `ci_sampler_extent`.
     pub fn ci_sampler_extent(
         handle: *mut c_void,
         out_x: *mut f64,
@@ -22,6 +24,7 @@ unsafe extern "C" {
         out_width: *mut f64,
         out_height: *mut f64,
     );
+/// Calls the `CoreImage` framework counterpart for `ci_sampler_definition_extent`.
     pub fn ci_sampler_definition_extent(
         handle: *mut c_void,
         out_x: *mut f64,

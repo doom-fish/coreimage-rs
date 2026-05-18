@@ -69,10 +69,12 @@ impl CIPlugInRegistration {
         unsafe { Self::from_raw(ptr) }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `new`.
     pub fn new(callback: impl Fn(*mut c_void) -> bool + 'static) -> Self {
         let callback = Box::new(PlugInRegistrationCallback {
             callback: Box::new(callback),
@@ -87,6 +89,7 @@ impl CIPlugInRegistration {
         Self::from_non_null(handle, "CIPlugInRegistration")
     }
 
+/// Calls the `CoreImage` framework counterpart for `load`.
     pub fn load(&self, host: Option<NonNull<c_void>>) -> bool {
         unsafe {
             ffi::ci_plugin_registration_load(
@@ -101,20 +104,24 @@ impl CIPlugInRegistration {
 pub struct CIPlugIn;
 
 impl CIPlugIn {
+/// Calls the `CoreImage` framework counterpart for `load_all_plugins`.
     pub fn load_all_plugins() {
         unsafe { ffi::ci_plugin_load_all_plugins() };
     }
 
+/// Calls the `CoreImage` framework counterpart for `load_non_executable_plugins`.
     pub fn load_non_executable_plugins() {
         unsafe { ffi::ci_plugin_load_non_executable_plugins() };
     }
 
+/// Calls the `CoreImage` framework counterpart for `load_plugin`.
     pub fn load_plugin(path: impl AsRef<Path>, allow_executable_code: bool) -> Result<(), CIError> {
         let path = path_to_cstring(path.as_ref())?;
         unsafe { ffi::ci_plugin_load_plugin(path.as_ptr(), allow_executable_code) };
         Ok(())
     }
 
+/// Calls the `CoreImage` framework counterpart for `load_non_executable_plugin`.
     pub fn load_non_executable_plugin(path: impl AsRef<Path>) -> Result<(), CIError> {
         let path = path_to_cstring(path.as_ref())?;
         unsafe { ffi::ci_plugin_load_non_executable_plugin(path.as_ptr()) };

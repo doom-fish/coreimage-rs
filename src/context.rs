@@ -18,15 +18,25 @@ use crate::{CIColorSpace, CIError, CIFormat, CIImage, CIRenderDestination, CIRen
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Clone, Debug, Default)]
 pub struct CIContextOptions {
+/// Mirrors the `CoreImage` framework property for `cache_intermediates`.
     pub cache_intermediates: bool,
+/// Mirrors the `CoreImage` framework property for `priority_request_low`.
     pub priority_request_low: bool,
+/// Mirrors the `CoreImage` framework property for `allow_low_power`.
     pub allow_low_power: bool,
+/// Mirrors the `CoreImage` framework property for `output_premultiplied`.
     pub output_premultiplied: bool,
+/// Mirrors the `CoreImage` framework property for `high_quality_downsample`.
     pub high_quality_downsample: bool,
+/// Mirrors the `CoreImage` framework property for `output_color_space`.
     pub output_color_space: Option<CIColorSpace>,
+/// Mirrors the `CoreImage` framework property for `working_color_space`.
     pub working_color_space: Option<CIColorSpace>,
+/// Mirrors the `CoreImage` framework property for `working_format`.
     pub working_format: Option<CIFormat>,
+/// Mirrors the `CoreImage` framework property for `memory_limit`.
     pub memory_limit: Option<f64>,
+/// Mirrors the `CoreImage` framework property for `name`.
     pub name: Option<String>,
 }
 
@@ -75,10 +85,12 @@ impl CIContext {
         unsafe { Self::from_raw(ptr) }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `new_default`.
     pub fn new_default() -> Self {
         Self::from_non_null(
             // SAFETY: `ci_context_new_default` returns a valid Objective-C context handle.
@@ -87,6 +99,7 @@ impl CIContext {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `new_cpu`.
     pub fn new_cpu() -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_context_new_cpu() },
@@ -94,6 +107,7 @@ impl CIContext {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `with_options`.
     pub fn with_options(options: &CIContextOptions) -> Result<Self, CIError> {
         let name = options
             .name
@@ -123,6 +137,7 @@ impl CIContext {
         ))
     }
 
+/// Calls the `CoreImage` framework counterpart for `new_metal`.
     #[cfg(feature = "metal")]
     #[cfg_attr(docsrs, doc(cfg(feature = "metal")))]
     pub fn new_metal(device: &MetalDevice) -> Self {
@@ -132,6 +147,7 @@ impl CIContext {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `new_command_queue`.
     #[cfg(feature = "metal")]
     #[cfg_attr(docsrs, doc(cfg(feature = "metal")))]
     pub fn new_command_queue(queue: &CommandQueue) -> Self {
@@ -141,14 +157,17 @@ impl CIContext {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `working_format`.
     pub fn working_format(&self) -> i32 {
         unsafe { ffi::ci_context_working_format(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `working_pixel_format`.
     pub fn working_pixel_format(&self) -> Option<CIFormat> {
         CIFormat::from_raw(self.working_format())
     }
 
+/// Calls the `CoreImage` framework counterpart for `render_to_cg_image`.
     pub fn render_to_cg_image(&self, image: &CIImage) -> Result<CGImage, CIError> {
         let rendered = unsafe { ffi::ci_context_create_cg_image(self.ptr, image.as_ptr()) };
         if rendered.is_null() {
@@ -160,6 +179,7 @@ impl CIContext {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `render_to_cv_pixel_buffer`.
     pub fn render_to_cv_pixel_buffer(
         &self,
         image: &CIImage,
@@ -177,6 +197,7 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `render_to_iosurface`.
     pub fn render_to_iosurface(&self, image: &CIImage, surface: &IOSurface) -> Result<(), CIError> {
         let mut error = ptr::null_mut();
         let status = unsafe {
@@ -190,6 +211,7 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `start_render_task`.
     pub fn start_render_task(
         &self,
         image: &CIImage,
@@ -216,6 +238,7 @@ impl CIContext {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `prepare_render`.
     pub fn prepare_render(
         &self,
         image: &CIImage,
@@ -233,6 +256,7 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `start_clear_task`.
     pub fn start_clear_task(
         &self,
         destination: &CIRenderDestination,
@@ -252,14 +276,17 @@ impl CIContext {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `reclaim_resources`.
     pub fn reclaim_resources(&self) {
         unsafe { ffi::ci_context_reclaim_resources(self.ptr) };
     }
 
+/// Calls the `CoreImage` framework counterpart for `clear_caches`.
     pub fn clear_caches(&self) {
         unsafe { ffi::ci_context_clear_caches(self.ptr) };
     }
 
+/// Calls the `CoreImage` framework counterpart for `input_image_maximum_size`.
     pub fn input_image_maximum_size(&self) -> CGSize {
         let mut width = 0.0;
         let mut height = 0.0;
@@ -267,6 +294,7 @@ impl CIContext {
         CGSize::new(width, height)
     }
 
+/// Calls the `CoreImage` framework counterpart for `output_image_maximum_size`.
     pub fn output_image_maximum_size(&self) -> CGSize {
         let mut width = 0.0;
         let mut height = 0.0;
@@ -274,6 +302,7 @@ impl CIContext {
         CGSize::new(width, height)
     }
 
+/// Calls the `CoreImage` framework counterpart for `write_png`.
     pub fn write_png(&self, image: &CIImage, path: impl AsRef<Path>) -> Result<(), CIError> {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();
@@ -283,6 +312,7 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `write_jpeg`.
     pub fn write_jpeg(
         &self,
         image: &CIImage,
@@ -297,6 +327,7 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `write_heif`.
     pub fn write_heif(
         &self,
         image: &CIImage,
@@ -311,6 +342,7 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `write_heif10`.
     pub fn write_heif10(
         &self,
         image: &CIImage,
@@ -331,6 +363,7 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `write_tiff`.
     pub fn write_tiff(&self, image: &CIImage, path: impl AsRef<Path>) -> Result<(), CIError> {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();
@@ -340,6 +373,7 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `write_openexr`.
     pub fn write_openexr(&self, image: &CIImage, path: impl AsRef<Path>) -> Result<(), CIError> {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();

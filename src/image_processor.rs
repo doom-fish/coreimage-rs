@@ -5,6 +5,7 @@ use crate::{CIError, CIFormat};
 use apple_cf::cg::CGRect;
 use core::ptr;
 
+/// Mirrors the `CoreImage` framework counterpart for `CIImageProcessorInput`.
 #[derive(Clone, Debug)]
 pub struct CIImageProcessorInput {
     region: CGRect,
@@ -18,43 +19,53 @@ pub struct CIImageProcessorInput {
 }
 
 impl CIImageProcessorInput {
+/// Calls the `CoreImage` framework counterpart for `region`.
     pub fn region(&self) -> CGRect {
         self.region
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn bytes_per_row(&self) -> usize {
         self.bytes_per_row
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn format_raw(&self) -> i32 {
         self.format_raw
     }
 
+/// Calls the `CoreImage` framework counterpart for `format`.
     pub fn format(&self) -> Option<CIFormat> {
         CIFormat::from_raw(self.format_raw)
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn has_pixel_buffer(&self) -> bool {
         self.has_pixel_buffer
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn has_metal_texture(&self) -> bool {
         self.has_metal_texture
     }
 
+/// Calls the `CoreImage` framework counterpart for `digest`.
     pub fn digest(&self) -> Option<&str> {
         self.digest.as_deref()
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn roi_tile_index(&self) -> Option<usize> {
         self.roi_tile_index
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn roi_tile_count(&self) -> Option<usize> {
         self.roi_tile_count
     }
 }
 
+/// Mirrors the `CoreImage` framework counterpart for `CIImageProcessorOutput`.
 #[derive(Clone, Debug)]
 pub struct CIImageProcessorOutput {
     region: CGRect,
@@ -66,35 +77,43 @@ pub struct CIImageProcessorOutput {
 }
 
 impl CIImageProcessorOutput {
+/// Calls the `CoreImage` framework counterpart for `region`.
     pub fn region(&self) -> CGRect {
         self.region
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn bytes_per_row(&self) -> usize {
         self.bytes_per_row
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn format_raw(&self) -> i32 {
         self.format_raw
     }
 
+/// Calls the `CoreImage` framework counterpart for `format`.
     pub fn format(&self) -> Option<CIFormat> {
         CIFormat::from_raw(self.format_raw)
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn has_pixel_buffer(&self) -> bool {
         self.has_pixel_buffer
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn has_metal_texture(&self) -> bool {
         self.has_metal_texture
     }
 
+/// Calls the `CoreImage` framework counterpart for `digest`.
     pub fn digest(&self) -> Option<&str> {
         self.digest.as_deref()
     }
 }
 
+/// Mirrors the `CoreImage` framework counterpart for `CIImageProcessorInvocation`.
 #[derive(Clone, Debug)]
 pub struct CIImageProcessorInvocation {
     input_count: usize,
@@ -103,14 +122,17 @@ pub struct CIImageProcessorInvocation {
 }
 
 impl CIImageProcessorInvocation {
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn input_count(&self) -> usize {
         self.input_count
     }
 
+/// Calls the `CoreImage` framework counterpart for `input`.
     pub fn input(&self) -> Option<&CIImageProcessorInput> {
         self.input.as_ref()
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn output(&self) -> &CIImageProcessorOutput {
         &self.output
     }
@@ -133,6 +155,7 @@ fn read_digest(read: unsafe extern "C" fn() -> *mut core::ffi::c_char) -> Option
 pub struct CIImageProcessor;
 
 impl CIImageProcessor {
+/// Calls the `CoreImage` framework counterpart for `apply_passthrough`.
     pub fn apply_passthrough(image: &CIImage) -> Result<CIImage, CIError> {
         let mut output = ptr::null_mut();
         let mut error = ptr::null_mut();
@@ -143,6 +166,7 @@ impl CIImageProcessor {
         Ok(unsafe { CIImage::from_raw(output) })
     }
 
+/// Calls the `CoreImage` framework counterpart for `last_invocation`.
     pub fn last_invocation() -> CIImageProcessorInvocation {
         let input = if unsafe { ffi::ci_image_processor_last_invocation_has_input() } {
             Some(CIImageProcessorInput {
@@ -183,6 +207,7 @@ impl CIImageProcessor {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `last_invocation_json`.
     pub fn last_invocation_json() -> String {
         unsafe { take_owned_string(ffi::ci_image_processor_last_invocation_json()) }
             .unwrap_or_else(|| "{}".to_string())

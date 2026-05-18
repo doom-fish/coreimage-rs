@@ -11,10 +11,15 @@ use crate::util::{take_array_objects, take_owned_string};
 /// Detected feature kinds.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CIFeatureKind {
+/// Mirrors the `CoreImage` framework case `Face`.
     Face,
+/// Mirrors the `CoreImage` framework case `Rectangle`.
     Rectangle,
+/// Mirrors the `CoreImage` framework case `QrCode`.
     QrCode,
+/// Mirrors the `CoreImage` framework case `Text`.
     Text,
+/// Mirrors the `CoreImage` framework case `Unknown`.
     Unknown,
 }
 
@@ -55,10 +60,12 @@ impl CIFeature {
         Self { ptr }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `kind`.
     pub fn kind(&self) -> CIFeatureKind {
         match unsafe { ffi::ci_feature_type_code(self.ptr) } {
             0 => CIFeatureKind::Face,
@@ -69,6 +76,7 @@ impl CIFeature {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `bounds`.
     pub fn bounds(&self) -> CGRect {
         let mut x = 0.0;
         let mut y = 0.0;
@@ -78,16 +86,19 @@ impl CIFeature {
         CGRect::new(x, y, width, height)
     }
 
+/// Calls the `CoreImage` framework counterpart for `details_json`.
     pub fn details_json(&self) -> String {
         unsafe { take_owned_string(ffi::ci_feature_details_json(self.ptr)) }
             .unwrap_or_else(|| "{}".to_string())
     }
 
+/// Calls the `CoreImage` framework counterpart for `message_string`.
     pub fn message_string(&self) -> Option<String> {
         unsafe { take_owned_string(ffi::ci_feature_message_string(self.ptr)) }
             .filter(|value| !value.is_empty())
     }
 
+/// Calls the `CoreImage` framework counterpart for `symbol_descriptor`.
     pub fn symbol_descriptor(&self) -> Option<CIBarcodeDescriptor> {
         let handle = unsafe { ffi::ci_feature_symbol_descriptor(self.ptr) };
         if handle.is_null() {
@@ -97,6 +108,7 @@ impl CIFeature {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `sub_features`.
     pub fn sub_features(&self) -> Vec<Self> {
         let handle = unsafe { ffi::ci_feature_subfeatures(self.ptr) };
         let objects = unsafe { take_array_objects(handle) };

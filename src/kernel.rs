@@ -14,46 +14,87 @@ use crate::CIError;
 /// Built-in Core Image blend kernels.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CIBlendKernelKind {
+/// Mirrors the `CoreImage` framework case `ComponentAdd`.
     ComponentAdd,
+/// Mirrors the `CoreImage` framework case `ComponentMultiply`.
     ComponentMultiply,
+/// Mirrors the `CoreImage` framework case `ComponentMin`.
     ComponentMin,
+/// Mirrors the `CoreImage` framework case `ComponentMax`.
     ComponentMax,
+/// Mirrors the `CoreImage` framework case `Clear`.
     Clear,
+/// Mirrors the `CoreImage` framework case `Source`.
     Source,
+/// Mirrors the `CoreImage` framework case `Destination`.
     Destination,
+/// Mirrors the `CoreImage` framework case `SourceOver`.
     SourceOver,
+/// Mirrors the `CoreImage` framework case `DestinationOver`.
     DestinationOver,
+/// Mirrors the `CoreImage` framework case `SourceIn`.
     SourceIn,
+/// Mirrors the `CoreImage` framework case `DestinationIn`.
     DestinationIn,
+/// Mirrors the `CoreImage` framework case `SourceOut`.
     SourceOut,
+/// Mirrors the `CoreImage` framework case `DestinationOut`.
     DestinationOut,
+/// Mirrors the `CoreImage` framework case `SourceAtop`.
     SourceAtop,
+/// Mirrors the `CoreImage` framework case `DestinationAtop`.
     DestinationAtop,
+/// Mirrors the `CoreImage` framework case `ExclusiveOr`.
     ExclusiveOr,
+/// Mirrors the `CoreImage` framework case `Multiply`.
     Multiply,
+/// Mirrors the `CoreImage` framework case `Screen`.
     Screen,
+/// Mirrors the `CoreImage` framework case `Overlay`.
     Overlay,
+/// Mirrors the `CoreImage` framework case `Darken`.
     Darken,
+/// Mirrors the `CoreImage` framework case `Lighten`.
     Lighten,
+/// Mirrors the `CoreImage` framework case `ColorDodge`.
     ColorDodge,
+/// Mirrors the `CoreImage` framework case `ColorBurn`.
     ColorBurn,
+/// Mirrors the `CoreImage` framework case `HardLight`.
     HardLight,
+/// Mirrors the `CoreImage` framework case `SoftLight`.
     SoftLight,
+/// Mirrors the `CoreImage` framework case `Difference`.
     Difference,
+/// Mirrors the `CoreImage` framework case `Exclusion`.
     Exclusion,
+/// Mirrors the `CoreImage` framework case `Hue`.
     Hue,
+/// Mirrors the `CoreImage` framework case `Saturation`.
     Saturation,
+/// Mirrors the `CoreImage` framework case `Color`.
     Color,
+/// Mirrors the `CoreImage` framework case `Luminosity`.
     Luminosity,
+/// Mirrors the `CoreImage` framework case `Subtract`.
     Subtract,
+/// Mirrors the `CoreImage` framework case `Divide`.
     Divide,
+/// Mirrors the `CoreImage` framework case `LinearBurn`.
     LinearBurn,
+/// Mirrors the `CoreImage` framework case `LinearDodge`.
     LinearDodge,
+/// Mirrors the `CoreImage` framework case `VividLight`.
     VividLight,
+/// Mirrors the `CoreImage` framework case `LinearLight`.
     LinearLight,
+/// Mirrors the `CoreImage` framework case `PinLight`.
     PinLight,
+/// Mirrors the `CoreImage` framework case `HardMix`.
     HardMix,
+/// Mirrors the `CoreImage` framework case `DarkerColor`.
     DarkerColor,
+/// Mirrors the `CoreImage` framework case `LighterColor`.
     LighterColor,
 }
 
@@ -164,10 +205,12 @@ macro_rules! impl_kernel_handle {
                 unsafe { Self::from_raw(ptr) }
             }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
             pub const fn as_ptr(&self) -> *mut c_void {
                 self.ptr
             }
 
+/// Calls the `CoreImage` framework counterpart for `name`.
             pub fn name(&self) -> String {
                 unsafe { take_owned_string(ffi::ci_kernel_name(self.ptr)) }.unwrap_or_default()
             }
@@ -199,10 +242,12 @@ impl From<&CIBlendKernel> for CIKernel {
 }
 
 impl CIColorKernel {
+/// Calls the `CoreImage` framework counterpart for `as_kernel`.
     pub fn as_kernel(&self) -> CIKernel {
         CIKernel::from(self)
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_source`.
     pub fn from_source(source: &str) -> Result<Self, CIError> {
         let source = string_to_cstring(source, "kernel source")?;
         let mut kernel = ptr::null_mut();
@@ -213,6 +258,7 @@ impl CIColorKernel {
         Ok(Self::from_non_null(kernel, "CIColorKernel(source:)"))
     }
 
+/// Calls the `CoreImage` framework counterpart for `apply_image_scalar`.
     pub fn apply_image_scalar(
         &self,
         image: &CIImage,
@@ -239,6 +285,7 @@ impl CIColorKernel {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `apply_image_color`.
     pub fn apply_image_color(
         &self,
         image: &CIImage,
@@ -265,6 +312,7 @@ impl CIColorKernel {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `apply_image_vector`.
     pub fn apply_image_vector(
         &self,
         image: &CIImage,
@@ -293,10 +341,12 @@ impl CIColorKernel {
 }
 
 impl CIWarpKernel {
+/// Calls the `CoreImage` framework counterpart for `as_kernel`.
     pub fn as_kernel(&self) -> CIKernel {
         CIKernel::from(self)
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_source`.
     pub fn from_source(source: &str) -> Result<Self, CIError> {
         let source = string_to_cstring(source, "kernel source")?;
         let mut kernel = ptr::null_mut();
@@ -307,6 +357,7 @@ impl CIWarpKernel {
         Ok(Self::from_non_null(kernel, "CIWarpKernel(source:)"))
     }
 
+/// Calls the `CoreImage` framework counterpart for `apply_image_scalar`.
     pub fn apply_image_scalar(
         &self,
         image: &CIImage,
@@ -335,10 +386,12 @@ impl CIWarpKernel {
 }
 
 impl CIBlendKernel {
+/// Calls the `CoreImage` framework counterpart for `as_kernel`.
     pub fn as_kernel(&self) -> CIKernel {
         CIKernel::from(self)
     }
 
+/// Calls the `CoreImage` framework counterpart for `built_in`.
     pub fn built_in(kind: CIBlendKernelKind) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_blend_kernel_builtin(kind.code()) },
@@ -346,6 +399,7 @@ impl CIBlendKernel {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `apply`.
     pub fn apply(&self, foreground: &CIImage, background: &CIImage) -> Result<CIImage, CIError> {
         let handle = unsafe {
             ffi::ci_blend_kernel_apply(self.ptr, foreground.as_ptr(), background.as_ptr())

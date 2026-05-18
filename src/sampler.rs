@@ -11,8 +11,10 @@ use crate::CIColorSpace;
 /// Wrap behavior when sampling outside the image extent.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum CISamplerWrapMode {
+/// Mirrors the `CoreImage` framework case `Black`.
     #[default]
     Black,
+/// Mirrors the `CoreImage` framework case `Clamp`.
     Clamp,
 }
 
@@ -28,8 +30,10 @@ impl CISamplerWrapMode {
 /// Sampling filter mode.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum CISamplerFilterMode {
+/// Mirrors the `CoreImage` framework case `Linear`.
     #[default]
     Linear,
+/// Mirrors the `CoreImage` framework case `Nearest`.
     Nearest,
 }
 
@@ -45,9 +49,13 @@ impl CISamplerFilterMode {
 /// Options when creating a `CISampler`.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct CISamplerOptions {
+/// Mirrors the `CoreImage` framework property for `wrap_mode`.
     pub wrap_mode: CISamplerWrapMode,
+/// Mirrors the `CoreImage` framework property for `filter_mode`.
     pub filter_mode: CISamplerFilterMode,
+/// Mirrors the `CoreImage` framework property for `affine_transform`.
     pub affine_transform: Option<CGAffineTransform>,
+/// Mirrors the `CoreImage` framework property for `color_space`.
     pub color_space: Option<CIColorSpace>,
 }
 
@@ -92,10 +100,12 @@ impl CISampler {
         unsafe { Self::from_raw(ptr) }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `new`.
     pub fn new(image: &CIImage, options: CISamplerOptions) -> Self {
         let transform = options
             .affine_transform
@@ -121,6 +131,7 @@ impl CISampler {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `extent`.
     pub fn extent(&self) -> CGRect {
         let mut x = 0.0;
         let mut y = 0.0;
@@ -130,6 +141,7 @@ impl CISampler {
         CGRect::new(x, y, width, height)
     }
 
+/// Calls the `CoreImage` framework counterpart for `definition_extent`.
     pub fn definition_extent(&self) -> CGRect {
         let mut x = 0.0;
         let mut y = 0.0;

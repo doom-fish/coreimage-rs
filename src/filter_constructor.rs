@@ -79,10 +79,12 @@ impl CIFilterConstructor {
         unsafe { Self::from_raw(ptr) }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `new`.
     pub fn new(callback: impl Fn(&str) -> Option<CIFilter> + 'static) -> Self {
         let callback = Box::new(FilterConstructorCallback {
             callback: Box::new(callback),
@@ -97,6 +99,7 @@ impl CIFilterConstructor {
         Self::from_non_null(handle, "CIFilterConstructor")
     }
 
+/// Calls the `CoreImage` framework counterpart for `filter_with_name`.
     pub fn filter_with_name(&self, name: &str) -> Option<CIFilter> {
         let name = string_to_cstring(name, "filter name").ok()?;
         let handle = unsafe { ffi::ci_filter_constructor_filter(self.ptr, name.as_ptr()) };
@@ -109,6 +112,7 @@ impl CIFilterConstructor {
 }
 
 impl CIFilter {
+/// Calls the `CoreImage` framework counterpart for `register_filter_name`.
     pub fn register_filter_name(
         name: &str,
         constructor: &CIFilterConstructor,

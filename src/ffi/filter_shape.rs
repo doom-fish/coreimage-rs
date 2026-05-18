@@ -1,7 +1,9 @@
 use core::ffi::c_void;
 
 unsafe extern "C" {
+/// Calls the `CoreImage` framework counterpart for `ci_filter_shape_new`.
     pub fn ci_filter_shape_new(x: f64, y: f64, width: f64, height: f64) -> *mut c_void;
+/// Calls the `CoreImage` framework counterpart for `ci_filter_shape_transform`.
     pub fn ci_filter_shape_transform(
         handle: *mut c_void,
         a: f64,
@@ -12,8 +14,11 @@ unsafe extern "C" {
         ty: f64,
         interior: bool,
     ) -> *mut c_void;
+/// Calls the `CoreImage` framework counterpart for `ci_filter_shape_inset`.
     pub fn ci_filter_shape_inset(handle: *mut c_void, dx: i32, dy: i32) -> *mut c_void;
+/// Calls the `CoreImage` framework counterpart for `ci_filter_shape_union`.
     pub fn ci_filter_shape_union(handle: *mut c_void, other: *mut c_void) -> *mut c_void;
+/// Calls the `CoreImage` framework counterpart for `ci_filter_shape_union_rect`.
     pub fn ci_filter_shape_union_rect(
         handle: *mut c_void,
         x: f64,
@@ -21,7 +26,9 @@ unsafe extern "C" {
         width: f64,
         height: f64,
     ) -> *mut c_void;
+/// Calls the `CoreImage` framework counterpart for `ci_filter_shape_intersect`.
     pub fn ci_filter_shape_intersect(handle: *mut c_void, other: *mut c_void) -> *mut c_void;
+/// Calls the `CoreImage` framework counterpart for `ci_filter_shape_intersect_rect`.
     pub fn ci_filter_shape_intersect_rect(
         handle: *mut c_void,
         x: f64,
@@ -29,6 +36,7 @@ unsafe extern "C" {
         width: f64,
         height: f64,
     ) -> *mut c_void;
+/// Calls the `CoreImage` framework counterpart for `ci_filter_shape_extent`.
     pub fn ci_filter_shape_extent(
         handle: *mut c_void,
         out_x: *mut f64,

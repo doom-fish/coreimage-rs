@@ -48,30 +48,37 @@ impl CIVector {
         unsafe { Self::from_raw(ptr) }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `new1`.
     pub fn new1(x: f64) -> Self {
         Self::from_non_null(unsafe { ffi::ci_vector_new1(x) }, "CIVector")
     }
 
+/// Calls the `CoreImage` framework counterpart for `new`.
     pub fn new(x: f64, y: f64) -> Self {
         Self::from_non_null(unsafe { ffi::ci_vector_new2(x, y) }, "CIVector")
     }
 
+/// Calls the `CoreImage` framework counterpart for `new3`.
     pub fn new3(x: f64, y: f64, z: f64) -> Self {
         Self::from_non_null(unsafe { ffi::ci_vector_new3(x, y, z) }, "CIVector")
     }
 
+/// Calls the `CoreImage` framework counterpart for `new4`.
     pub fn new4(x: f64, y: f64, z: f64, w: f64) -> Self {
         Self::from_non_null(unsafe { ffi::ci_vector_new4(x, y, z, w) }, "CIVector")
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_point`.
     pub fn from_point(point: CGPoint) -> Self {
         Self::new(point.x, point.y)
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_rect`.
     pub fn from_rect(rect: CGRect) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_vector_from_rect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height) },
@@ -79,6 +86,7 @@ impl CIVector {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_transform`.
     pub fn from_transform(transform: CGAffineTransform) -> Self {
         Self::from_non_null(
             unsafe {
@@ -95,6 +103,7 @@ impl CIVector {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_string`.
     pub fn from_string(representation: &str) -> Option<Self> {
         let representation = string_to_cstring(representation, "representation").ok()?;
         let handle = unsafe { ffi::ci_vector_from_string(representation.as_ptr()) };
@@ -105,36 +114,44 @@ impl CIVector {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `count`.
     pub fn count(&self) -> usize {
         unsafe { ffi::ci_vector_count(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `value_at`.
     pub fn value_at(&self, index: usize) -> f64 {
         unsafe { ffi::ci_vector_value_at(self.ptr, index) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `values`.
     pub fn values(&self) -> Vec<f64> {
         (0..self.count())
             .map(|index| self.value_at(index))
             .collect()
     }
 
+/// Calls the `CoreImage` framework counterpart for `x`.
     pub fn x(&self) -> f64 {
         unsafe { ffi::ci_vector_x(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `y`.
     pub fn y(&self) -> f64 {
         unsafe { ffi::ci_vector_y(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `z`.
     pub fn z(&self) -> f64 {
         unsafe { ffi::ci_vector_z(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `w`.
     pub fn w(&self) -> f64 {
         unsafe { ffi::ci_vector_w(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `point_value`.
     pub fn point_value(&self) -> CGPoint {
         let mut x = 0.0;
         let mut y = 0.0;
@@ -142,6 +159,7 @@ impl CIVector {
         CGPoint { x, y }
     }
 
+/// Calls the `CoreImage` framework counterpart for `rect_value`.
     pub fn rect_value(&self) -> CGRect {
         let mut x = 0.0;
         let mut y = 0.0;
@@ -151,6 +169,7 @@ impl CIVector {
         CGRect::new(x, y, width, height)
     }
 
+/// Calls the `CoreImage` framework counterpart for `affine_transform_value`.
     pub fn affine_transform_value(&self) -> CGAffineTransform {
         let mut a = 0.0;
         let mut b = 0.0;
@@ -164,6 +183,7 @@ impl CIVector {
         CGAffineTransform { a, b, c, d, tx, ty }
     }
 
+/// Calls the `CoreImage` framework counterpart for `string_representation`.
     pub fn string_representation(&self) -> String {
         unsafe { take_owned_string(ffi::ci_vector_string_representation(self.ptr)) }
             .unwrap_or_default()

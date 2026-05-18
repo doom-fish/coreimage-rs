@@ -1,6 +1,7 @@
 use core::ffi::{c_char, c_void};
 
 unsafe extern "C" {
+/// Calls the `CoreImage` framework counterpart for `ci_detector_new`.
     pub fn ci_detector_new(
         kind: i32,
         context: *mut c_void,
@@ -12,6 +13,7 @@ unsafe extern "C" {
         out_detector: *mut *mut c_void,
         out_error_message: *mut *mut c_char,
     ) -> i32;
+/// Calls the `CoreImage` framework counterpart for `ci_detector_features`.
     pub fn ci_detector_features(
         handle: *mut c_void,
         image: *mut c_void,

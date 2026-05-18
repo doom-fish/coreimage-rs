@@ -21,24 +21,28 @@ fn image_filter_output(
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `gaussian_blur`.
 pub fn gaussian_blur(input: &CIImage, radius: f64) -> Option<CIImage> {
     image_filter_output("CIGaussianBlur", input, |filter| {
         filter.set_input_number("inputRadius", radius);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `box_blur`.
 pub fn box_blur(input: &CIImage, radius: f64) -> Option<CIImage> {
     image_filter_output("CIBoxBlur", input, |filter| {
         filter.set_input_number("inputRadius", radius);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `disc_blur`.
 pub fn disc_blur(input: &CIImage, radius: f64) -> Option<CIImage> {
     image_filter_output("CIDiscBlur", input, |filter| {
         filter.set_input_number("inputRadius", radius);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `motion_blur`.
 pub fn motion_blur(input: &CIImage, radius: f64, angle: f64) -> Option<CIImage> {
     image_filter_output("CIMotionBlur", input, |filter| {
         filter.set_input_number("inputRadius", radius);
@@ -46,6 +50,7 @@ pub fn motion_blur(input: &CIImage, radius: f64, angle: f64) -> Option<CIImage> 
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `zoom_blur`.
 pub fn zoom_blur(input: &CIImage, center: (f64, f64), amount: f64) -> Option<CIImage> {
     let center = CIVector::new(center.0, center.1);
     image_filter_output("CIZoomBlur", input, |filter| {
@@ -54,6 +59,7 @@ pub fn zoom_blur(input: &CIImage, center: (f64, f64), amount: f64) -> Option<CII
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `sharpen_luminance`.
 pub fn sharpen_luminance(input: &CIImage, sharpness: f64, radius: f64) -> Option<CIImage> {
     image_filter_output("CISharpenLuminance", input, |filter| {
         filter.set_input_number("inputSharpness", sharpness);
@@ -61,6 +67,7 @@ pub fn sharpen_luminance(input: &CIImage, sharpness: f64, radius: f64) -> Option
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `unsharp_mask`.
 pub fn unsharp_mask(input: &CIImage, intensity: f64, radius: f64) -> Option<CIImage> {
     image_filter_output("CIUnsharpMask", input, |filter| {
         filter.set_input_number("inputIntensity", intensity);
@@ -68,6 +75,7 @@ pub fn unsharp_mask(input: &CIImage, intensity: f64, radius: f64) -> Option<CIIm
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `color_controls`.
 pub fn color_controls(
     input: &CIImage,
     brightness: f64,
@@ -81,30 +89,35 @@ pub fn color_controls(
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `exposure_adjust`.
 pub fn exposure_adjust(input: &CIImage, ev: f64) -> Option<CIImage> {
     image_filter_output("CIExposureAdjust", input, |filter| {
         filter.set_input_number("inputEV", ev);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `gamma_adjust`.
 pub fn gamma_adjust(input: &CIImage, power: f64) -> Option<CIImage> {
     image_filter_output("CIGammaAdjust", input, |filter| {
         filter.set_input_number("inputPower", power);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `hue_adjust`.
 pub fn hue_adjust(input: &CIImage, angle: f64) -> Option<CIImage> {
     image_filter_output("CIHueAdjust", input, |filter| {
         filter.set_input_number("inputAngle", angle);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `vibrance`.
 pub fn vibrance(input: &CIImage, amount: f64) -> Option<CIImage> {
     image_filter_output("CIVibrance", input, |filter| {
         filter.set_input_number("inputAmount", amount);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `temperature_and_tint`.
 pub fn temperature_and_tint(
     input: &CIImage,
     neutral: (f64, f64),
@@ -118,22 +131,26 @@ pub fn temperature_and_tint(
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `white_point_adjust`.
 pub fn white_point_adjust(input: &CIImage, color: &CIColor) -> Option<CIImage> {
     image_filter_output("CIWhitePointAdjust", input, |filter| {
         filter.set_input_color("inputColor", color);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `sepia_tone`.
 pub fn sepia_tone(input: &CIImage, intensity: f64) -> Option<CIImage> {
     image_filter_output("CISepiaTone", input, |filter| {
         filter.set_input_number("inputIntensity", intensity);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `color_invert`.
 pub fn color_invert(input: &CIImage) -> Option<CIImage> {
     image_filter_output("CIColorInvert", input, |_| {})
 }
 
+/// Calls the `CoreImage` framework counterpart for `color_monochrome`.
 pub fn color_monochrome(input: &CIImage, color: &CIColor, intensity: f64) -> Option<CIImage> {
     image_filter_output("CIColorMonochrome", input, |filter| {
         filter.set_input_color("inputColor", color);
@@ -141,6 +158,7 @@ pub fn color_monochrome(input: &CIImage, color: &CIColor, intensity: f64) -> Opt
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `false_color`.
 pub fn false_color(input: &CIImage, color0: &CIColor, color1: &CIColor) -> Option<CIImage> {
     image_filter_output("CIFalseColor", input, |filter| {
         filter.set_input_color("inputColor0", color0);
@@ -148,6 +166,7 @@ pub fn false_color(input: &CIImage, color0: &CIColor, color1: &CIColor) -> Optio
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `vignette`.
 pub fn vignette(input: &CIImage, intensity: f64, radius: f64) -> Option<CIImage> {
     image_filter_output("CIVignette", input, |filter| {
         filter.set_input_number("inputIntensity", intensity);
@@ -155,6 +174,7 @@ pub fn vignette(input: &CIImage, intensity: f64, radius: f64) -> Option<CIImage>
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `vignette_effect`.
 pub fn vignette_effect(
     input: &CIImage,
     center: (f64, f64),
@@ -169,18 +189,21 @@ pub fn vignette_effect(
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `edges`.
 pub fn edges(input: &CIImage, intensity: f64) -> Option<CIImage> {
     image_filter_output("CIEdges", input, |filter| {
         filter.set_input_number("inputIntensity", intensity);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `edge_work`.
 pub fn edge_work(input: &CIImage, radius: f64) -> Option<CIImage> {
     image_filter_output("CIEdgeWork", input, |filter| {
         filter.set_input_number("inputRadius", radius);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `bloom`.
 pub fn bloom(input: &CIImage, intensity: f64, radius: f64) -> Option<CIImage> {
     image_filter_output("CIBloom", input, |filter| {
         filter.set_input_number("inputIntensity", intensity);
@@ -188,6 +211,7 @@ pub fn bloom(input: &CIImage, intensity: f64, radius: f64) -> Option<CIImage> {
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `pixellate`.
 pub fn pixellate(input: &CIImage, center: (f64, f64), scale: f64) -> Option<CIImage> {
     let center = CIVector::new(center.0, center.1);
     image_filter_output("CIPixellate", input, |filter| {
@@ -196,10 +220,12 @@ pub fn pixellate(input: &CIImage, center: (f64, f64), scale: f64) -> Option<CIIm
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `comic_effect`.
 pub fn comic_effect(input: &CIImage) -> Option<CIImage> {
     image_filter_output("CIComicEffect", input, |_| {})
 }
 
+/// Calls the `CoreImage` framework counterpart for `crystallize`.
 pub fn crystallize(input: &CIImage, center: (f64, f64), radius: f64) -> Option<CIImage> {
     let center = CIVector::new(center.0, center.1);
     image_filter_output("CICrystallize", input, |filter| {
@@ -208,12 +234,14 @@ pub fn crystallize(input: &CIImage, center: (f64, f64), radius: f64) -> Option<C
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `straighten`.
 pub fn straighten(input: &CIImage, angle: f64) -> Option<CIImage> {
     image_filter_output("CIStraightenFilter", input, |filter| {
         filter.set_input_number("inputAngle", angle);
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `lanczos_scale_transform`.
 pub fn lanczos_scale_transform(input: &CIImage, scale: f64, aspect_ratio: f64) -> Option<CIImage> {
     image_filter_output("CILanczosScaleTransform", input, |filter| {
         filter.set_input_number("inputScale", scale);
@@ -221,6 +249,7 @@ pub fn lanczos_scale_transform(input: &CIImage, scale: f64, aspect_ratio: f64) -
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `perspective_correction`.
 pub fn perspective_correction(
     input: &CIImage,
     top_left: (f64, f64),
@@ -240,6 +269,7 @@ pub fn perspective_correction(
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `perspective_transform`.
 pub fn perspective_transform(
     input: &CIImage,
     top_left: (f64, f64),
@@ -259,10 +289,12 @@ pub fn perspective_transform(
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `crop`.
 pub fn crop(input: &CIImage, rect: CGRect) -> Option<CIImage> {
     Some(input.cropped_to(rect))
 }
 
+/// Calls the `CoreImage` framework counterpart for `source_over_compositing`.
 pub fn source_over_compositing(foreground: &CIImage, background: &CIImage) -> Option<CIImage> {
     filter_output("CISourceOverCompositing", |filter| {
         filter.set_input_image(foreground);
@@ -270,6 +302,7 @@ pub fn source_over_compositing(foreground: &CIImage, background: &CIImage) -> Op
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `multiply_compositing`.
 pub fn multiply_compositing(foreground: &CIImage, background: &CIImage) -> Option<CIImage> {
     filter_output("CIMultiplyCompositing", |filter| {
         filter.set_input_image(foreground);
@@ -277,6 +310,7 @@ pub fn multiply_compositing(foreground: &CIImage, background: &CIImage) -> Optio
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `blend_with_mask`.
 pub fn blend_with_mask(
     foreground: &CIImage,
     background: &CIImage,
@@ -289,6 +323,7 @@ pub fn blend_with_mask(
     })
 }
 
+/// Calls the `CoreImage` framework counterpart for `constant_color`.
 pub fn constant_color(width: usize, height: usize, color: &CIColor) -> Option<CIImage> {
     let image = filter_output("CIConstantColorGenerator", |filter| {
         filter.set_input_color("inputColor", color);
@@ -296,6 +331,7 @@ pub fn constant_color(width: usize, height: usize, color: &CIColor) -> Option<CI
     Some(image.cropped_to(CGRect::new(0.0, 0.0, width as f64, height as f64)))
 }
 
+/// Calls the `CoreImage` framework counterpart for `checkerboard`.
 pub fn checkerboard(
     width: usize,
     height: usize,
@@ -316,6 +352,7 @@ pub fn checkerboard(
     Some(image.cropped_to(CGRect::new(0.0, 0.0, width as f64, height as f64)))
 }
 
+/// Calls the `CoreImage` framework counterpart for `linear_gradient`.
 pub fn linear_gradient(
     width: usize,
     height: usize,
@@ -335,6 +372,7 @@ pub fn linear_gradient(
     Some(image.cropped_to(CGRect::new(0.0, 0.0, width as f64, height as f64)))
 }
 
+/// Calls the `CoreImage` framework counterpart for `radial_gradient`.
 pub fn radial_gradient(
     width: usize,
     height: usize,
@@ -359,40 +397,72 @@ fn builtin_filter(name: &str) -> Option<CIFilter> {
     CIFilter::new(name)
 }
 
+/// Mirrors the `CoreImage` framework counterpart for `CICompositeOperationKind`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CICompositeOperationKind {
+/// Mirrors the `CoreImage` framework case `Addition`.
     Addition,
+/// Mirrors the `CoreImage` framework case `ColorBlendMode`.
     ColorBlendMode,
+/// Mirrors the `CoreImage` framework case `ColorBurnBlendMode`.
     ColorBurnBlendMode,
+/// Mirrors the `CoreImage` framework case `ColorDodgeBlendMode`.
     ColorDodgeBlendMode,
+/// Mirrors the `CoreImage` framework case `DarkenBlendMode`.
     DarkenBlendMode,
+/// Mirrors the `CoreImage` framework case `DifferenceBlendMode`.
     DifferenceBlendMode,
+/// Mirrors the `CoreImage` framework case `DivideBlendMode`.
     DivideBlendMode,
+/// Mirrors the `CoreImage` framework case `ExclusionBlendMode`.
     ExclusionBlendMode,
+/// Mirrors the `CoreImage` framework case `HardLightBlendMode`.
     HardLightBlendMode,
+/// Mirrors the `CoreImage` framework case `HueBlendMode`.
     HueBlendMode,
+/// Mirrors the `CoreImage` framework case `LightenBlendMode`.
     LightenBlendMode,
+/// Mirrors the `CoreImage` framework case `LinearBurnBlendMode`.
     LinearBurnBlendMode,
+/// Mirrors the `CoreImage` framework case `LinearDodgeBlendMode`.
     LinearDodgeBlendMode,
+/// Mirrors the `CoreImage` framework case `LinearLightBlendMode`.
     LinearLightBlendMode,
+/// Mirrors the `CoreImage` framework case `LuminosityBlendMode`.
     LuminosityBlendMode,
+/// Mirrors the `CoreImage` framework case `MaximumCompositing`.
     MaximumCompositing,
+/// Mirrors the `CoreImage` framework case `MinimumCompositing`.
     MinimumCompositing,
+/// Mirrors the `CoreImage` framework case `MultiplyBlendMode`.
     MultiplyBlendMode,
+/// Mirrors the `CoreImage` framework case `MultiplyCompositing`.
     MultiplyCompositing,
+/// Mirrors the `CoreImage` framework case `OverlayBlendMode`.
     OverlayBlendMode,
+/// Mirrors the `CoreImage` framework case `PinLightBlendMode`.
     PinLightBlendMode,
+/// Mirrors the `CoreImage` framework case `SaturationBlendMode`.
     SaturationBlendMode,
+/// Mirrors the `CoreImage` framework case `ScreenBlendMode`.
     ScreenBlendMode,
+/// Mirrors the `CoreImage` framework case `SoftLightBlendMode`.
     SoftLightBlendMode,
+/// Mirrors the `CoreImage` framework case `SourceAtopCompositing`.
     SourceAtopCompositing,
+/// Mirrors the `CoreImage` framework case `SourceInCompositing`.
     SourceInCompositing,
+/// Mirrors the `CoreImage` framework case `SourceOutCompositing`.
     SourceOutCompositing,
+/// Mirrors the `CoreImage` framework case `SourceOverCompositing`.
     SourceOverCompositing,
+/// Mirrors the `CoreImage` framework case `SubtractBlendMode`.
     SubtractBlendMode,
+/// Mirrors the `CoreImage` framework case `VividLightBlendMode`.
     VividLightBlendMode,
 }
 
+/// Calls the `CoreImage` framework counterpart for `composite_operation`.
 pub fn composite_operation(kind: CICompositeOperationKind) -> Option<CIFilter> {
     builtin_filter(match kind {
         CICompositeOperationKind::Addition => "CIAdditionCompositing",
@@ -428,16 +498,24 @@ pub fn composite_operation(kind: CICompositeOperationKind) -> Option<CIFilter> {
     })
 }
 
+/// Mirrors the `CoreImage` framework counterpart for `CIFourCoordinateGeometryFilterKind`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CIFourCoordinateGeometryFilterKind {
+/// Mirrors the `CoreImage` framework case `KeystoneCorrectionCombined`.
     KeystoneCorrectionCombined,
+/// Mirrors the `CoreImage` framework case `KeystoneCorrectionHorizontal`.
     KeystoneCorrectionHorizontal,
+/// Mirrors the `CoreImage` framework case `KeystoneCorrectionVertical`.
     KeystoneCorrectionVertical,
+/// Mirrors the `CoreImage` framework case `PerspectiveCorrection`.
     PerspectiveCorrection,
+/// Mirrors the `CoreImage` framework case `PerspectiveTransform`.
     PerspectiveTransform,
+/// Mirrors the `CoreImage` framework case `PerspectiveTransformWithExtent`.
     PerspectiveTransformWithExtent,
 }
 
+/// Calls the `CoreImage` framework counterpart for `four_coordinate_geometry_filter`.
 pub fn four_coordinate_geometry_filter(
     kind: CIFourCoordinateGeometryFilterKind,
 ) -> Option<CIFilter> {
@@ -459,21 +537,34 @@ pub fn four_coordinate_geometry_filter(
     })
 }
 
+/// Mirrors the `CoreImage` framework counterpart for `CITransitionFilterKind`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CITransitionFilterKind {
+/// Mirrors the `CoreImage` framework case `AccordionFold`.
     AccordionFold,
+/// Mirrors the `CoreImage` framework case `BarsSwipe`.
     BarsSwipe,
+/// Mirrors the `CoreImage` framework case `CopyMachine`.
     CopyMachine,
+/// Mirrors the `CoreImage` framework case `DisintegrateWithMask`.
     DisintegrateWithMask,
+/// Mirrors the `CoreImage` framework case `Dissolve`.
     Dissolve,
+/// Mirrors the `CoreImage` framework case `Flash`.
     Flash,
+/// Mirrors the `CoreImage` framework case `Mod`.
     Mod,
+/// Mirrors the `CoreImage` framework case `PageCurl`.
     PageCurl,
+/// Mirrors the `CoreImage` framework case `PageCurlWithShadow`.
     PageCurlWithShadow,
+/// Mirrors the `CoreImage` framework case `Ripple`.
     Ripple,
+/// Mirrors the `CoreImage` framework case `Swipe`.
     Swipe,
 }
 
+/// Calls the `CoreImage` framework counterpart for `transition_filter`.
 pub fn transition_filter(kind: CITransitionFilterKind) -> Option<CIFilter> {
     builtin_filter(match kind {
         CITransitionFilterKind::AccordionFold => "CIAccordionFoldTransition",

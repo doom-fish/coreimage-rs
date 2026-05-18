@@ -56,10 +56,12 @@ impl CIFilterGenerator {
         unsafe { Self::from_raw(ptr) }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `new`.
     pub fn new() -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_filter_generator_new() },
@@ -67,6 +69,7 @@ impl CIFilterGenerator {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_path`.
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self, CIError> {
         let path = path_to_cstring(path.as_ref())?;
         let mut generator = ptr::null_mut();
@@ -81,6 +84,7 @@ impl CIFilterGenerator {
         ))
     }
 
+/// Calls the `CoreImage` framework counterpart for `connect_filter_output`.
     pub fn connect_filter_output(
         &mut self,
         source_filter: &CIFilter,
@@ -106,6 +110,7 @@ impl CIFilterGenerator {
         Ok(())
     }
 
+/// Calls the `CoreImage` framework counterpart for `disconnect_filter_output`.
     pub fn disconnect_filter_output(
         &mut self,
         source_filter: &CIFilter,
@@ -127,6 +132,7 @@ impl CIFilterGenerator {
         Ok(())
     }
 
+/// Calls the `CoreImage` framework counterpart for `connect_image`.
     pub fn connect_image(
         &mut self,
         image: &CIImage,
@@ -145,6 +151,7 @@ impl CIFilterGenerator {
         Ok(())
     }
 
+/// Calls the `CoreImage` framework counterpart for `export_key`.
     pub fn export_key(
         &mut self,
         key: &str,
@@ -168,17 +175,20 @@ impl CIFilterGenerator {
         Ok(())
     }
 
+/// Calls the `CoreImage` framework counterpart for `remove_exported_key`.
     pub fn remove_exported_key(&mut self, exported_name: &str) -> Result<(), CIError> {
         let exported_name = string_to_cstring(exported_name, "exported name")?;
         unsafe { ffi::ci_filter_generator_remove_exported_key(self.ptr, exported_name.as_ptr()) };
         Ok(())
     }
 
+/// Calls the `CoreImage` framework counterpart for `exported_keys_json`.
     pub fn exported_keys_json(&self) -> String {
         unsafe { take_owned_string(ffi::ci_filter_generator_exported_keys_json(self.ptr)) }
             .unwrap_or_else(|| "{}".to_string())
     }
 
+/// Calls the `CoreImage` framework counterpart for `filter`.
     pub fn filter(&self) -> Option<CIFilter> {
         let handle = unsafe { ffi::ci_filter_generator_filter(self.ptr) };
         if handle.is_null() {
@@ -188,6 +198,7 @@ impl CIFilterGenerator {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `register_filter_name`.
     pub fn register_filter_name(
         &mut self,
         name: &str,
@@ -209,6 +220,7 @@ impl CIFilterGenerator {
         Ok(())
     }
 
+/// Calls the `CoreImage` framework counterpart for `write_to_path`.
     pub fn write_to_path(&self, path: impl AsRef<Path>, atomically: bool) -> Result<(), CIError> {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();

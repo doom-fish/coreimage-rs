@@ -17,7 +17,10 @@ macro_rules! string_key_enum {
         $(#[$meta])*
         #[derive(Clone, Copy, Debug, PartialEq, Eq)]
         pub enum $name {
-            $($variant),+
+            $(
+                #[doc = concat!("Mirrors the `CoreImage` framework case `", stringify!($variant), "`.")]
+                $variant,
+            )+
         }
 
         impl $name {
@@ -41,6 +44,7 @@ macro_rules! string_key_enum {
                 })
             }
 
+            /// Calls the `CoreImage` framework counterpart for `as_str`.
             pub fn as_str(self) -> &'static str {
                 Self::values()[self.index()].as_str()
             }
@@ -57,7 +61,10 @@ macro_rules! string_key_enum {
         #[derive(Clone, Copy, Debug, PartialEq, Eq)]
         #[repr(usize)]
         pub enum $name {
-            $($variant),+
+            $(
+                #[doc = concat!("Mirrors the `CoreImage` framework case `", stringify!($variant), "`.")]
+                $variant,
+            )+
         }
 
         impl $name {
@@ -73,6 +80,7 @@ macro_rules! string_key_enum {
                 })
             }
 
+            /// Calls the `CoreImage` framework counterpart for `as_str`.
             pub fn as_str(self) -> &'static str {
                 Self::values()[self as usize].as_str()
             }
@@ -117,37 +125,69 @@ impl CIColorSpace {
 /// Core Image pixel formats (`CIFormat`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CIFormat {
+/// Mirrors the `CoreImage` framework case `Argb8`.
     Argb8,
+/// Mirrors the `CoreImage` framework case `Bgra8`.
     Bgra8,
+/// Mirrors the `CoreImage` framework case `Rgba8`.
     Rgba8,
+/// Mirrors the `CoreImage` framework case `Rgbx8`.
     Rgbx8,
+/// Mirrors the `CoreImage` framework case `Abgr8`.
     Abgr8,
+/// Mirrors the `CoreImage` framework case `RgbaH`.
     RgbaH,
+/// Mirrors the `CoreImage` framework case `Rgba16`.
     Rgba16,
+/// Mirrors the `CoreImage` framework case `RgbaF`.
     RgbaF,
+/// Mirrors the `CoreImage` framework case `Rgbx16`.
     Rgbx16,
+/// Mirrors the `CoreImage` framework case `RgbxH`.
     RgbxH,
+/// Mirrors the `CoreImage` framework case `RgbxF`.
     RgbxF,
+/// Mirrors the `CoreImage` framework case `Rgb10`.
     Rgb10,
+/// Mirrors the `CoreImage` framework case `A8`.
     A8,
+/// Mirrors the `CoreImage` framework case `A16`.
     A16,
+/// Mirrors the `CoreImage` framework case `AH`.
     AH,
+/// Mirrors the `CoreImage` framework case `AF`.
     AF,
+/// Mirrors the `CoreImage` framework case `R8`.
     R8,
+/// Mirrors the `CoreImage` framework case `R16`.
     R16,
+/// Mirrors the `CoreImage` framework case `RH`.
     RH,
+/// Mirrors the `CoreImage` framework case `RF`.
     RF,
+/// Mirrors the `CoreImage` framework case `Rg8`.
     Rg8,
+/// Mirrors the `CoreImage` framework case `Rg16`.
     Rg16,
+/// Mirrors the `CoreImage` framework case `RgH`.
     RgH,
+/// Mirrors the `CoreImage` framework case `RgF`.
     RgF,
+/// Mirrors the `CoreImage` framework case `L8`.
     L8,
+/// Mirrors the `CoreImage` framework case `L16`.
     L16,
+/// Mirrors the `CoreImage` framework case `LH`.
     LH,
+/// Mirrors the `CoreImage` framework case `LF`.
     LF,
+/// Mirrors the `CoreImage` framework case `La8`.
     La8,
+/// Mirrors the `CoreImage` framework case `La16`.
     La16,
+/// Mirrors the `CoreImage` framework case `LaH`.
     LaH,
+/// Mirrors the `CoreImage` framework case `LaF`.
     LaF,
 }
 
@@ -224,10 +264,12 @@ impl CIFormat {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `raw_value`.
     pub fn raw_value(self) -> i32 {
         unsafe { ffi::ci_image_format_value(self.index()) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_raw`.
     pub fn from_raw(raw: i32) -> Option<Self> {
         Self::ALL
             .iter()
@@ -235,6 +277,7 @@ impl CIFormat {
             .find(|format| format.raw_value() == raw)
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn bytes_per_pixel(self) -> usize {
         match self {
             Self::A8 | Self::R8 | Self::L8 => 1,
@@ -434,6 +477,7 @@ string_key_enum! {
 }
 
 impl CIFilterCategory {
+/// Calls the `CoreImage` framework counterpart for `value`.
     pub fn value(self) -> &'static str {
         static VALUES: OnceLock<Vec<String>> = OnceLock::new();
         VALUES.get_or_init(|| {
@@ -509,6 +553,7 @@ string_key_enum! {
 }
 
 impl CIInputKey {
+/// Calls the `CoreImage` framework counterpart for `value`.
     pub fn value(self) -> &'static str {
         static VALUES: OnceLock<Vec<String>> = OnceLock::new();
         VALUES.get_or_init(|| {
@@ -531,6 +576,7 @@ string_key_enum! {
 }
 
 impl CIOutputKey {
+/// Calls the `CoreImage` framework counterpart for `value`.
     pub fn value(self) -> &'static str {
         static VALUES: OnceLock<Vec<String>> = OnceLock::new();
         VALUES.get_or_init(|| {

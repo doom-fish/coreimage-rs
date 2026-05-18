@@ -61,10 +61,12 @@ impl CIImage {
         unsafe { Self::from_raw(ptr) }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_path`.
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self, CIError> {
         let path = path_to_cstring(path.as_ref())?;
         let mut image = ptr::null_mut();
@@ -78,6 +80,7 @@ impl CIImage {
         Ok(Self::from_non_null(image, "CIImage(contentsOf:)"))
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_encoded_data`.
     pub fn from_encoded_data(data: &[u8]) -> Result<Self, CIError> {
         if data.is_empty() {
             return Err(CIError::InvalidArgument(
@@ -96,6 +99,7 @@ impl CIImage {
         Ok(Self::from_non_null(image, "CIImage(data:)"))
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_cg_image`.
     pub fn from_cg_image(image: &CGImage) -> Self {
         Self::from_non_null(
             // SAFETY: `image.as_ptr()` is a valid CoreGraphics handle. The FFI function wraps it
@@ -105,6 +109,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_cv_pixel_buffer`.
     pub fn from_cv_pixel_buffer(buffer: &CVPixelBuffer) -> Self {
         Self::from_non_null(
             // SAFETY: `buffer.as_ptr()` is a valid CoreVideo handle. The FFI function wraps it
@@ -114,6 +119,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_iosurface`.
     pub fn from_iosurface(surface: &IOSurface) -> Self {
         Self::from_non_null(
             // SAFETY: `surface.as_ptr()` is a valid IOSurface handle. The FFI function wraps it
@@ -123,6 +129,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_color`.
     pub fn from_color(color: &CIColor) -> Self {
         Self::from_non_null(
             // SAFETY: `color.as_ptr()` is a valid CIColor handle. The FFI function returns
@@ -132,6 +139,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `empty`.
     pub fn empty() -> Self {
         Self::from_non_null(
             // SAFETY: `ci_image_empty` returns a valid Objective-C image handle.
@@ -140,10 +148,12 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `named_color`.
     pub fn named_color(color: crate::color::CIColorName) -> Self {
         Self::from_color(&CIColor::named(color))
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_bitmap`.
     pub fn from_bitmap(
         data: &[u8],
         width: usize,
@@ -187,6 +197,7 @@ impl CIImage {
         Ok(Self::from_non_null(image, "CIImage(bitmapData:)"))
     }
 
+/// Calls the `CoreImage` framework counterpart for `from_bitmap_rgba8`.
     pub fn from_bitmap_rgba8(data: &[u8], width: usize, height: usize) -> Result<Self, CIError> {
         let expected_len = width
             .checked_mul(height)
@@ -210,6 +221,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `extent`.
     pub fn extent(&self) -> CGRect {
         let mut x = 0.0;
         let mut y = 0.0;
@@ -221,15 +233,18 @@ impl CIImage {
         CGRect::new(x, y, width, height)
     }
 
+/// Calls the `CoreImage` framework counterpart for `is_opaque`.
     pub fn is_opaque(&self) -> bool {
         unsafe { ffi::ci_image_is_opaque(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `properties_json`.
     pub fn properties_json(&self) -> String {
         unsafe { take_owned_string(ffi::ci_image_properties_json(self.ptr)) }
             .unwrap_or_else(|| "{}".to_string())
     }
 
+/// Calls the `CoreImage` framework counterpart for `cropped_to`.
     pub fn cropped_to(&self, rect: CGRect) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_cropped(self.ptr, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height) },
@@ -237,6 +252,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `clamped_to_extent`.
     pub fn clamped_to_extent(&self) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_clamped_to_extent(self.ptr) },
@@ -244,6 +260,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `clamped_to_rect`.
     pub fn clamped_to_rect(&self, rect: CGRect) -> Self {
         Self::from_non_null(
             unsafe {
@@ -253,6 +270,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `applying_orientation`.
     pub fn applying_orientation(&self, exif_orientation: u32) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_applying_orientation(self.ptr, exif_orientation) },
@@ -260,10 +278,12 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `oriented`.
     pub fn oriented(&self, exif_orientation: u32) -> Self {
         self.applying_orientation(exif_orientation)
     }
 
+/// Calls the `CoreImage` framework counterpart for `composited_over`.
     pub fn composited_over(&self, background: &Self) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_composited_over(self.ptr, background.ptr) },
@@ -271,6 +291,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `transformed`.
     pub fn transformed(&self, transform: CGAffineTransform) -> Self {
         Self::from_non_null(
             unsafe {
@@ -288,14 +309,17 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `translated`.
     pub fn translated(&self, dx: f64, dy: f64) -> Self {
         self.transformed(CGAffineTransform::translation(dx, dy))
     }
 
+/// Calls the `CoreImage` framework counterpart for `scaled`.
     pub fn scaled(&self, sx: f64, sy: f64) -> Self {
         self.transformed(CGAffineTransform::scale(sx, sy))
     }
 
+/// Calls the `CoreImage` framework counterpart for `applying_filter`.
     pub fn applying_filter(&self, filter_name: &str) -> Option<Self> {
         let filter_name = string_to_cstring(filter_name, "filter name").ok()?;
         let handle = unsafe { ffi::ci_image_apply_filter_name(self.ptr, filter_name.as_ptr()) };
@@ -306,6 +330,7 @@ impl CIImage {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `premultiplying_alpha`.
     pub fn premultiplying_alpha(&self) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_premultiplying_alpha(self.ptr) },
@@ -313,6 +338,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `unpremultiplying_alpha`.
     pub fn unpremultiplying_alpha(&self) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_unpremultiplying_alpha(self.ptr) },
@@ -320,6 +346,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `setting_alpha_one_in_extent`.
     pub fn setting_alpha_one_in_extent(&self, rect: CGRect) -> Self {
         Self::from_non_null(
             unsafe {
@@ -335,6 +362,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `gaussian_blurred`.
     pub fn gaussian_blurred(&self, sigma: f64) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_gaussian_blur(self.ptr, sigma) },
@@ -342,6 +370,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `sampling_linear`.
     pub fn sampling_linear(&self) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_sampling_linear(self.ptr) },
@@ -349,6 +378,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `sampling_nearest`.
     pub fn sampling_nearest(&self) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_sampling_nearest(self.ptr) },
@@ -356,6 +386,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `inserting_intermediate`.
     pub fn inserting_intermediate(&self, cache: bool) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_insert_intermediate(self.ptr, cache) },
@@ -363,6 +394,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `applying_gain_map`.
     pub fn applying_gain_map(&self, gain_map: &Self) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_apply_gain_map(self.ptr, gain_map.ptr) },
@@ -370,6 +402,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `applying_gain_map_with_headroom`.
     pub fn applying_gain_map_with_headroom(&self, gain_map: &Self, headroom: f32) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_apply_gain_map_headroom(self.ptr, gain_map.ptr, headroom) },
@@ -377,14 +410,17 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `content_headroom`.
     pub fn content_headroom(&self) -> f32 {
         unsafe { ffi::ci_image_content_headroom(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `content_average_light_level`.
     pub fn content_average_light_level(&self) -> f32 {
         unsafe { ffi::ci_image_content_average_light_level(self.ptr) }
     }
 
+/// Calls the `CoreImage` framework counterpart for `setting_content_headroom`.
     pub fn setting_content_headroom(&self, headroom: f32) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_setting_content_headroom(self.ptr, headroom) },
@@ -392,6 +428,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `setting_content_average_light_level`.
     pub fn setting_content_average_light_level(&self, average: f32) -> Self {
         Self::from_non_null(
             unsafe { ffi::ci_image_setting_content_average_light_level(self.ptr, average) },
@@ -399,6 +436,7 @@ impl CIImage {
         )
     }
 
+/// Calls the `CoreImage` framework counterpart for `region_of_interest_for_image`.
     pub fn region_of_interest_for_image(&self, image: &Self, rect: CGRect) -> CGRect {
         let mut x = 0.0;
         let mut y = 0.0;
@@ -421,6 +459,7 @@ impl CIImage {
         CGRect::new(x, y, width, height)
     }
 
+/// Calls the `CoreImage` framework counterpart for `apply_filter`.
     pub fn apply_filter(&self, filter: &mut CIFilter) -> Result<Self, CIError> {
         filter.set_input_image(self);
         filter

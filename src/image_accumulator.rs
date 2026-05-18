@@ -44,14 +44,17 @@ impl CIImageAccumulator {
         Self { ptr }
     }
 
+/// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn as_ptr(&self) -> *mut c_void {
         self.ptr
     }
 
+/// Calls the `CoreImage` framework counterpart for `new`.
     pub fn new(extent: CGRect, format: CIFormat) -> Option<Self> {
         Self::new_inner(extent, format, None)
     }
 
+/// Calls the `CoreImage` framework counterpart for `with_color_space`.
     pub fn with_color_space(
         extent: CGRect,
         format: CIFormat,
@@ -83,6 +86,7 @@ impl CIImageAccumulator {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `extent`.
     pub fn extent(&self) -> CGRect {
         let mut x = 0.0;
         let mut y = 0.0;
@@ -94,10 +98,12 @@ impl CIImageAccumulator {
         CGRect::new(x, y, width, height)
     }
 
+/// Calls the `CoreImage` framework counterpart for `format`.
     pub fn format(&self) -> Option<CIFormat> {
         CIFormat::from_raw(unsafe { ffi::ci_image_accumulator_format(self.ptr) })
     }
 
+/// Calls the `CoreImage` framework counterpart for `image`.
     pub fn image(&self) -> Option<CIImage> {
         let handle = unsafe { ffi::ci_image_accumulator_image(self.ptr) };
         if handle.is_null() {
@@ -107,10 +113,12 @@ impl CIImageAccumulator {
         }
     }
 
+/// Calls the `CoreImage` framework counterpart for `set_image`.
     pub fn set_image(&mut self, image: &CIImage) {
         unsafe { ffi::ci_image_accumulator_set_image(self.ptr, image.as_ptr()) };
     }
 
+/// Calls the `CoreImage` framework counterpart for `set_image_dirty_rect`.
     pub fn set_image_dirty_rect(&mut self, image: &CIImage, dirty_rect: CGRect) {
         unsafe {
             ffi::ci_image_accumulator_set_image_dirty_rect(
@@ -124,6 +132,7 @@ impl CIImageAccumulator {
         };
     }
 
+/// Calls the `CoreImage` framework counterpart for `clear`.
     pub fn clear(&mut self) {
         unsafe { ffi::ci_image_accumulator_clear(self.ptr) };
     }
