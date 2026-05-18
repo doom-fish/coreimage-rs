@@ -20,8 +20,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!(
         "filter {} -> {}x{}",
         filter.name(),
-        extent.width,
-        extent.height
+        extent.size.width,
+        extent.size.height
     );
     Ok(())
 }

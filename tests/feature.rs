@@ -21,6 +21,6 @@ fn qr_features_expose_message_and_descriptor() -> Result<(), Box<dyn Error>> {
             .map(|descriptor| descriptor.kind()),
         Some(CIBarcodeDescriptorKind::QrCode)
     );
-    assert!(feature.bounds().width > 0.0);
+    assert!(feature.bounds().size.width > 0.0);
     Ok(())
 }

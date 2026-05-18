@@ -8,7 +8,7 @@ fn vectors_round_trip_geometry() {
     let transform_vector = CIVector::from_transform(transform);
 
     assert_eq!(rect_vector.count(), 4);
-    assert!((rect_vector.rect_value().width - 3.0).abs() < f64::EPSILON);
+    assert!((rect_vector.rect_value().size.width - 3.0).abs() < f64::EPSILON);
     assert!((transform_vector.affine_transform_value().tx - 5.0).abs() < f64::EPSILON);
     assert!(!transform_vector.string_representation().is_empty());
 }

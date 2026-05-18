@@ -16,8 +16,8 @@ fn image_accumulator_tracks_image_contents() {
         .image()
         .expect("accumulator should produce an image");
     let snapshot_extent = snapshot.extent();
-    assert!((snapshot_extent.width - 64.0).abs() < f64::EPSILON);
-    assert!((snapshot_extent.height - 64.0).abs() < f64::EPSILON);
+    assert!((snapshot_extent.size.width - 64.0).abs() < f64::EPSILON);
+    assert!((snapshot_extent.size.height - 64.0).abs() < f64::EPSILON);
     assert!(accumulator.format().is_some());
 
     accumulator.clear();

@@ -13,6 +13,6 @@ fn sampler_reports_image_extents() {
         },
     );
 
-    assert!((sampler.extent().width - image.extent().width).abs() < f64::EPSILON);
-    assert!((sampler.definition_extent().height - image.extent().height).abs() < f64::EPSILON);
+    assert!((sampler.extent().size.width - image.extent().size.width).abs() < f64::EPSILON);
+    assert!((sampler.definition_extent().size.height - image.extent().size.height).abs() < f64::EPSILON);
 }

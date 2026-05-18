@@ -9,5 +9,5 @@ fn main() {
     let image = solid_image();
     let sampler = CISampler::new(&image, CISamplerOptions::default());
     let extent = sampler.extent();
-    println!("sampler extent: {}x{}", extent.width, extent.height);
+    println!("sampler extent: {}x{}", extent.size.width, extent.size.height);
 }

@@ -224,10 +224,10 @@ impl CIColorKernel {
                 self.ptr,
                 image.as_ptr(),
                 value,
-                extent.x,
-                extent.y,
-                extent.width,
-                extent.height,
+                extent.origin.x,
+                extent.origin.y,
+                extent.size.width,
+                extent.size.height,
             )
         };
         if handle.is_null() {
@@ -250,10 +250,10 @@ impl CIColorKernel {
                 self.ptr,
                 image.as_ptr(),
                 color.as_ptr(),
-                extent.x,
-                extent.y,
-                extent.width,
-                extent.height,
+                extent.origin.x,
+                extent.origin.y,
+                extent.size.width,
+                extent.size.height,
             )
         };
         if handle.is_null() {
@@ -276,10 +276,10 @@ impl CIColorKernel {
                 self.ptr,
                 image.as_ptr(),
                 vector.as_ptr(),
-                extent.x,
-                extent.y,
-                extent.width,
-                extent.height,
+                extent.origin.x,
+                extent.origin.y,
+                extent.size.width,
+                extent.size.height,
             )
         };
         if handle.is_null() {
@@ -318,10 +318,10 @@ impl CIWarpKernel {
                 self.ptr,
                 image.as_ptr(),
                 value,
-                extent.x,
-                extent.y,
-                extent.width,
-                extent.height,
+                extent.origin.x,
+                extent.origin.y,
+                extent.size.width,
+                extent.size.height,
             )
         };
         if handle.is_null() {

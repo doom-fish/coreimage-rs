@@ -8,8 +8,8 @@ fn filter_shapes_transform_and_combine() {
     let union = inset.union_rect(CGRect::new(0.0, 0.0, 4.0, 4.0));
     let intersection = union.intersection(&shape);
 
-    assert!((moved.extent().x - 5.0).abs() < f64::EPSILON);
-    assert!(inset.extent().width <= moved.extent().width);
-    assert!(union.extent().width >= intersection.extent().width);
-    assert!(intersection.extent().height <= shape.extent().height);
+    assert!((moved.extent().origin.x - 5.0).abs() < f64::EPSILON);
+    assert!(inset.extent().size.width <= moved.extent().size.width);
+    assert!(union.extent().size.width >= intersection.extent().size.width);
+    assert!(intersection.extent().size.height <= shape.extent().size.height);
 }

@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!(
         "image extent: {}x{} at {},{}",
-        extent.width, extent.height, extent.x, extent.y
+        extent.size.width, extent.size.height, extent.origin.x, extent.origin.y
     );
     Ok(())
 }

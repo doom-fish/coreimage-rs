@@ -67,10 +67,10 @@ impl CIImageAccumulator {
     ) -> Option<Self> {
         let handle = unsafe {
             ffi::ci_image_accumulator_new(
-                extent.x,
-                extent.y,
-                extent.width,
-                extent.height,
+                extent.origin.x,
+                extent.origin.y,
+                extent.size.width,
+                extent.size.height,
                 format.raw_value(),
                 color_space.is_some(),
                 color_space.map_or(0, CIColorSpace::code),
@@ -116,10 +116,10 @@ impl CIImageAccumulator {
             ffi::ci_image_accumulator_set_image_dirty_rect(
                 self.ptr,
                 image.as_ptr(),
-                dirty_rect.x,
-                dirty_rect.y,
-                dirty_rect.width,
-                dirty_rect.height,
+                dirty_rect.origin.x,
+                dirty_rect.origin.y,
+                dirty_rect.size.width,
+                dirty_rect.size.height,
             );
         };
     }

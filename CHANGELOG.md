@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0] - 2026-05-18
+
+### Breaking
+
+- Raised `apple-cf` support to `>=0.7, <0.9` and migrated crate-wide `CGRect` usage to the nested `origin`/`size` representation introduced by `apple-cf 0.8.0`.
+
 ## [0.2.3] - 2026-05-18
 
 ### Fixed

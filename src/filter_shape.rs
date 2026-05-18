@@ -53,7 +53,7 @@ impl CIFilterShape {
 
     pub fn new(rect: CGRect) -> Self {
         Self::from_non_null(
-            unsafe { ffi::ci_filter_shape_new(rect.x, rect.y, rect.width, rect.height) },
+            unsafe { ffi::ci_filter_shape_new(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height) },
             "CIFilterShape(rect:)",
         )
     }
@@ -102,7 +102,7 @@ impl CIFilterShape {
     pub fn union_rect(&self, rect: CGRect) -> Self {
         Self::from_non_null(
             unsafe {
-                ffi::ci_filter_shape_union_rect(self.ptr, rect.x, rect.y, rect.width, rect.height)
+                ffi::ci_filter_shape_union_rect(self.ptr, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height)
             },
             "CIFilterShape.union(with:)",
         )
@@ -120,10 +120,10 @@ impl CIFilterShape {
             unsafe {
                 ffi::ci_filter_shape_intersect_rect(
                     self.ptr,
-                    rect.x,
-                    rect.y,
-                    rect.width,
-                    rect.height,
+                    rect.origin.x,
+                    rect.origin.y,
+                    rect.size.width,
+                    rect.size.height,
                 )
             },
             "CIFilterShape.intersect(with:)",

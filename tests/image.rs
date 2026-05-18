@@ -13,8 +13,8 @@ fn image_from_bitmap_tracks_extent() -> Result<(), Box<dyn Error>> {
     let shifted = image.translated(2.0, 3.0);
     let extent = shifted.extent();
 
-    assert!((extent.width - 2.0).abs() < f64::EPSILON);
-    assert!((extent.height - 2.0).abs() < f64::EPSILON);
+    assert!((extent.size.width - 2.0).abs() < f64::EPSILON);
+    assert!((extent.size.height - 2.0).abs() < f64::EPSILON);
     assert!(shifted.properties_json().starts_with('{'));
     Ok(())
 }

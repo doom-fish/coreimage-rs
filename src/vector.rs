@@ -74,7 +74,7 @@ impl CIVector {
 
     pub fn from_rect(rect: CGRect) -> Self {
         Self::from_non_null(
-            unsafe { ffi::ci_vector_from_rect(rect.x, rect.y, rect.width, rect.height) },
+            unsafe { ffi::ci_vector_from_rect(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height) },
             "CIVector",
         )
     }

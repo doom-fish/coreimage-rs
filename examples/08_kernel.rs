@@ -15,6 +15,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let output = kernel.apply(&foreground, &background)?;
     let extent = output.extent();
 
-    println!("kernel output extent: {}x{}", extent.width, extent.height);
+    println!("kernel output extent: {}x{}", extent.size.width, extent.size.height);
     Ok(())
 }

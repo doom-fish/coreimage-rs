@@ -232,7 +232,7 @@ impl CIImage {
 
     pub fn cropped_to(&self, rect: CGRect) -> Self {
         Self::from_non_null(
-            unsafe { ffi::ci_image_cropped(self.ptr, rect.x, rect.y, rect.width, rect.height) },
+            unsafe { ffi::ci_image_cropped(self.ptr, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height) },
             "CIImage.cropped(to:)",
         )
     }
@@ -247,7 +247,7 @@ impl CIImage {
     pub fn clamped_to_rect(&self, rect: CGRect) -> Self {
         Self::from_non_null(
             unsafe {
-                ffi::ci_image_clamped_to_rect(self.ptr, rect.x, rect.y, rect.width, rect.height)
+                ffi::ci_image_clamped_to_rect(self.ptr, rect.origin.x, rect.origin.y, rect.size.width, rect.size.height)
             },
             "CIImage.clamped(to:)",
         )
@@ -325,10 +325,10 @@ impl CIImage {
             unsafe {
                 ffi::ci_image_setting_alpha_one_in_extent(
                     self.ptr,
-                    rect.x,
-                    rect.y,
-                    rect.width,
-                    rect.height,
+                    rect.origin.x,
+                    rect.origin.y,
+                    rect.size.width,
+                    rect.size.height,
                 )
             },
             "CIImage.settingAlphaOne(in:)",
@@ -408,10 +408,10 @@ impl CIImage {
             ffi::ci_image_region_of_interest_for_image(
                 self.ptr,
                 image.ptr,
-                rect.x,
-                rect.y,
-                rect.width,
-                rect.height,
+                rect.origin.x,
+                rect.origin.y,
+                rect.size.width,
+                rect.size.height,
                 &mut x,
                 &mut y,
                 &mut width,

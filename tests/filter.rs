@@ -12,6 +12,6 @@ fn monochrome_filter_produces_output() {
     let output = filter
         .output_image_for_key(CIOutputKey::Image)
         .expect("filter should produce output");
-    assert!((output.extent().width - 64.0).abs() < f64::EPSILON);
+    assert!((output.extent().size.width - 64.0).abs() < f64::EPSILON);
     assert!(filter.input_keys().iter().any(|key| key == "inputImage"));
 }

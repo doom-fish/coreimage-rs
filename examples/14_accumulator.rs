@@ -20,8 +20,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!(
         "shape {:?} accumulator {}x{}",
         shape.extent(),
-        snapshot.extent().width,
-        snapshot.extent().height
+        snapshot.extent().size.width,
+        snapshot.extent().size.height
     );
     Ok(())
 }
