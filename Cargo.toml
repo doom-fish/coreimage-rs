@@ -1,6 +1,6 @@
 [package]
 name = "coreimage"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 homepage = "https://github.com/doom-fish/coreimage-rs"
@@ -43,7 +43,7 @@ metal = ["dep:apple-metal"]
 
 [dependencies]
 apple-cf = { version = ">=0.7, <0.9", default-features = false, features = ["cv", "cg", "iosurface"] }
-apple-metal = { version = ">=0.5, <0.8", optional = true }
+apple-metal = { version = ">=0.5, <0.9", optional = true }
 libc = "0.2"
 
 [package.metadata.docs.rs]
