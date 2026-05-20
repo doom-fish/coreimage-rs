@@ -139,3 +139,52 @@ impl CIFilterShape {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn assert_close(left: f64, right: f64) {
+        assert!(
+            (left - right).abs() < f64::EPSILON,
+            "expected {left} to match {right}"
+        );
+    }
+
+    fn assert_rect_eq(left: CGRect, right: CGRect) {
+        assert_close(left.origin.x, right.origin.x);
+        assert_close(left.origin.y, right.origin.y);
+        assert_close(left.size.width, right.size.width);
+        assert_close(left.size.height, right.size.height);
+    }
+
+    #[test]
+    fn new_shape_reports_requested_extent() {
+        let rect = CGRect::new(1.0, 2.0, 10.0, 20.0);
+        let shape = CIFilterShape::new(rect);
+
+        assert_rect_eq(shape.extent(), rect);
+    }
+
+    #[test]
+    fn translating_and_insetting_shapes_updates_geometry() {
+        let shape = CIFilterShape::new(CGRect::new(0.0, 0.0, 10.0, 10.0));
+        let moved = shape.transform(CGAffineTransform::translation(5.0, 3.0), false);
+        let inset = moved.inset(1, 2);
+
+        assert_close(moved.extent().origin.x, 5.0);
+        assert_close(moved.extent().origin.y, 3.0);
+        assert!(inset.extent().size.width <= moved.extent().size.width);
+        assert!(inset.extent().size.height <= moved.extent().size.height);
+    }
+
+    #[test]
+    fn union_and_intersection_rects_follow_bounds() {
+        let shape = CIFilterShape::new(CGRect::new(0.0, 0.0, 10.0, 10.0));
+        let union = shape.union_rect(CGRect::new(-2.0, 1.0, 4.0, 3.0));
+        let intersection = shape.intersection_rect(CGRect::new(5.0, 5.0, 4.0, 4.0));
+
+        assert_rect_eq(union.extent(), CGRect::new(-2.0, 0.0, 12.0, 10.0));
+        assert_rect_eq(intersection.extent(), CGRect::new(5.0, 5.0, 4.0, 4.0));
+    }
+}

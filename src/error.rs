@@ -50,3 +50,35 @@ impl CIError {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn display_formats_each_error_variant() {
+        assert_eq!(CIError::InvalidArgument("bad".to_string()).to_string(), "invalid argument: bad");
+        assert_eq!(CIError::NullResult("missing".to_string()).to_string(), "unexpected nil result: missing");
+        assert_eq!(CIError::Unsupported("gpu".to_string()).to_string(), "unsupported operation: gpu");
+        assert_eq!(CIError::Io("disk".to_string()).to_string(), "image I/O failed: disk");
+        assert_eq!(CIError::Framework("bridge".to_string()).to_string(), "CoreImage framework error: bridge");
+        assert_eq!(
+            CIError::Unknown {
+                code: -9,
+                message: "mystery".to_string(),
+            }
+            .to_string(),
+            "CoreImage error -9: mystery"
+        );
+    }
+
+    #[test]
+    fn cloned_errors_preserve_payloads_and_have_no_source() {
+        let error = CIError::Framework("bridge".to_string());
+        let cloned = error.clone();
+        let as_std_error: &dyn std::error::Error = &cloned;
+
+        assert_eq!(cloned, error);
+        assert!(as_std_error.source().is_none());
+    }
+}

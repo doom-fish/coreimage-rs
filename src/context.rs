@@ -383,3 +383,58 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_options_start_empty() {
+        let options = CIContextOptions::default();
+
+        assert!(!options.cache_intermediates);
+        assert!(!options.priority_request_low);
+        assert!(!options.allow_low_power);
+        assert!(!options.output_premultiplied);
+        assert!(!options.high_quality_downsample);
+        assert_eq!(options.output_color_space, None);
+        assert_eq!(options.working_color_space, None);
+        assert_eq!(options.working_format, None);
+        assert_eq!(options.memory_limit, None);
+        assert_eq!(options.name, None);
+    }
+
+    #[test]
+    fn with_options_rejects_names_with_interior_nul_bytes() {
+        let options = CIContextOptions {
+            name: Some("fast\0context".to_string()),
+            ..CIContextOptions::default()
+        };
+
+        let error = CIContext::with_options(&options).expect_err("invalid names must be rejected");
+        assert_eq!(
+            error,
+            CIError::InvalidArgument("context name contains an interior NUL byte".to_string())
+        );
+    }
+
+    #[test]
+    fn with_options_honors_typed_working_format_selection() -> Result<(), CIError> {
+        let options = CIContextOptions {
+            cache_intermediates: true,
+            priority_request_low: true,
+            allow_low_power: true,
+            output_premultiplied: true,
+            high_quality_downsample: true,
+            output_color_space: Some(CIColorSpace::Srgb),
+            working_color_space: Some(CIColorSpace::ExtendedSrgb),
+            working_format: Some(CIFormat::Rgba8),
+            memory_limit: Some(8.0 * 1024.0 * 1024.0),
+            name: Some("unit-test-context".to_string()),
+        };
+
+        let context = CIContext::with_options(&options)?;
+        assert_eq!(context.working_pixel_format(), Some(CIFormat::Rgba8));
+        Ok(())
+    }
+}

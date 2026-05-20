@@ -638,3 +638,60 @@ string_key_enum! {
     }
     loader = ffi::ci_sampler_option_name;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn color_space_defaults_and_codes_are_stable() {
+        assert_eq!(CIColorSpace::default(), CIColorSpace::Srgb);
+
+        let cases = [
+            (CIColorSpace::None, 0),
+            (CIColorSpace::Srgb, 1),
+            (CIColorSpace::ExtendedSrgb, 2),
+            (CIColorSpace::DisplayP3, 3),
+            (CIColorSpace::GenericGrayGamma2_2, 4),
+        ];
+
+        for (color_space, expected_code) in cases {
+            assert_eq!(color_space.code(), expected_code);
+        }
+    }
+
+    #[test]
+    fn pixel_formats_round_trip_through_raw_values() {
+        for format in CIFormat::ALL {
+            assert_eq!(CIFormat::from_raw(format.raw_value()), Some(format));
+        }
+
+        assert_eq!(CIFormat::from_raw(i32::MIN), None);
+    }
+
+    #[test]
+    fn bytes_per_pixel_match_expected_groups() {
+        let cases = [
+            (CIFormat::A8, 1),
+            (CIFormat::Rg8, 2),
+            (CIFormat::Rgba8, 4),
+            (CIFormat::Rgba16, 8),
+            (CIFormat::RgbaF, 16),
+        ];
+
+        for (format, expected_bytes) in cases {
+            assert_eq!(format.bytes_per_pixel(), expected_bytes);
+        }
+    }
+
+    #[test]
+    fn typed_string_keys_match_framework_constants() {
+        assert_eq!(CIContextOptionKey::MemoryLimit.as_str(), "kCIContextMemoryLimit");
+        assert_eq!(CIImageOptionKey::AuxiliaryHdrGainMap.as_str(), "kCIImageAuxiliaryHDRGainMap");
+        assert_eq!(CIApplyOptionKey::ColorSpace.as_str(), "kCIApplyOptionColorSpace");
+        assert_eq!(CIInputKey::Intensity.as_str(), "kCIInputIntensityKey");
+        assert_eq!(CIOutputKey::Image.as_str(), "kCIOutputImageKey");
+        assert_eq!(CIUIParameterSet::Advanced.as_str(), "kCIUISetAdvanced");
+        assert_eq!(CISamplerOptionKey::ColorSpace.as_str(), "kCISamplerColorSpace");
+    }
+}

@@ -175,3 +175,78 @@ impl CIColor {
             .unwrap_or_default()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn assert_close(left: f64, right: f64) {
+        assert!(
+            (left - right).abs() < 1e-6,
+            "expected {left} to be within 1e-6 of {right}"
+        );
+    }
+
+    #[test]
+    fn color_name_codes_are_stable() {
+        let cases = [
+            (CIColorName::Black, 0),
+            (CIColorName::White, 1),
+            (CIColorName::Gray, 2),
+            (CIColorName::Red, 3),
+            (CIColorName::Green, 4),
+            (CIColorName::Blue, 5),
+            (CIColorName::Cyan, 6),
+            (CIColorName::Magenta, 7),
+            (CIColorName::Yellow, 8),
+            (CIColorName::Clear, 9),
+        ];
+
+        for (name, expected_code) in cases {
+            assert_eq!(name.code(), expected_code);
+        }
+    }
+
+    #[test]
+    fn rgba_colors_expose_expected_channels() {
+        let color = CIColor::rgba(0.1, 0.2, 0.3, 0.4);
+
+        assert_eq!(color.number_of_components(), 4);
+        assert_close(color.red(), 0.1);
+        assert_close(color.green(), 0.2);
+        assert_close(color.blue(), 0.3);
+        assert_close(color.alpha(), 0.4);
+        assert_eq!(color.components().len(), 4);
+    }
+
+    #[test]
+    fn helper_constructors_match_named_color_expectations() {
+        let rgb = CIColor::rgb(0.25, 0.5, 0.75);
+        let black = CIColor::black();
+        let clear = CIColor::clear();
+        let red = CIColor::named(CIColorName::Red);
+
+        assert_close(rgb.alpha(), 1.0);
+        assert_close(black.red(), 0.0);
+        assert_close(black.green(), 0.0);
+        assert_close(black.blue(), 0.0);
+        assert_close(black.alpha(), 1.0);
+        assert_close(clear.alpha(), 0.0);
+        assert!(red.red() > 0.9);
+    }
+
+    #[test]
+    fn string_round_trip_preserves_components() {
+        let original = CIColor::rgba(0.9, 0.4, 0.2, 0.7);
+        let representation = original.string_representation();
+        let round_trip = CIColor::from_string(&representation)
+            .expect("Core Image should parse its own string representation");
+
+        let original_components = original.components();
+        let round_trip_components = round_trip.components();
+        assert_eq!(original_components.len(), round_trip_components.len());
+        for (expected, actual) in original_components.iter().zip(&round_trip_components) {
+            assert_close(*expected, *actual);
+        }
+    }
+}

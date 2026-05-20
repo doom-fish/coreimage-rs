@@ -259,3 +259,44 @@ impl CIRAWFilter {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn decoder_version_indexes_are_stable() {
+        let cases = [
+            (CIRAWDecoderVersion::None, 0),
+            (CIRAWDecoderVersion::Version9, 1),
+            (CIRAWDecoderVersion::Version9Dng, 2),
+            (CIRAWDecoderVersion::Version8, 3),
+            (CIRAWDecoderVersion::Version8Dng, 4),
+            (CIRAWDecoderVersion::Version7, 5),
+            (CIRAWDecoderVersion::Version7Dng, 6),
+            (CIRAWDecoderVersion::Version6, 7),
+            (CIRAWDecoderVersion::Version6Dng, 8),
+        ];
+
+        for (version, expected_index) in cases {
+            assert_eq!(version.index(), expected_index);
+        }
+    }
+
+    #[test]
+    fn decoder_version_strings_match_expected_values() {
+        assert_eq!(CIRAWDecoderVersion::None.as_str(), "None");
+        assert_eq!(CIRAWDecoderVersion::Version9.as_str(), "9");
+        assert_eq!(CIRAWDecoderVersion::Version9Dng.as_str(), "9.dng");
+        assert_eq!(CIRAWDecoderVersion::Version6Dng.as_str(), "6.dng");
+    }
+
+    #[test]
+    fn from_data_rejects_empty_buffers() {
+        let error = CIRAWFilter::from_data(&[], None).expect_err("empty buffers must be rejected");
+        assert_eq!(
+            error,
+            CIError::InvalidArgument("RAW image data must not be empty".to_string())
+        );
+    }
+}
