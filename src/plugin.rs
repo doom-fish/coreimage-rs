@@ -1,6 +1,7 @@
 use core::ffi::c_void;
 use core::fmt;
 use core::ptr::{self, NonNull};
+use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::Path;
 
 use crate::ffi;
@@ -18,8 +19,13 @@ unsafe extern "C" fn plugin_registration_invoke(context: *mut c_void, host: *mut
         return false;
     }
 
-    let context = unsafe { &*context.cast::<PlugInRegistrationCallback>() };
-    (context.callback)(host)
+    // The user closure may panic; unwinding across the C ABI into Core Image
+    // is undefined behavior, so contain it and return false on panic.
+    catch_unwind(AssertUnwindSafe(|| {
+        let context = unsafe { &*context.cast::<PlugInRegistrationCallback>() };
+        (context.callback)(host)
+    }))
+    .unwrap_or(false)
 }
 
 unsafe extern "C" fn plugin_registration_release(context: *mut c_void) {

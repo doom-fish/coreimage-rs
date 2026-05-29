@@ -3,6 +3,7 @@ use core::fmt;
 use core::ptr;
 use std::ffi::CStr;
 use std::mem;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 
 use crate::ffi;
 use crate::filter::CIFilter;
@@ -23,13 +24,18 @@ unsafe extern "C" fn filter_constructor_invoke(
         return ptr::null_mut();
     }
 
-    let context = unsafe { &*context.cast::<FilterConstructorCallback>() };
-    let name = unsafe { CStr::from_ptr(name) }.to_string_lossy();
-    (context.callback)(name.as_ref()).map_or(ptr::null_mut(), |filter| {
-        let handle = filter.as_ptr();
-        mem::forget(filter);
-        handle
-    })
+    // The user closure may panic; unwinding across the C ABI into Core Image
+    // is undefined behavior, so contain it and return nil on panic.
+    catch_unwind(AssertUnwindSafe(|| {
+        let context = unsafe { &*context.cast::<FilterConstructorCallback>() };
+        let name = unsafe { CStr::from_ptr(name) }.to_string_lossy();
+        (context.callback)(name.as_ref()).map_or(ptr::null_mut(), |filter| {
+            let handle = filter.as_ptr();
+            mem::forget(filter);
+            handle
+        })
+    }))
+    .unwrap_or(ptr::null_mut())
 }
 
 unsafe extern "C" fn filter_constructor_release(context: *mut c_void) {
