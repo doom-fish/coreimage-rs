@@ -3,14 +3,15 @@ use core::fmt;
 use core::ptr;
 use std::ffi::CStr;
 use std::mem;
-use std::panic::{catch_unwind, AssertUnwindSafe};
 
 use crate::ffi;
 use crate::filter::CIFilter;
-use crate::util::string_to_cstring;
+use crate::util::{
+    catch_callback_panic, catch_callback_panic_with_cleanup, string_to_cstring,
+};
 use crate::CIError;
 
-type FilterConstructorFn = dyn Fn(&str) -> Option<CIFilter>;
+type FilterConstructorFn = dyn Fn(&str) -> Option<CIFilter> + Send + Sync;
 
 struct FilterConstructorCallback {
     callback: Box<FilterConstructorFn>,
@@ -24,9 +25,7 @@ unsafe extern "C" fn filter_constructor_invoke(
         return ptr::null_mut();
     }
 
-    // The user closure may panic; unwinding across the C ABI into Core Image
-    // is undefined behavior, so contain it and return nil on panic.
-    catch_unwind(AssertUnwindSafe(|| {
+    catch_callback_panic("CIFilterConstructor callback", ptr::null_mut(), || {
         let context = unsafe { &*context.cast::<FilterConstructorCallback>() };
         let name = unsafe { CStr::from_ptr(name) }.to_string_lossy();
         (context.callback)(name.as_ref()).map_or(ptr::null_mut(), |filter| {
@@ -34,15 +33,20 @@ unsafe extern "C" fn filter_constructor_invoke(
             mem::forget(filter);
             handle
         })
-    }))
-    .unwrap_or(ptr::null_mut())
+    })
 }
 
 unsafe extern "C" fn filter_constructor_release(context: *mut c_void) {
     if context.is_null() {
         return;
     }
-    unsafe { drop(Box::from_raw(context.cast::<FilterConstructorCallback>())) };
+    let state = unsafe { Some(Box::from_raw(context.cast::<FilterConstructorCallback>())) };
+    let _ = catch_callback_panic_with_cleanup(
+        "CIFilterConstructor release",
+        state,
+        |_| (),
+        |state| drop(state.take()),
+    );
 }
 
 /// A Rust-backed `CIFilterConstructor` protocol object.
@@ -90,8 +94,22 @@ impl CIFilterConstructor {
         self.ptr
     }
 
-/// Calls the `CoreImage` framework counterpart for `new`.
-    pub fn new(callback: impl Fn(&str) -> Option<CIFilter> + 'static) -> Self {
+    /// Creates a constructor whose callback and captures may be invoked and released on any thread.
+    ///
+    /// Callback-body panics return `None`. Captured values must implement non-panicking `Drop`;
+    /// Rust cannot recover from multiple destructor panics in one closure aggregate.
+    ///
+    /// ```compile_fail
+    /// use std::rc::Rc;
+    /// use coreimage::CIFilterConstructor;
+    ///
+    /// let state = Rc::new(());
+    /// let _constructor = CIFilterConstructor::new(move |_| {
+    ///     drop(Rc::clone(&state));
+    ///     None
+    /// });
+    /// ```
+    pub fn new(callback: impl Fn(&str) -> Option<CIFilter> + Send + Sync + 'static) -> Self {
         let callback = Box::new(FilterConstructorCallback {
             callback: Box::new(callback),
         });

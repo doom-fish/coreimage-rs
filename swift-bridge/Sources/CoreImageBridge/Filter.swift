@@ -1,5 +1,38 @@
 import CoreImage
+import CoreImageObjCBridge
 import Foundation
+
+private func ci_filter_set_value(
+    _ filter: CIFilter,
+    key: String,
+    value: NSObject
+) throws {
+    guard filter.inputKeys.contains(key) else {
+        throw CIBridgeError.invalidArgument("unsupported filter input key '\(key)'")
+    }
+    guard let attributes = filter.attributes[key] as? [String: Any],
+          let className = attributes[kCIAttributeClass] as? String,
+          let expectedClass = NSClassFromString(className)
+    else {
+        throw CIBridgeError.invalidArgument("filter input '\(key)' has no supported value class")
+    }
+    guard value.isKind(of: expectedClass) else {
+        throw CIBridgeError.invalidArgument(
+            "filter input '\(key)' expects \(className), not \(type(of: value))"
+        )
+    }
+
+    var error: NSError?
+    guard CIXTrySetValueForKey(filter, value, key, &error) else {
+        throw CIBridgeError.framework(
+            error ?? NSError(
+                domain: "CoreImageObjCBridge",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "filter input assignment failed"]
+            )
+        )
+    }
+}
 
 @_cdecl("ci_filter_new")
 public func ci_filter_new(_ name: UnsafePointer<CChar>?) -> UnsafeMutableRawPointer? {
@@ -88,35 +121,56 @@ public func ci_filter_localized_reference_url(_ name: UnsafePointer<CChar>?) -> 
 public func ci_filter_set_image(
     _ handle: UnsafeMutableRawPointer?,
     _ key: UnsafePointer<CChar>?,
-    _ imageHandle: UnsafeMutableRawPointer?
-) {
-    guard let filter: CIFilter = ci_borrow(handle),
-          let key,
-          let image: CIImage = ci_borrow(imageHandle)
-    else {
-        return
+    _ imageHandle: UnsafeMutableRawPointer?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let filter: CIFilter = ci_borrow(handle),
+              let key,
+              let image: CIImage = ci_borrow(imageHandle)
+        else {
+            throw CIBridgeError.invalidArgument("missing filter, key, or image")
+        }
+        try ci_filter_set_value(filter, key: String(cString: key), value: image)
     }
-    filter.setValue(image, forKey: String(cString: key))
 }
 
 @_cdecl("ci_filter_set_number")
 public func ci_filter_set_number(
     _ handle: UnsafeMutableRawPointer?,
     _ key: UnsafePointer<CChar>?,
-    _ value: Double
-) {
-    guard let filter: CIFilter = ci_borrow(handle), let key else { return }
-    filter.setValue(value, forKey: String(cString: key))
+    _ value: Double,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let filter: CIFilter = ci_borrow(handle), let key else {
+            throw CIBridgeError.invalidArgument("missing filter or numeric input key")
+        }
+        try ci_filter_set_value(
+            filter,
+            key: String(cString: key),
+            value: NSNumber(value: value)
+        )
+    }
 }
 
 @_cdecl("ci_filter_set_string")
 public func ci_filter_set_string(
     _ handle: UnsafeMutableRawPointer?,
     _ key: UnsafePointer<CChar>?,
-    _ value: UnsafePointer<CChar>?
-) {
-    guard let filter: CIFilter = ci_borrow(handle), let key, let value else { return }
-    filter.setValue(String(cString: value), forKey: String(cString: key))
+    _ value: UnsafePointer<CChar>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let filter: CIFilter = ci_borrow(handle), let key, let value else {
+            throw CIBridgeError.invalidArgument("missing filter, string input key, or value")
+        }
+        try ci_filter_set_value(
+            filter,
+            key: String(cString: key),
+            value: NSString(cString: value, encoding: String.Encoding.utf8.rawValue) ?? ""
+        )
+    }
 }
 
 @_cdecl("ci_filter_set_bytes")
@@ -124,55 +178,75 @@ public func ci_filter_set_bytes(
     _ handle: UnsafeMutableRawPointer?,
     _ key: UnsafePointer<CChar>?,
     _ bytes: UnsafePointer<UInt8>?,
-    _ len: Int
-) {
-    guard let filter: CIFilter = ci_borrow(handle), let key, let bytes, len >= 0 else { return }
-    filter.setValue(Data(bytes: bytes, count: len), forKey: String(cString: key))
+    _ len: Int,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let filter: CIFilter = ci_borrow(handle), let key, let bytes, len >= 0 else {
+            throw CIBridgeError.invalidArgument("missing filter, data input key, or bytes")
+        }
+        try ci_filter_set_value(
+            filter,
+            key: String(cString: key),
+            value: NSData(bytes: bytes, length: len)
+        )
+    }
 }
 
 @_cdecl("ci_filter_set_vector")
 public func ci_filter_set_vector(
     _ handle: UnsafeMutableRawPointer?,
     _ key: UnsafePointer<CChar>?,
-    _ vectorHandle: UnsafeMutableRawPointer?
-) {
-    guard let filter: CIFilter = ci_borrow(handle),
-          let key,
-          let vector: CIVector = ci_borrow(vectorHandle)
-    else {
-        return
+    _ vectorHandle: UnsafeMutableRawPointer?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let filter: CIFilter = ci_borrow(handle),
+              let key,
+              let vector: CIVector = ci_borrow(vectorHandle)
+        else {
+            throw CIBridgeError.invalidArgument("missing filter, vector input key, or value")
+        }
+        try ci_filter_set_value(filter, key: String(cString: key), value: vector)
     }
-    filter.setValue(vector, forKey: String(cString: key))
 }
 
 @_cdecl("ci_filter_set_color")
 public func ci_filter_set_color(
     _ handle: UnsafeMutableRawPointer?,
     _ key: UnsafePointer<CChar>?,
-    _ colorHandle: UnsafeMutableRawPointer?
-) {
-    guard let filter: CIFilter = ci_borrow(handle),
-          let key,
-          let color: CIColor = ci_borrow(colorHandle)
-    else {
-        return
+    _ colorHandle: UnsafeMutableRawPointer?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let filter: CIFilter = ci_borrow(handle),
+              let key,
+              let color: CIColor = ci_borrow(colorHandle)
+        else {
+            throw CIBridgeError.invalidArgument("missing filter, color input key, or value")
+        }
+        try ci_filter_set_value(filter, key: String(cString: key), value: color)
     }
-    filter.setValue(color, forKey: String(cString: key))
 }
 
 @_cdecl("ci_filter_set_barcode_descriptor")
 public func ci_filter_set_barcode_descriptor(
     _ handle: UnsafeMutableRawPointer?,
     _ key: UnsafePointer<CChar>?,
-    _ descriptorHandle: UnsafeMutableRawPointer?
-) {
-    guard let filter: CIFilter = ci_borrow(handle),
-          let key,
-          let descriptor: CIBarcodeDescriptor = ci_borrow(descriptorHandle)
-    else {
-        return
+    _ descriptorHandle: UnsafeMutableRawPointer?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let filter: CIFilter = ci_borrow(handle),
+              let key,
+              let descriptor: CIBarcodeDescriptor = ci_borrow(descriptorHandle)
+        else {
+            throw CIBridgeError.invalidArgument(
+                "missing filter, barcode descriptor input key, or value"
+            )
+        }
+        try ci_filter_set_value(filter, key: String(cString: key), value: descriptor)
     }
-    filter.setValue(descriptor, forKey: String(cString: key))
 }
 
 @_cdecl("ci_filter_output_image")

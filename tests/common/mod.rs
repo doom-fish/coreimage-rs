@@ -11,8 +11,12 @@ pub fn solid_image() -> CIImage {
 
 pub fn qr_image() -> CIImage {
     let mut filter = CIFilter::new("CIQRCodeGenerator").expect("CIQRCodeGenerator should exist");
-    filter.set_input_bytes("inputMessage", b"coreimage-rs");
-    filter.set_input_string("inputCorrectionLevel", "M");
+    filter
+        .set_message(b"coreimage-rs")
+        .expect("inputMessage should accept bytes");
+    filter
+        .set_correction_level("M")
+        .expect("inputCorrectionLevel should accept a string");
     filter
         .output_image()
         .expect("CIQRCodeGenerator should produce an image")

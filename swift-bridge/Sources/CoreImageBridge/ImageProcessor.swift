@@ -100,6 +100,14 @@ private struct BridgeImageProcessorInvocationSnapshot {
     }
 }
 
+private final class BridgeImageProcessorInvocationSnapshotBox {
+    let value: BridgeImageProcessorInvocationSnapshot
+
+    init(_ value: BridgeImageProcessorInvocationSnapshot) {
+        self.value = value
+    }
+}
+
 private func ci_write_rect(
     _ rect: CGRect,
     _ outX: UnsafeMutablePointer<Double>?,
@@ -114,6 +122,7 @@ private func ci_write_rect(
 }
 
 private final class BridgePassthroughImageProcessorKernel: CIImageProcessorKernel {
+    private static let invocationLock = NSLock()
     private static var lastInvocation = BridgeImageProcessorInvocationSnapshot()
 
     private class func record(
@@ -127,6 +136,8 @@ private final class BridgePassthroughImageProcessorKernel: CIImageProcessorKerne
         if let input {
             snapshot.input = BridgeImageProcessorInputSnapshot(input: input)
         }
+        invocationLock.lock()
+        defer { invocationLock.unlock() }
         lastInvocation = snapshot
     }
 
@@ -150,12 +161,10 @@ private final class BridgePassthroughImageProcessorKernel: CIImageProcessorKerne
         memcpy(output.baseAddress, input.baseAddress, rowBytes * rows)
     }
 
-    class func lastInvocationJSON() -> String {
-        ci_json_string(from: lastInvocation.jsonObject) ?? "{}"
-    }
-
     class func lastInvocationSnapshot() -> BridgeImageProcessorInvocationSnapshot {
-        lastInvocation
+        invocationLock.lock()
+        defer { invocationLock.unlock() }
+        return lastInvocation
     }
 }
 
@@ -182,104 +191,192 @@ public func ci_image_processor_apply_passthrough(
     }
 }
 
-@_cdecl("ci_image_processor_last_invocation_json")
-public func ci_image_processor_last_invocation_json() -> UnsafeMutablePointer<CChar>? {
-    ci_string(BridgePassthroughImageProcessorKernel.lastInvocationJSON())
-}
-
-@_cdecl("ci_image_processor_last_invocation_input_count")
-public func ci_image_processor_last_invocation_input_count() -> Int {
-    BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().inputCount
-}
-
-@_cdecl("ci_image_processor_last_invocation_has_input")
-public func ci_image_processor_last_invocation_has_input() -> Bool {
-    BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().input != nil
-}
-
-@_cdecl("ci_image_processor_last_input_region")
-public func ci_image_processor_last_input_region(
-    _ outX: UnsafeMutablePointer<Double>?,
-    _ outY: UnsafeMutablePointer<Double>?,
-    _ outWidth: UnsafeMutablePointer<Double>?,
-    _ outHeight: UnsafeMutablePointer<Double>?
-) {
-    let rect = BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().input?.region ?? .zero
-    ci_write_rect(rect, outX, outY, outWidth, outHeight)
-}
-
-@_cdecl("ci_image_processor_last_output_region")
-public func ci_image_processor_last_output_region(
-    _ outX: UnsafeMutablePointer<Double>?,
-    _ outY: UnsafeMutablePointer<Double>?,
-    _ outWidth: UnsafeMutablePointer<Double>?,
-    _ outHeight: UnsafeMutablePointer<Double>?
-) {
-    ci_write_rect(
-        BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().output.region,
-        outX,
-        outY,
-        outWidth,
-        outHeight
+@_cdecl("ci_image_processor_invocation_snapshot_new")
+public func ci_image_processor_invocation_snapshot_new() -> UnsafeMutableRawPointer? {
+    ci_retain(
+        BridgeImageProcessorInvocationSnapshotBox(
+            BridgePassthroughImageProcessorKernel.lastInvocationSnapshot()
+        )
     )
 }
 
-@_cdecl("ci_image_processor_last_input_bytes_per_row")
-public func ci_image_processor_last_input_bytes_per_row() -> Int {
-    BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().input?.bytesPerRow ?? 0
+@_cdecl("ci_image_processor_invocation_snapshot_json")
+public func ci_image_processor_invocation_snapshot_json(
+    _ handle: UnsafeMutableRawPointer?
+) -> UnsafeMutablePointer<CChar>? {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return nil
+    }
+    return ci_string(ci_json_string(from: snapshot.value.jsonObject) ?? "{}")
 }
 
-@_cdecl("ci_image_processor_last_output_bytes_per_row")
-public func ci_image_processor_last_output_bytes_per_row() -> Int {
-    BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().output.bytesPerRow
+@_cdecl("ci_image_processor_invocation_snapshot_input_count")
+public func ci_image_processor_invocation_snapshot_input_count(
+    _ handle: UnsafeMutableRawPointer?
+) -> Int {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return 0
+    }
+    return snapshot.value.inputCount
 }
 
-@_cdecl("ci_image_processor_last_input_format")
-public func ci_image_processor_last_input_format() -> Int32 {
-    BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().input?.format ?? 0
+@_cdecl("ci_image_processor_invocation_snapshot_has_input")
+public func ci_image_processor_invocation_snapshot_has_input(
+    _ handle: UnsafeMutableRawPointer?
+) -> Bool {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return false
+    }
+    return snapshot.value.input != nil
 }
 
-@_cdecl("ci_image_processor_last_output_format")
-public func ci_image_processor_last_output_format() -> Int32 {
-    BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().output.format
+@_cdecl("ci_image_processor_invocation_snapshot_input_region")
+public func ci_image_processor_invocation_snapshot_input_region(
+    _ handle: UnsafeMutableRawPointer?,
+    _ outX: UnsafeMutablePointer<Double>?,
+    _ outY: UnsafeMutablePointer<Double>?,
+    _ outWidth: UnsafeMutablePointer<Double>?,
+    _ outHeight: UnsafeMutablePointer<Double>?
+) {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        ci_write_rect(.zero, outX, outY, outWidth, outHeight)
+        return
+    }
+    let rect = snapshot.value.input?.region ?? .zero
+    ci_write_rect(rect, outX, outY, outWidth, outHeight)
 }
 
-@_cdecl("ci_image_processor_last_input_has_pixel_buffer")
-public func ci_image_processor_last_input_has_pixel_buffer() -> Bool {
-    BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().input?.hasPixelBuffer ?? false
+@_cdecl("ci_image_processor_invocation_snapshot_output_region")
+public func ci_image_processor_invocation_snapshot_output_region(
+    _ handle: UnsafeMutableRawPointer?,
+    _ outX: UnsafeMutablePointer<Double>?,
+    _ outY: UnsafeMutablePointer<Double>?,
+    _ outWidth: UnsafeMutablePointer<Double>?,
+    _ outHeight: UnsafeMutablePointer<Double>?
+) {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        ci_write_rect(.zero, outX, outY, outWidth, outHeight)
+        return
+    }
+    ci_write_rect(snapshot.value.output.region, outX, outY, outWidth, outHeight)
 }
 
-@_cdecl("ci_image_processor_last_output_has_pixel_buffer")
-public func ci_image_processor_last_output_has_pixel_buffer() -> Bool {
-    BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().output.hasPixelBuffer
+@_cdecl("ci_image_processor_invocation_snapshot_input_bytes_per_row")
+public func ci_image_processor_invocation_snapshot_input_bytes_per_row(
+    _ handle: UnsafeMutableRawPointer?
+) -> Int {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return 0
+    }
+    return snapshot.value.input?.bytesPerRow ?? 0
 }
 
-@_cdecl("ci_image_processor_last_input_has_metal_texture")
-public func ci_image_processor_last_input_has_metal_texture() -> Bool {
-    BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().input?.hasMetalTexture ?? false
+@_cdecl("ci_image_processor_invocation_snapshot_output_bytes_per_row")
+public func ci_image_processor_invocation_snapshot_output_bytes_per_row(
+    _ handle: UnsafeMutableRawPointer?
+) -> Int {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return 0
+    }
+    return snapshot.value.output.bytesPerRow
 }
 
-@_cdecl("ci_image_processor_last_output_has_metal_texture")
-public func ci_image_processor_last_output_has_metal_texture() -> Bool {
-    BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().output.hasMetalTexture
+@_cdecl("ci_image_processor_invocation_snapshot_input_format")
+public func ci_image_processor_invocation_snapshot_input_format(
+    _ handle: UnsafeMutableRawPointer?
+) -> Int32 {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return 0
+    }
+    return snapshot.value.input?.format ?? 0
 }
 
-@_cdecl("ci_image_processor_last_input_digest")
-public func ci_image_processor_last_input_digest() -> UnsafeMutablePointer<CChar>? {
-    ci_string(BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().input?.digest ?? "")
+@_cdecl("ci_image_processor_invocation_snapshot_output_format")
+public func ci_image_processor_invocation_snapshot_output_format(
+    _ handle: UnsafeMutableRawPointer?
+) -> Int32 {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return 0
+    }
+    return snapshot.value.output.format
 }
 
-@_cdecl("ci_image_processor_last_output_digest")
-public func ci_image_processor_last_output_digest() -> UnsafeMutablePointer<CChar>? {
-    ci_string(BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().output.digest ?? "")
+@_cdecl("ci_image_processor_invocation_snapshot_input_has_pixel_buffer")
+public func ci_image_processor_invocation_snapshot_input_has_pixel_buffer(
+    _ handle: UnsafeMutableRawPointer?
+) -> Bool {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return false
+    }
+    return snapshot.value.input?.hasPixelBuffer ?? false
 }
 
-@_cdecl("ci_image_processor_last_input_roi_tile_index")
-public func ci_image_processor_last_input_roi_tile_index() -> Int64 {
-    Int64(BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().input?.roiTileIndex ?? -1)
+@_cdecl("ci_image_processor_invocation_snapshot_output_has_pixel_buffer")
+public func ci_image_processor_invocation_snapshot_output_has_pixel_buffer(
+    _ handle: UnsafeMutableRawPointer?
+) -> Bool {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return false
+    }
+    return snapshot.value.output.hasPixelBuffer
 }
 
-@_cdecl("ci_image_processor_last_input_roi_tile_count")
-public func ci_image_processor_last_input_roi_tile_count() -> Int64 {
-    Int64(BridgePassthroughImageProcessorKernel.lastInvocationSnapshot().input?.roiTileCount ?? -1)
+@_cdecl("ci_image_processor_invocation_snapshot_input_has_metal_texture")
+public func ci_image_processor_invocation_snapshot_input_has_metal_texture(
+    _ handle: UnsafeMutableRawPointer?
+) -> Bool {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return false
+    }
+    return snapshot.value.input?.hasMetalTexture ?? false
+}
+
+@_cdecl("ci_image_processor_invocation_snapshot_output_has_metal_texture")
+public func ci_image_processor_invocation_snapshot_output_has_metal_texture(
+    _ handle: UnsafeMutableRawPointer?
+) -> Bool {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return false
+    }
+    return snapshot.value.output.hasMetalTexture
+}
+
+@_cdecl("ci_image_processor_invocation_snapshot_input_digest")
+public func ci_image_processor_invocation_snapshot_input_digest(
+    _ handle: UnsafeMutableRawPointer?
+) -> UnsafeMutablePointer<CChar>? {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return nil
+    }
+    return ci_string(snapshot.value.input?.digest ?? "")
+}
+
+@_cdecl("ci_image_processor_invocation_snapshot_output_digest")
+public func ci_image_processor_invocation_snapshot_output_digest(
+    _ handle: UnsafeMutableRawPointer?
+) -> UnsafeMutablePointer<CChar>? {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return nil
+    }
+    return ci_string(snapshot.value.output.digest ?? "")
+}
+
+@_cdecl("ci_image_processor_invocation_snapshot_input_roi_tile_index")
+public func ci_image_processor_invocation_snapshot_input_roi_tile_index(
+    _ handle: UnsafeMutableRawPointer?
+) -> Int64 {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return -1
+    }
+    return Int64(snapshot.value.input?.roiTileIndex ?? -1)
+}
+
+@_cdecl("ci_image_processor_invocation_snapshot_input_roi_tile_count")
+public func ci_image_processor_invocation_snapshot_input_roi_tile_count(
+    _ handle: UnsafeMutableRawPointer?
+) -> Int64 {
+    guard let snapshot: BridgeImageProcessorInvocationSnapshotBox = ci_borrow(handle) else {
+        return -1
+    }
+    return Int64(snapshot.value.input?.roiTileCount ?? -1)
 }

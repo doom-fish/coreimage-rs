@@ -8,6 +8,8 @@ COVERAGE_PCT: 100.00%
 
 > Method note: this is a symbol-level audit. Generic stringly-typed escape hatches such as `CIFilter::new(name)`, raw input-key strings, and JSON metadata blobs are **not** counted as symbol coverage unless the crate exposes a dedicated typed helper for that SDK symbol.
 
+> Correctness note: current wrappers also retain bitmap render storage through task completion, validate dynamic filter KVC inputs behind an Objective-C exception boundary, transfer processor data as one synchronized snapshot, expose explicit warp ROI contracts, use the native sampler affine-array representation, and report unavailable context maximum-size methods as errors.
+
 ## 🟢 VERIFIED
 | Symbol | Kind | Header | Wrapped by |
 | --- | --- | --- | --- |

@@ -179,7 +179,10 @@ impl CIContext {
         }
     }
 
-/// Calls the `CoreImage` framework counterpart for `render_to_cv_pixel_buffer`.
+/// Synchronously renders into a pixel buffer's native storage.
+///
+/// The caller must exclude outstanding unsafe CPU byte views and all retained or foreign aliases
+/// that may access the same storage for the duration of this call.
     pub fn render_to_cv_pixel_buffer(
         &self,
         image: &CIImage,
@@ -197,7 +200,10 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
-/// Calls the `CoreImage` framework counterpart for `render_to_iosurface`.
+/// Synchronously renders into an IOSurface's native storage.
+///
+/// The caller must exclude outstanding unsafe CPU byte views and all retained or foreign aliases
+/// that may access the same storage for the duration of this call.
     pub fn render_to_iosurface(&self, image: &CIImage, surface: &IOSurface) -> Result<(), CIError> {
         let mut error = ptr::null_mut();
         let status = unsafe {
@@ -211,12 +217,13 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
-/// Calls the `CoreImage` framework counterpart for `start_render_task`.
+/// Starts a render while exclusively reserving the destination until task completion.
     pub fn start_render_task(
         &self,
         image: &CIImage,
-        destination: &CIRenderDestination,
+        destination: &mut CIRenderDestination,
     ) -> Result<CIRenderTask, CIError> {
+        let reservation = destination.reserve_task()?;
         let mut task = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status = unsafe {
@@ -228,13 +235,16 @@ impl CIContext {
                 &mut error,
             )
         };
-        unsafe { status_result(status, error)? };
-        if task.is_null() {
-            Err(CIError::NullResult(
+        match unsafe { status_result(status, error) } {
+            Ok(()) if task.is_null() => Err(CIError::NullResult(
                 "CIContext.startTask(toRender:to:) returned nil".to_string(),
-            ))
-        } else {
-            Ok(unsafe { CIRenderTask::from_raw(task) })
+            )),
+            Ok(()) => Ok(reservation.into_task(task)),
+            Err(error) if task.is_null() => Err(error),
+            Err(error) => {
+                drop(reservation.into_task(task));
+                Err(error)
+            }
         }
     }
 
@@ -244,6 +254,7 @@ impl CIContext {
         image: &CIImage,
         destination: &CIRenderDestination,
     ) -> Result<(), CIError> {
+        destination.ensure_idle()?;
         let mut error = ptr::null_mut();
         let status = unsafe {
             ffi::ci_context_prepare_render(
@@ -256,23 +267,27 @@ impl CIContext {
         unsafe { status_result(status, error) }
     }
 
-/// Calls the `CoreImage` framework counterpart for `start_clear_task`.
+/// Starts a clear while exclusively reserving the destination until task completion.
     pub fn start_clear_task(
         &self,
-        destination: &CIRenderDestination,
+        destination: &mut CIRenderDestination,
     ) -> Result<CIRenderTask, CIError> {
+        let reservation = destination.reserve_task()?;
         let mut task = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status = unsafe {
             ffi::ci_context_start_clear_task(self.ptr, destination.as_ptr(), &mut task, &mut error)
         };
-        unsafe { status_result(status, error)? };
-        if task.is_null() {
-            Err(CIError::NullResult(
+        match unsafe { status_result(status, error) } {
+            Ok(()) if task.is_null() => Err(CIError::NullResult(
                 "CIContext.startTask(toClear:) returned nil".to_string(),
-            ))
-        } else {
-            Ok(unsafe { CIRenderTask::from_raw(task) })
+            )),
+            Ok(()) => Ok(reservation.into_task(task)),
+            Err(error) if task.is_null() => Err(error),
+            Err(error) => {
+                drop(reservation.into_task(task));
+                Err(error)
+            }
         }
     }
 
@@ -286,20 +301,42 @@ impl CIContext {
         unsafe { ffi::ci_context_clear_caches(self.ptr) };
     }
 
-/// Calls the `CoreImage` framework counterpart for `input_image_maximum_size`.
-    pub fn input_image_maximum_size(&self) -> CGSize {
+/// Returns the native maximum input size where supported.
+///
+/// The API is unavailable on macOS and returns [`CIError::Unsupported`].
+    pub fn input_image_maximum_size(&self) -> Result<CGSize, CIError> {
         let mut width = 0.0;
         let mut height = 0.0;
-        unsafe { ffi::ci_context_input_image_maximum_size(self.ptr, &mut width, &mut height) };
-        CGSize::new(width, height)
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_context_input_image_maximum_size(
+                self.ptr,
+                &mut width,
+                &mut height,
+                &mut error,
+            )
+        };
+        unsafe { status_result(status, error)? };
+        Ok(CGSize::new(width, height))
     }
 
-/// Calls the `CoreImage` framework counterpart for `output_image_maximum_size`.
-    pub fn output_image_maximum_size(&self) -> CGSize {
+/// Returns the native maximum output size where supported.
+///
+/// The API is unavailable on macOS and returns [`CIError::Unsupported`].
+    pub fn output_image_maximum_size(&self) -> Result<CGSize, CIError> {
         let mut width = 0.0;
         let mut height = 0.0;
-        unsafe { ffi::ci_context_output_image_maximum_size(self.ptr, &mut width, &mut height) };
-        CGSize::new(width, height)
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_context_output_image_maximum_size(
+                self.ptr,
+                &mut width,
+                &mut height,
+                &mut error,
+            )
+        };
+        unsafe { status_result(status, error)? };
+        Ok(CGSize::new(width, height))
     }
 
 /// Calls the `CoreImage` framework counterpart for `write_png`.

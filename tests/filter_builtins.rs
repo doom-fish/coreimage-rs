@@ -1,3 +1,5 @@
+#![cfg(feature = "filters")]
+
 use coreimage::prelude::*;
 
 type BuiltinConstructor = fn() -> Option<CIFilter>;

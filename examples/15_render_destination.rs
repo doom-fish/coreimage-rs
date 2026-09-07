@@ -10,16 +10,16 @@ fn solid_image() -> CIImage {
 fn main() -> Result<(), Box<dyn Error>> {
     let context = CIContext::new_default();
     let image = solid_image();
-    let destination = CIRenderDestination::bitmap_rgba8(64, 64)?;
+    let mut destination = CIRenderDestination::bitmap_rgba8(64, 64)?;
     let info = context
-        .start_render_task(&image, &destination)?
+        .start_render_task(&image, &mut destination)?
         .wait_until_completed()?;
 
     println!(
         "rendered {} pixels in {} passes ({} bytes)",
         info.pixels_processed(),
         info.pass_count(),
-        destination.bitmap_data().len()
+        destination.bitmap_data()?.len()
     );
     Ok(())
 }

@@ -19,7 +19,14 @@ private func ci_sampler_options(
     options[kCISamplerWrapMode] = wrapMode == 1 ? kCISamplerWrapClamp : kCISamplerWrapBlack
     options[kCISamplerFilterMode] = filterMode == 1 ? kCISamplerFilterNearest : kCISamplerFilterLinear
     if useTransform {
-        options[kCISamplerAffineMatrix] = CIVector(cgAffineTransform: CGAffineTransform(a: a, b: b, c: c, d: d, tx: tx, ty: ty))
+        options[kCISamplerAffineMatrix] = [
+            NSNumber(value: a),
+            NSNumber(value: b),
+            NSNumber(value: c),
+            NSNumber(value: d),
+            NSNumber(value: tx),
+            NSNumber(value: ty),
+        ]
     }
     if useColorSpace {
         options[kCISamplerColorSpace] = ci_color_space(from: colorSpace)

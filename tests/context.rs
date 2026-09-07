@@ -18,3 +18,17 @@ fn context_renders_and_writes_png() -> Result<(), Box<dyn Error>> {
     assert!(output.exists());
     Ok(())
 }
+
+#[test]
+fn maximum_image_size_queries_report_platform_unavailability() {
+    let context = CIContext::new_default();
+
+    assert!(matches!(
+        context.input_image_maximum_size(),
+        Err(CIError::Unsupported(_))
+    ));
+    assert!(matches!(
+        context.output_image_maximum_size(),
+        Err(CIError::Unsupported(_))
+    ));
+}

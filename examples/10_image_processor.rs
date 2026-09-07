@@ -10,7 +10,9 @@ fn solid_image() -> CIImage {
 fn main() -> Result<(), Box<dyn Error>> {
     let output = CIImageProcessor::apply_passthrough(&solid_image())?;
     let extent = output.extent();
+    let invocation = CIImageProcessor::last_invocation();
     println!("processor extent: {}x{}", extent.size.width, extent.size.height);
+    println!("processor input count: {}", invocation.input_count());
     println!(
         "processor snapshot: {}",
         CIImageProcessor::last_invocation_json()

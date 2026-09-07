@@ -2,6 +2,62 @@ import CoreGraphics
 import CoreImage
 import Foundation
 
+public typealias CIXWarpRegionOfInterestCallback = @convention(c) (
+    UnsafeMutableRawPointer?,
+    Int32,
+    Double,
+    Double,
+    Double,
+    Double,
+    UnsafeMutablePointer<Double>?,
+    UnsafeMutablePointer<Double>?,
+    UnsafeMutablePointer<Double>?,
+    UnsafeMutablePointer<Double>?
+) -> Void
+public typealias CIXWarpRegionOfInterestReleaseCallback = @convention(c) (
+    UnsafeMutableRawPointer?
+) -> Void
+
+private final class BridgeWarpRegionOfInterestCallback {
+    private let context: UnsafeMutableRawPointer?
+    private let callback: CIXWarpRegionOfInterestCallback
+    private let releaseCallback: CIXWarpRegionOfInterestReleaseCallback?
+
+    init(
+        context: UnsafeMutableRawPointer?,
+        callback: @escaping CIXWarpRegionOfInterestCallback,
+        releaseCallback: CIXWarpRegionOfInterestReleaseCallback?
+    ) {
+        self.context = context
+        self.callback = callback
+        self.releaseCallback = releaseCallback
+    }
+
+    deinit {
+        releaseCallback?(context)
+    }
+
+    func region(inputIndex: Int32, destination: CGRect) -> CGRect {
+        var x = 0.0
+        var y = 0.0
+        var width = 0.0
+        var height = 0.0
+        callback(
+            context,
+            inputIndex,
+            destination.origin.x,
+            destination.origin.y,
+            destination.size.width,
+            destination.size.height,
+            &x,
+            &y,
+            &width,
+            &height
+        )
+        return CGRect(x: x, y: y, width: width, height: height)
+    }
+}
+
 private func ci_kernel_result(_ image: CIImage?, _ kind: String) -> UnsafeMutableRawPointer? {
     guard let image else { return nil }
     return ci_retain(image)
@@ -167,7 +223,8 @@ public func ci_warp_kernel_apply_image_scalar(
     _ x: Double,
     _ y: Double,
     _ width: Double,
-    _ height: Double
+    _ height: Double,
+    _ useDestinationRect: Bool
 ) -> UnsafeMutableRawPointer? {
     guard let kernel: CIWarpKernel = ci_borrow(handle),
           let image: CIImage = ci_borrow(imageHandle)
@@ -175,7 +232,54 @@ public func ci_warp_kernel_apply_image_scalar(
         return nil
     }
     let extent = CGRect(x: x, y: y, width: width, height: height)
-    return ci_kernel_result(kernel.apply(extent: extent, roiCallback: { _, rect in rect }, image: image, arguments: [value]), "warp")
+    let output = kernel.apply(
+        extent: extent,
+        roiCallback: { _, destination in
+            useDestinationRect ? destination : image.extent
+        },
+        image: image,
+        arguments: [value]
+    )
+    return ci_kernel_result(output, "warp")
+}
+
+@_cdecl("ci_warp_kernel_apply_image_scalar_with_roi")
+public func ci_warp_kernel_apply_image_scalar_with_roi(
+    _ handle: UnsafeMutableRawPointer?,
+    _ imageHandle: UnsafeMutableRawPointer?,
+    _ value: Double,
+    _ x: Double,
+    _ y: Double,
+    _ width: Double,
+    _ height: Double,
+    _ context: UnsafeMutableRawPointer?,
+    _ callback: CIXWarpRegionOfInterestCallback?,
+    _ releaseCallback: CIXWarpRegionOfInterestReleaseCallback?
+) -> UnsafeMutableRawPointer? {
+    guard let callback else {
+        releaseCallback?(context)
+        return nil
+    }
+    let callbackHolder = BridgeWarpRegionOfInterestCallback(
+        context: context,
+        callback: callback,
+        releaseCallback: releaseCallback
+    )
+    guard let kernel: CIWarpKernel = ci_borrow(handle),
+          let image: CIImage = ci_borrow(imageHandle)
+    else {
+        return nil
+    }
+    let extent = CGRect(x: x, y: y, width: width, height: height)
+    let output = kernel.apply(
+        extent: extent,
+        roiCallback: { inputIndex, destination in
+            callbackHolder.region(inputIndex: inputIndex, destination: destination)
+        },
+        image: image,
+        arguments: [value]
+    )
+    return ci_kernel_result(output, "warp")
 }
 
 @_cdecl("ci_blend_kernel_apply")

@@ -7,7 +7,16 @@ fn solid_image() -> CIImage {
 
 fn main() {
     let image = solid_image();
-    let sampler = CISampler::new(&image, CISamplerOptions::default());
+    let sampler = CISampler::new(
+        &image,
+        CISamplerOptions {
+            affine_transform: Some(CGAffineTransform::translation(10.0, 20.0)),
+            ..CISamplerOptions::default()
+        },
+    );
     let extent = sampler.extent();
-    println!("sampler extent: {}x{}", extent.size.width, extent.size.height);
+    println!(
+        "sampler extent: {}x{} at {},{}",
+        extent.size.width, extent.size.height, extent.origin.x, extent.origin.y
+    );
 }

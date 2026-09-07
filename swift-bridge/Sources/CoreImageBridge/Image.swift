@@ -207,7 +207,9 @@ public func ci_image_applying_orientation(
     _ handle: UnsafeMutableRawPointer?,
     _ exifOrientation: UInt32
 ) -> UnsafeMutableRawPointer? {
-    guard let image: CIImage = ci_borrow(handle) else { return nil }
+    guard let image: CIImage = ci_borrow(handle), (1 ... 8).contains(exifOrientation) else {
+        return nil
+    }
     return ci_retain(image.oriented(forExifOrientation: Int32(exifOrientation)))
 }
 

@@ -2,14 +2,14 @@ use std::error::Error;
 
 use coreimage::prelude::*;
 
-fn qr_image() -> CIImage {
+fn qr_image() -> Result<CIImage, CIError> {
     let mut filter = CIFilter::new("CIQRCodeGenerator").expect("CIQRCodeGenerator should exist");
-    filter.set_input_bytes("inputMessage", b"coreimage-rs");
-    filter.set_input_string("inputCorrectionLevel", "M");
-    filter
+    filter.set_message(b"coreimage-rs")?;
+    filter.set_correction_level("M")?;
+    Ok(filter
         .output_image()
         .expect("CIQRCodeGenerator should produce an image")
-        .scaled(8.0, 8.0)
+        .scaled(8.0, 8.0))
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             ..CIDetectorOptions::default()
         },
     )?;
-    let features = detector.features_in_image(&qr_image(), &CIDetectionOptions::default())?;
+    let features = detector.features_in_image(&qr_image()?, &CIDetectionOptions::default())?;
 
     println!("detected {} qr features", features.len());
     Ok(())

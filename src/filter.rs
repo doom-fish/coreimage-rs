@@ -7,10 +7,14 @@ use crate::color::CIColor;
 use crate::constants::{CIFilterCategory, CIInputKey, CIOutputKey};
 use crate::ffi;
 use crate::image::CIImage;
-use crate::util::{split_lines, string_to_cstring, take_owned_string};
+use crate::util::{split_lines, status_result, string_to_cstring, take_owned_string};
 use crate::vector::CIVector;
+use crate::CIError;
 
 /// A mutable Core Image filter instance.
+///
+/// Dynamic input setters validate the filter's supported keys and declared value classes before
+/// crossing an Objective-C exception boundary.
 pub struct CIFilter {
     ptr: *mut c_void,
 }
@@ -149,99 +153,148 @@ impl CIFilter {
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_image`.
-    pub fn set_input_image(&mut self, image: &CIImage) {
-        self.set_input_image_for_key("inputImage", image);
+    pub fn set_input_image(&mut self, image: &CIImage) -> Result<(), CIError> {
+        self.set_input_image_key(CIInputKey::Image, image)
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_image_for_key`.
-    pub fn set_input_image_for_key(&mut self, key: &str, image: &CIImage) {
-        let Ok(key) = string_to_cstring(key, "key") else {
-            return;
-        };
-        unsafe { ffi::ci_filter_set_image(self.ptr, key.as_ptr(), image.as_ptr()) };
+    pub fn set_input_image_for_key(
+        &mut self,
+        key: &str,
+        image: &CIImage,
+    ) -> Result<(), CIError> {
+        let key = string_to_cstring(key, "key")?;
+        let mut error = ptr::null_mut();
+        let status =
+            unsafe { ffi::ci_filter_set_image(self.ptr, key.as_ptr(), image.as_ptr(), &mut error) };
+        unsafe { status_result(status, error) }
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_image_key`.
-    pub fn set_input_image_key(&mut self, key: CIInputKey, image: &CIImage) {
-        self.set_input_image_for_key(key.value(), image);
+    pub fn set_input_image_key(
+        &mut self,
+        key: CIInputKey,
+        image: &CIImage,
+    ) -> Result<(), CIError> {
+        self.set_input_image_for_key(key.value(), image)
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_number`.
-    pub fn set_input_number(&mut self, key: &str, value: f64) {
-        let Ok(key) = string_to_cstring(key, "key") else {
-            return;
-        };
-        unsafe { ffi::ci_filter_set_number(self.ptr, key.as_ptr(), value) };
+    pub fn set_input_number(&mut self, key: &str, value: f64) -> Result<(), CIError> {
+        let key = string_to_cstring(key, "key")?;
+        let mut error = ptr::null_mut();
+        let status =
+            unsafe { ffi::ci_filter_set_number(self.ptr, key.as_ptr(), value, &mut error) };
+        unsafe { status_result(status, error) }
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_number_key`.
-    pub fn set_input_number_key(&mut self, key: CIInputKey, value: f64) {
-        self.set_input_number(key.value(), value);
+    pub fn set_input_number_key(
+        &mut self,
+        key: CIInputKey,
+        value: f64,
+    ) -> Result<(), CIError> {
+        self.set_input_number(key.value(), value)
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_string`.
-    pub fn set_input_string(&mut self, key: &str, value: &str) {
-        let Ok(key) = string_to_cstring(key, "key") else {
-            return;
+    pub fn set_input_string(&mut self, key: &str, value: &str) -> Result<(), CIError> {
+        let key = string_to_cstring(key, "key")?;
+        let value = string_to_cstring(value, "value")?;
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_filter_set_string(self.ptr, key.as_ptr(), value.as_ptr(), &mut error)
         };
-        let Ok(value) = string_to_cstring(value, "value") else {
-            return;
-        };
-        unsafe { ffi::ci_filter_set_string(self.ptr, key.as_ptr(), value.as_ptr()) };
+        unsafe { status_result(status, error) }
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_string_key`.
-    pub fn set_input_string_key(&mut self, key: CIInputKey, value: &str) {
-        self.set_input_string(key.value(), value);
+    pub fn set_input_string_key(
+        &mut self,
+        key: CIInputKey,
+        value: &str,
+    ) -> Result<(), CIError> {
+        self.set_input_string(key.value(), value)
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_bytes`.
-    pub fn set_input_bytes(&mut self, key: &str, value: &[u8]) {
-        let Ok(key) = string_to_cstring(key, "key") else {
-            return;
+    pub fn set_input_bytes(&mut self, key: &str, value: &[u8]) -> Result<(), CIError> {
+        let key = string_to_cstring(key, "key")?;
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_filter_set_bytes(
+                self.ptr,
+                key.as_ptr(),
+                value.as_ptr(),
+                value.len(),
+                &mut error,
+            )
         };
-        unsafe { ffi::ci_filter_set_bytes(self.ptr, key.as_ptr(), value.as_ptr(), value.len()) };
+        unsafe { status_result(status, error) }
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_bytes_key`.
-    pub fn set_input_bytes_key(&mut self, key: CIInputKey, value: &[u8]) {
-        self.set_input_bytes(key.value(), value);
+    pub fn set_input_bytes_key(
+        &mut self,
+        key: CIInputKey,
+        value: &[u8],
+    ) -> Result<(), CIError> {
+        self.set_input_bytes(key.value(), value)
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_vector`.
-    pub fn set_input_vector(&mut self, key: &str, value: &CIVector) {
-        let Ok(key) = string_to_cstring(key, "key") else {
-            return;
-        };
-        unsafe { ffi::ci_filter_set_vector(self.ptr, key.as_ptr(), value.as_ptr()) };
+    pub fn set_input_vector(&mut self, key: &str, value: &CIVector) -> Result<(), CIError> {
+        let key = string_to_cstring(key, "key")?;
+        let mut error = ptr::null_mut();
+        let status =
+            unsafe { ffi::ci_filter_set_vector(self.ptr, key.as_ptr(), value.as_ptr(), &mut error) };
+        unsafe { status_result(status, error) }
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_vector_key`.
-    pub fn set_input_vector_key(&mut self, key: CIInputKey, value: &CIVector) {
-        self.set_input_vector(key.value(), value);
+    pub fn set_input_vector_key(
+        &mut self,
+        key: CIInputKey,
+        value: &CIVector,
+    ) -> Result<(), CIError> {
+        self.set_input_vector(key.value(), value)
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_color`.
-    pub fn set_input_color(&mut self, key: &str, value: &CIColor) {
-        let Ok(key) = string_to_cstring(key, "key") else {
-            return;
-        };
-        unsafe { ffi::ci_filter_set_color(self.ptr, key.as_ptr(), value.as_ptr()) };
+    pub fn set_input_color(&mut self, key: &str, value: &CIColor) -> Result<(), CIError> {
+        let key = string_to_cstring(key, "key")?;
+        let mut error = ptr::null_mut();
+        let status =
+            unsafe { ffi::ci_filter_set_color(self.ptr, key.as_ptr(), value.as_ptr(), &mut error) };
+        unsafe { status_result(status, error) }
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_color_key`.
-    pub fn set_input_color_key(&mut self, key: CIInputKey, value: &CIColor) {
-        self.set_input_color(key.value(), value);
+    pub fn set_input_color_key(
+        &mut self,
+        key: CIInputKey,
+        value: &CIColor,
+    ) -> Result<(), CIError> {
+        self.set_input_color(key.value(), value)
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_barcode_descriptor`.
-    pub fn set_input_barcode_descriptor(&mut self, key: &str, value: &CIBarcodeDescriptor) {
-        let Ok(key) = string_to_cstring(key, "key") else {
-            return;
+    pub fn set_input_barcode_descriptor(
+        &mut self,
+        key: &str,
+        value: &CIBarcodeDescriptor,
+    ) -> Result<(), CIError> {
+        let key = string_to_cstring(key, "key")?;
+        let mut error = ptr::null_mut();
+        let status = unsafe {
+            ffi::ci_filter_set_barcode_descriptor(
+                self.ptr,
+                key.as_ptr(),
+                value.as_ptr(),
+                &mut error,
+            )
         };
-        unsafe {
-            ffi::ci_filter_set_barcode_descriptor(self.ptr, key.as_ptr(), value.as_ptr());
-        };
+        unsafe { status_result(status, error) }
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_input_barcode_descriptor_key`.
@@ -249,8 +302,63 @@ impl CIFilter {
         &mut self,
         key: CIInputKey,
         value: &CIBarcodeDescriptor,
-    ) {
-        self.set_input_barcode_descriptor(key.value(), value);
+    ) -> Result<(), CIError> {
+        self.set_input_barcode_descriptor(key.value(), value)
+    }
+
+/// Sets the common `inputBackgroundImage` input.
+    pub fn set_background_image(&mut self, image: &CIImage) -> Result<(), CIError> {
+        self.set_input_image_key(CIInputKey::BackgroundImage, image)
+    }
+
+/// Sets the common `inputMaskImage` input.
+    pub fn set_mask_image(&mut self, image: &CIImage) -> Result<(), CIError> {
+        self.set_input_image_key(CIInputKey::MaskImage, image)
+    }
+
+/// Sets the common `inputRadius` input.
+    pub fn set_radius(&mut self, value: f64) -> Result<(), CIError> {
+        self.set_input_number_key(CIInputKey::Radius, value)
+    }
+
+/// Sets the common `inputAngle` input.
+    pub fn set_angle(&mut self, value: f64) -> Result<(), CIError> {
+        self.set_input_number_key(CIInputKey::Angle, value)
+    }
+
+/// Sets the common `inputScale` input.
+    pub fn set_scale(&mut self, value: f64) -> Result<(), CIError> {
+        self.set_input_number_key(CIInputKey::Scale, value)
+    }
+
+/// Sets the common `inputAmount` input.
+    pub fn set_amount(&mut self, value: f64) -> Result<(), CIError> {
+        self.set_input_number_key(CIInputKey::Amount, value)
+    }
+
+/// Sets the common `inputIntensity` input.
+    pub fn set_intensity(&mut self, value: f64) -> Result<(), CIError> {
+        self.set_input_number_key(CIInputKey::Intensity, value)
+    }
+
+/// Sets the common `inputCenter` input.
+    pub fn set_center(&mut self, value: &CIVector) -> Result<(), CIError> {
+        self.set_input_vector_key(CIInputKey::Center, value)
+    }
+
+/// Sets the common `inputColor` input.
+    pub fn set_color(&mut self, value: &CIColor) -> Result<(), CIError> {
+        self.set_input_color_key(CIInputKey::Color, value)
+    }
+
+/// Sets the QR/barcode generator `inputMessage` input.
+    pub fn set_message(&mut self, value: &[u8]) -> Result<(), CIError> {
+        self.set_input_bytes("inputMessage", value)
+    }
+
+/// Sets the QR generator `inputCorrectionLevel` input.
+    pub fn set_correction_level(&mut self, value: &str) -> Result<(), CIError> {
+        self.set_input_string("inputCorrectionLevel", value)
     }
 
 /// Calls the `CoreImage` framework counterpart for `output_image`.

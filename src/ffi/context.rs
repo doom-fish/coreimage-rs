@@ -55,13 +55,15 @@ unsafe extern "C" {
         handle: *mut c_void,
         out_width: *mut f64,
         out_height: *mut f64,
-    );
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 /// Calls the `CoreImage` framework counterpart for `ci_context_output_image_maximum_size`.
     pub fn ci_context_output_image_maximum_size(
         handle: *mut c_void,
         out_width: *mut f64,
         out_height: *mut f64,
-    );
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 /// Calls the `CoreImage` framework counterpart for `ci_context_write_png`.
     pub fn ci_context_write_png(
         handle: *mut c_void,

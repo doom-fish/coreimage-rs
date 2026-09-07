@@ -9,9 +9,9 @@ fn solid_image() -> CIImage {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut filter = CIFilter::new("CIColorMonochrome").ok_or("CIColorMonochrome should exist")?;
-    filter.set_input_image(&solid_image());
-    filter.set_input_color("inputColor", &CIColor::named(CIColorName::Blue));
-    filter.set_input_number("inputIntensity", 0.75);
+    filter.set_input_image(&solid_image())?;
+    filter.set_color(&CIColor::named(CIColorName::Blue))?;
+    filter.set_intensity(0.75)?;
     let output = filter
         .output_image()
         .ok_or("filter should produce output")?;

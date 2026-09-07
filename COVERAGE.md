@@ -1,4 +1,4 @@
-# CoreImage coverage audit for `coreimage` 0.2.2
+# CoreImage coverage audit
 
 This document tracks the public CoreImage framework headers against the surfaces currently wrapped by this crate.
 
@@ -10,6 +10,16 @@ This document tracks the public CoreImage framework headers against the surfaces
 - Coverage: 100.00%
 
 Audit-complete here means every non-exempt public symbol from the header audit has a typed Rust surface. It does **not** imply that every Objective-C method overload has a one-for-one ergonomic wrapper; some headers are represented by umbrella handles, typed constant families, or invocation snapshots.
+
+## Semantic correctness notes
+
+- Bitmap-backed `CIRenderDestination` storage is retained by each render task until native completion. Safe byte access is unavailable while a task is pending, and task drop is a completion barrier.
+- Synchronous `CVPixelBuffer` and `IOSurface` rendering is documented as a native write that must not overlap unsafe CPU views or retained/foreign aliases accessing the same storage.
+- Dynamic filter inputs are checked against `inputKeys` and `kCIAttributeClass`; Objective-C KVC exceptions are converted to `CIError`.
+- Processor invocation fields are transferred from one synchronized retained snapshot.
+- Warp kernels default to the full source extent, with explicit destination-rect and custom ROI callback variants.
+- Sampler affine transforms use the native six-number array contract.
+- Context maximum input/output size methods are unavailable in the macOS SDK and therefore return `CIError::Unsupported`; no successful zero-size value is fabricated.
 
 ## Implemented user-requested areas
 
@@ -40,26 +50,26 @@ Audit-complete here means every non-exempt public symbol from the header audit h
 | --- | --- | --- |
 | `CIBarcodeDescriptor.h` | Implemented | Constructors + inspection for QR/Aztec/PDF417/Data Matrix descriptors. |
 | `CIColor.h` | Implemented | RGBA/named colors, parsing, component access, string conversion. |
-| `CIContext.h` | Implemented | Core context creation/render/export helpers, typed option keys, working-format inspection, and bitmap-backed render-task helpers. Audit-complete; image-maximum-size accessors remain conservative macOS bridges. |
+| `CIContext.h` | Implemented | Core context creation/render/export helpers, typed option keys, working-format inspection, completion-safe bitmap render tasks, and explicit unavailability for maximum-size methods on macOS. |
 | `CIDetector.h` | Implemented | Detector creation + feature extraction for face/rectangle/QR/text detectors. |
 | `CIFeature.h` | Implemented | Feature kind, bounds, JSON details, QR message/symbol descriptor, text sub-features. |
-| `CIFilter.h` | Implemented | Filter construction, registry, localization, metadata, typed apply/attribute/category/input/output/UI constants, typed setters, and output image coverage. |
+| `CIFilter.h` | Implemented | Filter construction, registry, localization, metadata, typed apply/attribute/category/input/output/UI constants, validated fallible setters, and output image coverage. |
 | `CIFilterBuiltins.h` | Implemented | `filters` exposes 157 typed constructors for instantiable built-ins plus family helpers for abstract protocols. |
 | `CIFilterConstructor.h` | Implemented | Callback-backed `CIFilterConstructor` bridge plus `CIFilter::register_filter_name`. |
 | `CIFilterGenerator.h` | Implemented | Graph creation/serialization/extraction helpers plus typed exported-key constants. |
 | `CIFilterShape.h` | Implemented | Extent, transform, inset, union, and intersection helpers are wrapped. |
 | `CIImage.h` | Implemented | File/data/color/bitmap creation, typed format/color-space constants, transforms, compositing, ROI helpers, and gain-map/headroom entry points with runtime availability checks. |
 | `CIImageAccumulator.h` | Implemented | Creation, extent/format/image access, mutation, dirty-rect updates, and clear are wrapped. |
-| `CIImageProcessor.h` | Implemented | Passthrough processor bridge for `CIImageProcessorKernel` plus typed input/output invocation snapshots. |
+| `CIImageProcessor.h` | Implemented | Passthrough processor bridge for `CIImageProcessorKernel` plus synchronized, atomically transferred input/output invocation snapshots. |
 | `CIImageProvider.h` | Implemented | Typed `CIImageProviderOptionKey` coverage for the audited symbols in this header; a direct provider callback bridge would be future ergonomic work. |
-| `CIKernel.h` | Implemented | `CIColorKernel`, `CIWarpKernel`, `CIBlendKernel`, and shared `CIKernel` handle coverage. |
+| `CIKernel.h` | Implemented | `CIColorKernel`, `CIWarpKernel`, `CIBlendKernel`, shared `CIKernel` handles, and conservative/custom warp ROI contracts. |
 | `CIKernelMetalLib.h` | N/A | Metal shader helper header; not part of the audited Objective-C/Core Image symbol surface. |
 | `CIPlugIn.h` | Implemented | `CIPlugIn` loading helpers are wrapped. |
 | `CIPlugInInterface.h` | Implemented | `CIPlugInRegistration` callback bridge is wrapped. |
 | `CIRAWFilter_Deprecated.h` | Exempt | Deprecated RAW filter constants remain intentionally excluded from the audit. |
 | `CIRAWFilter.h` | Implemented | Practical RAW construction, decoder-version discovery, preview/output access, and common adjustment helpers cover every non-exempt audited symbol. |
-| `CIRenderDestination.h` | Implemented | Bitmap-backed destinations, alpha mode, render tasks, and render info cover every non-exempt audited symbol. |
-| `CISampler.h` | Implemented | Sampler creation, wrap/filter/color-space modes, affine transform, extent queries. |
+| `CIRenderDestination.h` | Implemented | Bitmap-backed destinations with task-owned storage, guarded byte access, alpha mode, render tasks, and render info. |
+| `CISampler.h` | Implemented | Sampler creation, wrap/filter/color-space modes, native six-number affine matrices, and extent queries. |
 | `CIVector.h` | Implemented | Scalar/point/rect/transform creation, indexed access, geometry round-trips. |
 | `CoreImage.h` / `CoreImageDefines.h` | N/A | Umbrella / macro headers, not standalone wrapper targets. |
 

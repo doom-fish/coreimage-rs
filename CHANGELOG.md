@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.4.0] - 2026-09-07
+
+### Changed (breaking)
+
+- `CIRenderTask` now retains bitmap storage and its native destination through completion, waits when dropped, and keeps forgotten tasks conservatively in flight. Bitmap access and destination mutation return errors while native writes may still occur.
+- Documented that synchronous `CVPixelBuffer` and `IOSurface` rendering mutates aliased native storage and must not overlap unsafe CPU byte views or other native access.
+- Dynamic `CIFilter` input setters now return `Result`, validate supported keys and declared value classes, and use an Objective-C exception boundary for KVC. Named setters cover common image, numeric, vector, color, message, and correction-level inputs.
+- `CIImage::applying_orientation` and `CIImage::oriented` now return `Result` and reject EXIF orientation values outside 1 through 8.
+- `CIFilterConstructor`, `CIPlugInRegistration`, and custom warp ROI callbacks now require `Send + Sync` captures.
+- `CIWarpKernel::apply_image_scalar` now uses the full input extent as a conservative ROI. Added destination-rect and caller-callback variants.
+- Context maximum input/output size queries now return `Result`; unsupported macOS calls report `CIError::Unsupported`.
+- Raised in-family requirements to `apple-cf >=0.10, <0.11` and
+  `apple-metal >=0.9, <0.10`.
+
+### Fixed
+
+- Processor invocation data is copied under a lock and read through one retained snapshot handle, preventing fields from different concurrent invocations from being mixed.
+- Callback-body and caught panic-payload destruction are contained at the C ABI boundary, while library-owned release work runs in separately guarded cleanup phases. Callback captures retain Rust's normal non-panicking `Drop` requirement.
+- Sampler affine transforms now use the six-number array required by `kCISamplerAffineMatrix`.
+
 ## [0.3.4] - 2026-05-20
 
 - Added in-`src/` unit tests across color, constants, context, error, filter_shape, and raw_filter (Tier 2 quality polish), providing fast `cargo test --lib` fail-fast signal alongside the existing integration tests under `tests/`.

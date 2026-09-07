@@ -1,6 +1,10 @@
+use core::cell::UnsafeCell;
 use core::ffi::c_void;
 use core::fmt;
 use core::ptr;
+use core::sync::atomic::{AtomicBool, Ordering};
+use std::mem;
+use std::sync::Arc;
 
 use crate::ffi;
 use crate::{CIColorSpace, CIError, CIFormat};
@@ -36,11 +40,50 @@ impl CIRenderDestinationAlphaMode {
 }
 
 /// A render target for asynchronous Core Image rendering.
+///
+/// Bitmap storage is shared with each task and remains inaccessible until native work completes.
 pub struct CIRenderDestination {
     ptr: *mut c_void,
-    bytes: Vec<u8>,
+    backing: Arc<RenderDestinationBacking>,
     bytes_per_row: usize,
     format: CIFormat,
+}
+
+struct RenderDestinationBacking {
+    bytes: UnsafeCell<Box<[u8]>>,
+    in_flight: AtomicBool,
+}
+
+// Native writes are bracketed by the in-flight state and task completion barrier; Rust only
+// exposes shared or exclusive byte references while that state is idle.
+unsafe impl Send for RenderDestinationBacking {}
+unsafe impl Sync for RenderDestinationBacking {}
+
+pub(crate) struct CIRenderDestinationReservation {
+    destination: *mut c_void,
+    backing: Option<Arc<RenderDestinationBacking>>,
+}
+
+impl Drop for CIRenderDestinationReservation {
+    fn drop(&mut self) {
+        if !self.destination.is_null() {
+            unsafe { ffi::ci_object_release(self.destination) };
+            self.destination = ptr::null_mut();
+        }
+        if let Some(backing) = self.backing.take() {
+            backing.in_flight.store(false, Ordering::Release);
+        }
+    }
+}
+
+impl CIRenderDestinationReservation {
+    pub(crate) fn into_task(mut self, task: *mut c_void) -> CIRenderTask {
+        CIRenderTask {
+            ptr: task,
+            destination: mem::replace(&mut self.destination, ptr::null_mut()),
+            backing: self.backing.take(),
+        }
+    }
 }
 
 impl Drop for CIRenderDestination {
@@ -82,10 +125,14 @@ impl CIRenderDestination {
         let len = bytes_per_row.checked_mul(height).ok_or_else(|| {
             CIError::InvalidArgument("render destination buffer size overflowed".to_string())
         })?;
-        let mut bytes = vec![0_u8; len];
+        let backing = Arc::new(RenderDestinationBacking {
+            bytes: UnsafeCell::new(vec![0_u8; len].into_boxed_slice()),
+            in_flight: AtomicBool::new(false),
+        });
+        let data = unsafe { (&mut *backing.bytes.get()).as_mut_ptr() };
         let handle = unsafe {
             ffi::ci_render_destination_new_bitmap_data(
-                bytes.as_mut_ptr().cast(),
+                data.cast(),
                 len,
                 width,
                 height,
@@ -103,7 +150,7 @@ impl CIRenderDestination {
         }
         Ok(Self {
             ptr: handle,
-            bytes,
+            backing,
             bytes_per_row,
             format,
         })
@@ -132,8 +179,13 @@ impl CIRenderDestination {
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_alpha_mode`.
-    pub fn set_alpha_mode(&mut self, alpha_mode: CIRenderDestinationAlphaMode) {
+    pub fn set_alpha_mode(
+        &mut self,
+        alpha_mode: CIRenderDestinationAlphaMode,
+    ) -> Result<(), CIError> {
+        self.ensure_idle()?;
         unsafe { ffi::ci_render_destination_set_alpha_mode(self.ptr, alpha_mode.code()) };
+        Ok(())
     }
 
 /// Calls the `CoreImage` framework counterpart for `is_flipped`.
@@ -142,8 +194,10 @@ impl CIRenderDestination {
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_flipped`.
-    pub fn set_flipped(&mut self, flipped: bool) {
+    pub fn set_flipped(&mut self, flipped: bool) -> Result<(), CIError> {
+        self.ensure_idle()?;
         unsafe { ffi::ci_render_destination_set_flipped(self.ptr, flipped) };
+        Ok(())
     }
 
 /// Calls the `CoreImage` framework counterpart for `is_dithered`.
@@ -152,8 +206,10 @@ impl CIRenderDestination {
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_dithered`.
-    pub fn set_dithered(&mut self, dithered: bool) {
+    pub fn set_dithered(&mut self, dithered: bool) -> Result<(), CIError> {
+        self.ensure_idle()?;
         unsafe { ffi::ci_render_destination_set_dithered(self.ptr, dithered) };
+        Ok(())
     }
 
 /// Calls the `CoreImage` framework counterpart for `is_clamped`.
@@ -162,18 +218,22 @@ impl CIRenderDestination {
     }
 
 /// Calls the `CoreImage` framework counterpart for `set_clamped`.
-    pub fn set_clamped(&mut self, clamped: bool) {
+    pub fn set_clamped(&mut self, clamped: bool) -> Result<(), CIError> {
+        self.ensure_idle()?;
         unsafe { ffi::ci_render_destination_set_clamped(self.ptr, clamped) };
+        Ok(())
     }
 
-/// Calls the `CoreImage` framework counterpart for `bitmap_data`.
-    pub fn bitmap_data(&self) -> &[u8] {
-        self.bytes.as_slice()
+/// Borrows the bitmap bytes after any render task has completed.
+    pub fn bitmap_data(&self) -> Result<&[u8], CIError> {
+        self.ensure_idle()?;
+        Ok(unsafe { (&*self.backing.bytes.get()).as_ref() })
     }
 
-/// Calls the `CoreImage` framework counterpart for `bitmap_data_mut`.
-    pub fn bitmap_data_mut(&mut self) -> &mut [u8] {
-        self.bytes.as_mut_slice()
+/// Mutably borrows the bitmap bytes after any render task has completed.
+    pub fn bitmap_data_mut(&mut self) -> Result<&mut [u8], CIError> {
+        self.ensure_idle()?;
+        Ok(unsafe { (&mut *self.backing.bytes.get()).as_mut() })
     }
 
 /// Mirrors the `CoreImage` framework constant `fn`.
@@ -184,6 +244,38 @@ impl CIRenderDestination {
 /// Mirrors the `CoreImage` framework constant `fn`.
     pub const fn format(&self) -> CIFormat {
         self.format
+    }
+
+    pub(crate) fn ensure_idle(&self) -> Result<(), CIError> {
+        if self.backing.in_flight.load(Ordering::Acquire) {
+            Err(CIError::InvalidArgument(
+                "render destination has an in-flight task".to_string(),
+            ))
+        } else {
+            Ok(())
+        }
+    }
+
+    pub(crate) fn reserve_task(&mut self) -> Result<CIRenderDestinationReservation, CIError> {
+        self.backing
+            .in_flight
+            .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+            .map_err(|_| {
+                CIError::InvalidArgument(
+                    "render destination already has an in-flight task".to_string(),
+                )
+            })?;
+        let destination = unsafe { ffi::ci_object_retain(self.ptr) };
+        if destination.is_null() {
+            self.backing.in_flight.store(false, Ordering::Release);
+            return Err(CIError::NullResult(
+                "retaining CIRenderDestination returned nil".to_string(),
+            ));
+        }
+        Ok(CIRenderDestinationReservation {
+            destination,
+            backing: Some(Arc::clone(&self.backing)),
+        })
     }
 }
 
@@ -239,16 +331,26 @@ impl CIRenderInfo {
 }
 
 /// A handle for an in-flight Core Image render.
+///
+/// Dropping the task waits for completion. Forgetting it leaks the retained destination and bitmap
+/// storage, keeping safe byte access closed rather than exposing memory still owned by native work.
 pub struct CIRenderTask {
     ptr: *mut c_void,
+    destination: *mut c_void,
+    backing: Option<Arc<RenderDestinationBacking>>,
 }
 
 impl Drop for CIRenderTask {
     fn drop(&mut self) {
-        if !self.ptr.is_null() {
-            unsafe { ffi::ci_object_release(self.ptr) };
-            self.ptr = ptr::null_mut();
+        if self.ptr.is_null() {
+            self.release_after_completion();
+            return;
         }
+        let mut info = ptr::null_mut();
+        let mut error = ptr::null_mut();
+        let status =
+            unsafe { ffi::ci_render_task_wait_until_completed(self.ptr, &mut info, &mut error) };
+        let _ = self.complete_wait(status, info, error);
     }
 }
 
@@ -256,22 +358,39 @@ impl fmt::Debug for CIRenderTask {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("CIRenderTask")
             .field("ptr", &self.ptr)
+            .field("destination", &self.destination)
             .finish_non_exhaustive()
     }
 }
 
 impl CIRenderTask {
-    pub(crate) const unsafe fn from_raw(ptr: *mut c_void) -> Self {
-        Self { ptr }
+    fn release_after_completion(&mut self) {
+        if !self.ptr.is_null() {
+            unsafe { ffi::ci_object_release(self.ptr) };
+            self.ptr = ptr::null_mut();
+        }
+        if !self.destination.is_null() {
+            unsafe { ffi::ci_object_release(self.destination) };
+            self.destination = ptr::null_mut();
+        }
+        if let Some(backing) = self.backing.take() {
+            backing.in_flight.store(false, Ordering::Release);
+        }
     }
 
-/// Calls the `CoreImage` framework counterpart for `wait_until_completed`.
-    pub fn wait_until_completed(self) -> Result<CIRenderInfo, CIError> {
-        let mut info = ptr::null_mut();
-        let mut error = ptr::null_mut();
-        let status =
-            unsafe { ffi::ci_render_task_wait_until_completed(self.ptr, &mut info, &mut error) };
-        unsafe { crate::util::status_result(status, error)? };
+    fn complete_wait(
+        &mut self,
+        status: i32,
+        info: *mut c_void,
+        error: *mut core::ffi::c_char,
+    ) -> Result<CIRenderInfo, CIError> {
+        self.release_after_completion();
+        if let Err(error) = unsafe { crate::util::status_result(status, error) } {
+            if !info.is_null() {
+                unsafe { ffi::ci_object_release(info) };
+            }
+            return Err(error);
+        }
         if info.is_null() {
             Err(CIError::NullResult(
                 "CIRenderTask.waitUntilCompleted() returned nil".to_string(),
@@ -279,5 +398,57 @@ impl CIRenderTask {
         } else {
             Ok(unsafe { CIRenderInfo::from_raw(info) })
         }
+    }
+
+/// Waits for completion, releases the destination reservation, and returns owned render info.
+    pub fn wait_until_completed(mut self) -> Result<CIRenderInfo, CIError> {
+        let mut info = ptr::null_mut();
+        let mut error = ptr::null_mut();
+        let status =
+            unsafe { ffi::ci_render_task_wait_until_completed(self.ptr, &mut info, &mut error) };
+        self.complete_wait(status, info, error)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn completion_errors_release_the_destination_reservation() {
+        let mut destination =
+            CIRenderDestination::bitmap_rgba8(1, 1).expect("bitmap destination should be valid");
+        let reservation = destination
+            .reserve_task()
+            .expect("destination should be idle");
+        let mut task = reservation.into_task(ptr::null_mut());
+
+        let error = task
+            .complete_wait(
+                ffi::status::FRAMEWORK,
+                ptr::null_mut(),
+                ptr::null_mut(),
+            )
+            .expect_err("framework status should fail");
+
+        assert!(matches!(error, CIError::Framework(_)));
+        assert!(destination.bitmap_data().is_ok());
+    }
+
+    #[test]
+    fn missing_render_info_releases_the_destination_reservation() {
+        let mut destination =
+            CIRenderDestination::bitmap_rgba8(1, 1).expect("bitmap destination should be valid");
+        let reservation = destination
+            .reserve_task()
+            .expect("destination should be idle");
+        let mut task = reservation.into_task(ptr::null_mut());
+
+        let error = task
+            .complete_wait(ffi::status::OK, ptr::null_mut(), ptr::null_mut())
+            .expect_err("missing render info should fail");
+
+        assert!(matches!(error, CIError::NullResult(_)));
+        assert!(destination.bitmap_data().is_ok());
     }
 }

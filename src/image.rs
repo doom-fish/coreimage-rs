@@ -270,16 +270,25 @@ impl CIImage {
         )
     }
 
-/// Calls the `CoreImage` framework counterpart for `applying_orientation`.
-    pub fn applying_orientation(&self, exif_orientation: u32) -> Self {
-        Self::from_non_null(
-            unsafe { ffi::ci_image_applying_orientation(self.ptr, exif_orientation) },
-            "CIImage.oriented(forExifOrientation:)",
-        )
+/// Applies an EXIF orientation value from 1 through 8.
+    pub fn applying_orientation(&self, exif_orientation: u32) -> Result<Self, CIError> {
+        if !(1..=8).contains(&exif_orientation) {
+            return Err(CIError::InvalidArgument(
+                "EXIF orientation must be an integer from 1 through 8".to_string(),
+            ));
+        }
+        let handle = unsafe { ffi::ci_image_applying_orientation(self.ptr, exif_orientation) };
+        if handle.is_null() {
+            Err(CIError::NullResult(
+                "CIImage.oriented(forExifOrientation:) returned nil".to_string(),
+            ))
+        } else {
+            Ok(unsafe { Self::from_raw(handle) })
+        }
     }
 
-/// Calls the `CoreImage` framework counterpart for `oriented`.
-    pub fn oriented(&self, exif_orientation: u32) -> Self {
+/// Applies an EXIF orientation value from 1 through 8.
+    pub fn oriented(&self, exif_orientation: u32) -> Result<Self, CIError> {
         self.applying_orientation(exif_orientation)
     }
 
@@ -461,7 +470,7 @@ impl CIImage {
 
 /// Calls the `CoreImage` framework counterpart for `apply_filter`.
     pub fn apply_filter(&self, filter: &mut CIFilter) -> Result<Self, CIError> {
-        filter.set_input_image(self);
+        filter.set_input_image(self)?;
         filter
             .output_image()
             .ok_or_else(|| CIError::NullResult("CIFilter.outputImage returned nil".to_string()))

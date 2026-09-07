@@ -1,14 +1,15 @@
 use core::ffi::c_void;
 use core::fmt;
 use core::ptr::{self, NonNull};
-use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::Path;
 
 use crate::ffi;
-use crate::util::path_to_cstring;
+use crate::util::{
+    catch_callback_panic, catch_callback_panic_with_cleanup, path_to_cstring,
+};
 use crate::CIError;
 
-type PlugInRegistrationFn = dyn Fn(*mut c_void) -> bool;
+type PlugInRegistrationFn = dyn Fn(*mut c_void) -> bool + Send + Sync;
 
 struct PlugInRegistrationCallback {
     callback: Box<PlugInRegistrationFn>,
@@ -19,20 +20,23 @@ unsafe extern "C" fn plugin_registration_invoke(context: *mut c_void, host: *mut
         return false;
     }
 
-    // The user closure may panic; unwinding across the C ABI into Core Image
-    // is undefined behavior, so contain it and return false on panic.
-    catch_unwind(AssertUnwindSafe(|| {
+    catch_callback_panic("CIPlugInRegistration callback", false, || {
         let context = unsafe { &*context.cast::<PlugInRegistrationCallback>() };
         (context.callback)(host)
-    }))
-    .unwrap_or(false)
+    })
 }
 
 unsafe extern "C" fn plugin_registration_release(context: *mut c_void) {
     if context.is_null() {
         return;
     }
-    unsafe { drop(Box::from_raw(context.cast::<PlugInRegistrationCallback>())) };
+    let state = unsafe { Some(Box::from_raw(context.cast::<PlugInRegistrationCallback>())) };
+    let _ = catch_callback_panic_with_cleanup(
+        "CIPlugInRegistration release",
+        state,
+        |_| (),
+        |state| drop(state.take()),
+    );
 }
 
 /// A Rust-backed `CIPlugInRegistration` protocol object.
@@ -80,8 +84,11 @@ impl CIPlugInRegistration {
         self.ptr
     }
 
-/// Calls the `CoreImage` framework counterpart for `new`.
-    pub fn new(callback: impl Fn(*mut c_void) -> bool + 'static) -> Self {
+/// Creates a registration callback that may be invoked and released on any thread.
+///
+/// Callback-body panics return `false`. Captured values must implement non-panicking `Drop`;
+/// Rust cannot recover from multiple destructor panics in one closure aggregate.
+    pub fn new(callback: impl Fn(*mut c_void) -> bool + Send + Sync + 'static) -> Self {
         let callback = Box::new(PlugInRegistrationCallback {
             callback: Box::new(callback),
         });

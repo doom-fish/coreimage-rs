@@ -3,6 +3,7 @@ use crate::image::CIImage;
 use crate::util::{status_result, take_owned_string};
 use crate::{CIError, CIFormat};
 use apple_cf::cg::CGRect;
+use core::ffi::c_void;
 use core::ptr;
 
 /// Mirrors the `CoreImage` framework counterpart for `CIImageProcessorInput`.
@@ -138,17 +139,44 @@ impl CIImageProcessorInvocation {
     }
 }
 
-fn read_region(read: unsafe extern "C" fn(*mut f64, *mut f64, *mut f64, *mut f64)) -> CGRect {
+struct InvocationSnapshot {
+    ptr: *mut c_void,
+}
+
+impl InvocationSnapshot {
+    fn acquire() -> Self {
+        let ptr = unsafe { ffi::ci_image_processor_invocation_snapshot_new() };
+        assert!(!ptr.is_null(), "CIImageProcessor invocation snapshot returned nil");
+        Self { ptr }
+    }
+}
+
+impl Drop for InvocationSnapshot {
+    fn drop(&mut self) {
+        if !self.ptr.is_null() {
+            unsafe { ffi::ci_object_release(self.ptr) };
+            self.ptr = ptr::null_mut();
+        }
+    }
+}
+
+fn read_region(
+    snapshot: *mut c_void,
+    read: unsafe extern "C" fn(*mut c_void, *mut f64, *mut f64, *mut f64, *mut f64),
+) -> CGRect {
     let mut x = 0.0;
     let mut y = 0.0;
     let mut width = 0.0;
     let mut height = 0.0;
-    unsafe { read(&mut x, &mut y, &mut width, &mut height) };
+    unsafe { read(snapshot, &mut x, &mut y, &mut width, &mut height) };
     CGRect::new(x, y, width, height)
 }
 
-fn read_digest(read: unsafe extern "C" fn() -> *mut core::ffi::c_char) -> Option<String> {
-    unsafe { take_owned_string(read()) }.filter(|value| !value.is_empty())
+fn read_digest(
+    snapshot: *mut c_void,
+    read: unsafe extern "C" fn(*mut c_void) -> *mut core::ffi::c_char,
+) -> Option<String> {
+    unsafe { take_owned_string(read(snapshot)) }.filter(|value| !value.is_empty())
 }
 
 /// Helpers for running the built-in bridge image processor kernels.
@@ -166,24 +194,39 @@ impl CIImageProcessor {
         Ok(unsafe { CIImage::from_raw(output) })
     }
 
-/// Calls the `CoreImage` framework counterpart for `last_invocation`.
+/// Returns one owned invocation snapshot captured atomically under the bridge lock.
     pub fn last_invocation() -> CIImageProcessorInvocation {
-        let input = if unsafe { ffi::ci_image_processor_last_invocation_has_input() } {
+        let snapshot = InvocationSnapshot::acquire();
+        let input = if unsafe {
+            ffi::ci_image_processor_invocation_snapshot_has_input(snapshot.ptr)
+        } {
             Some(CIImageProcessorInput {
-                region: read_region(ffi::ci_image_processor_last_input_region),
-                bytes_per_row: unsafe { ffi::ci_image_processor_last_input_bytes_per_row() },
-                format_raw: unsafe { ffi::ci_image_processor_last_input_format() },
-                has_pixel_buffer: unsafe { ffi::ci_image_processor_last_input_has_pixel_buffer() },
-                has_metal_texture: unsafe {
-                    ffi::ci_image_processor_last_input_has_metal_texture()
+                region: read_region(
+                    snapshot.ptr,
+                    ffi::ci_image_processor_invocation_snapshot_input_region,
+                ),
+                bytes_per_row: unsafe {
+                    ffi::ci_image_processor_invocation_snapshot_input_bytes_per_row(snapshot.ptr)
                 },
-                digest: read_digest(ffi::ci_image_processor_last_input_digest),
+                format_raw: unsafe {
+                    ffi::ci_image_processor_invocation_snapshot_input_format(snapshot.ptr)
+                },
+                has_pixel_buffer: unsafe {
+                    ffi::ci_image_processor_invocation_snapshot_input_has_pixel_buffer(snapshot.ptr)
+                },
+                has_metal_texture: unsafe {
+                    ffi::ci_image_processor_invocation_snapshot_input_has_metal_texture(snapshot.ptr)
+                },
+                digest: read_digest(
+                    snapshot.ptr,
+                    ffi::ci_image_processor_invocation_snapshot_input_digest,
+                ),
                 roi_tile_index: usize::try_from(unsafe {
-                    ffi::ci_image_processor_last_input_roi_tile_index()
+                    ffi::ci_image_processor_invocation_snapshot_input_roi_tile_index(snapshot.ptr)
                 })
                 .ok(),
                 roi_tile_count: usize::try_from(unsafe {
-                    ffi::ci_image_processor_last_input_roi_tile_count()
+                    ffi::ci_image_processor_invocation_snapshot_input_roi_tile_count(snapshot.ptr)
                 })
                 .ok(),
             })
@@ -192,24 +235,45 @@ impl CIImageProcessor {
         };
 
         let output = CIImageProcessorOutput {
-            region: read_region(ffi::ci_image_processor_last_output_region),
-            bytes_per_row: unsafe { ffi::ci_image_processor_last_output_bytes_per_row() },
-            format_raw: unsafe { ffi::ci_image_processor_last_output_format() },
-            has_pixel_buffer: unsafe { ffi::ci_image_processor_last_output_has_pixel_buffer() },
-            has_metal_texture: unsafe { ffi::ci_image_processor_last_output_has_metal_texture() },
-            digest: read_digest(ffi::ci_image_processor_last_output_digest),
+            region: read_region(
+                snapshot.ptr,
+                ffi::ci_image_processor_invocation_snapshot_output_region,
+            ),
+            bytes_per_row: unsafe {
+                ffi::ci_image_processor_invocation_snapshot_output_bytes_per_row(snapshot.ptr)
+            },
+            format_raw: unsafe {
+                ffi::ci_image_processor_invocation_snapshot_output_format(snapshot.ptr)
+            },
+            has_pixel_buffer: unsafe {
+                ffi::ci_image_processor_invocation_snapshot_output_has_pixel_buffer(snapshot.ptr)
+            },
+            has_metal_texture: unsafe {
+                ffi::ci_image_processor_invocation_snapshot_output_has_metal_texture(snapshot.ptr)
+            },
+            digest: read_digest(
+                snapshot.ptr,
+                ffi::ci_image_processor_invocation_snapshot_output_digest,
+            ),
         };
 
         CIImageProcessorInvocation {
-            input_count: unsafe { ffi::ci_image_processor_last_invocation_input_count() },
+            input_count: unsafe {
+                ffi::ci_image_processor_invocation_snapshot_input_count(snapshot.ptr)
+            },
             input,
             output,
         }
     }
 
-/// Calls the `CoreImage` framework counterpart for `last_invocation_json`.
+/// Returns JSON for one owned invocation snapshot captured atomically under the bridge lock.
     pub fn last_invocation_json() -> String {
-        unsafe { take_owned_string(ffi::ci_image_processor_last_invocation_json()) }
-            .unwrap_or_else(|| "{}".to_string())
+        let snapshot = InvocationSnapshot::acquire();
+        unsafe {
+            take_owned_string(ffi::ci_image_processor_invocation_snapshot_json(
+                snapshot.ptr,
+            ))
+        }
+        .unwrap_or_else(|| "{}".to_string())
     }
 }

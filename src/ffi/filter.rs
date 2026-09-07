@@ -28,28 +28,55 @@ unsafe extern "C" {
 /// Calls the `CoreImage` framework counterpart for `ci_filter_localized_reference_url`.
     pub fn ci_filter_localized_reference_url(name: *const c_char) -> *mut c_char;
 /// Calls the `CoreImage` framework counterpart for `ci_filter_set_image`.
-    pub fn ci_filter_set_image(handle: *mut c_void, key: *const c_char, image: *mut c_void);
+    pub fn ci_filter_set_image(
+        handle: *mut c_void,
+        key: *const c_char,
+        image: *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 /// Calls the `CoreImage` framework counterpart for `ci_filter_set_number`.
-    pub fn ci_filter_set_number(handle: *mut c_void, key: *const c_char, value: f64);
+    pub fn ci_filter_set_number(
+        handle: *mut c_void,
+        key: *const c_char,
+        value: f64,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 /// Calls the `CoreImage` framework counterpart for `ci_filter_set_string`.
-    pub fn ci_filter_set_string(handle: *mut c_void, key: *const c_char, value: *const c_char);
+    pub fn ci_filter_set_string(
+        handle: *mut c_void,
+        key: *const c_char,
+        value: *const c_char,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 /// Calls the `CoreImage` framework counterpart for `ci_filter_set_bytes`.
     pub fn ci_filter_set_bytes(
         handle: *mut c_void,
         key: *const c_char,
         bytes: *const u8,
         len: usize,
-    );
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 /// Calls the `CoreImage` framework counterpart for `ci_filter_set_vector`.
-    pub fn ci_filter_set_vector(handle: *mut c_void, key: *const c_char, value: *mut c_void);
+    pub fn ci_filter_set_vector(
+        handle: *mut c_void,
+        key: *const c_char,
+        value: *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 /// Calls the `CoreImage` framework counterpart for `ci_filter_set_color`.
-    pub fn ci_filter_set_color(handle: *mut c_void, key: *const c_char, value: *mut c_void);
+    pub fn ci_filter_set_color(
+        handle: *mut c_void,
+        key: *const c_char,
+        value: *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 /// Calls the `CoreImage` framework counterpart for `ci_filter_set_barcode_descriptor`.
     pub fn ci_filter_set_barcode_descriptor(
         handle: *mut c_void,
         key: *const c_char,
         value: *mut c_void,
-    );
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 /// Calls the `CoreImage` framework counterpart for `ci_filter_output_image`.
     pub fn ci_filter_output_image(handle: *mut c_void) -> *mut c_void;
 }

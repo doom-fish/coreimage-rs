@@ -155,30 +155,44 @@ public func ci_context_clear_caches(_ handle: UnsafeMutableRawPointer?) {
 public func ci_context_input_image_maximum_size(
     _ handle: UnsafeMutableRawPointer?,
     _ outWidth: UnsafeMutablePointer<Double>?,
-    _ outHeight: UnsafeMutablePointer<Double>?
-) {
-    guard let _: CIContext = ci_borrow(handle) else {
-        outWidth?.pointee = 0
-        outHeight?.pointee = 0
-        return
+    _ outHeight: UnsafeMutablePointer<Double>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let context: CIContext = ci_borrow(handle), let outWidth, let outHeight else {
+            throw CIBridgeError.invalidArgument("missing CIContext handle or maximum-size output")
+        }
+        #if os(iOS)
+        let size = context.inputImageMaximumSize
+        outWidth.pointee = size.width
+        outHeight.pointee = size.height
+        #else
+        _ = context
+        throw CIBridgeError.unsupported("CIContext.inputImageMaximumSize is unavailable on macOS")
+        #endif
     }
-    outWidth?.pointee = 0
-    outHeight?.pointee = 0
 }
 
 @_cdecl("ci_context_output_image_maximum_size")
 public func ci_context_output_image_maximum_size(
     _ handle: UnsafeMutableRawPointer?,
     _ outWidth: UnsafeMutablePointer<Double>?,
-    _ outHeight: UnsafeMutablePointer<Double>?
-) {
-    guard let _: CIContext = ci_borrow(handle) else {
-        outWidth?.pointee = 0
-        outHeight?.pointee = 0
-        return
+    _ outHeight: UnsafeMutablePointer<Double>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let context: CIContext = ci_borrow(handle), let outWidth, let outHeight else {
+            throw CIBridgeError.invalidArgument("missing CIContext handle or maximum-size output")
+        }
+        #if os(iOS)
+        let size = context.outputImageMaximumSize
+        outWidth.pointee = size.width
+        outHeight.pointee = size.height
+        #else
+        _ = context
+        throw CIBridgeError.unsupported("CIContext.outputImageMaximumSize is unavailable on macOS")
+        #endif
     }
-    outWidth?.pointee = 0
-    outHeight?.pointee = 0
 }
 
 @_cdecl("ci_context_write_png")

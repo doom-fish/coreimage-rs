@@ -14,8 +14,17 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "CoreImageObjCBridge",
+            path: "Sources/CoreImageObjCBridge",
+            publicHeadersPath: "include"),
+        .target(
             name: "CoreImageBridge",
+            dependencies: ["CoreImageObjCBridge"],
             path: "Sources/CoreImageBridge",
-            publicHeadersPath: "include")
+            publicHeadersPath: "include"),
+        .testTarget(
+            name: "CoreImageObjCBridgeTests",
+            dependencies: ["CoreImageObjCBridge"],
+            path: "Tests/CoreImageObjCBridgeTests")
     ]
 )

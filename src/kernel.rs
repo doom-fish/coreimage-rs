@@ -7,9 +7,75 @@ use apple_cf::cg::CGRect;
 use crate::color::CIColor;
 use crate::ffi;
 use crate::image::CIImage;
-use crate::util::{status_result, string_to_cstring, take_owned_string};
+use crate::util::{
+    catch_callback_panic, catch_callback_panic_with_cleanup, status_result, string_to_cstring,
+    take_owned_string,
+};
 use crate::vector::CIVector;
 use crate::CIError;
+
+type WarpRegionOfInterestFn = dyn Fn(usize, CGRect) -> CGRect + Send + Sync;
+
+struct WarpRegionOfInterestCallback {
+    callback: Box<WarpRegionOfInterestFn>,
+    fallback: CGRect,
+}
+
+unsafe extern "C" fn warp_region_of_interest_invoke(
+    context: *mut c_void,
+    input_index: i32,
+    destination_x: f64,
+    destination_y: f64,
+    destination_width: f64,
+    destination_height: f64,
+    out_x: *mut f64,
+    out_y: *mut f64,
+    out_width: *mut f64,
+    out_height: *mut f64,
+) {
+    if context.is_null()
+        || out_x.is_null()
+        || out_y.is_null()
+        || out_width.is_null()
+        || out_height.is_null()
+    {
+        return;
+    }
+    let context = unsafe { &*context.cast::<WarpRegionOfInterestCallback>() };
+    let destination = CGRect::new(
+        destination_x,
+        destination_y,
+        destination_width,
+        destination_height,
+    );
+    let region = catch_callback_panic(
+        "CIWarpKernel region-of-interest callback",
+        context.fallback,
+        || {
+            let input_index = usize::try_from(input_index).unwrap_or_default();
+            (context.callback)(input_index, destination)
+        },
+    );
+    unsafe {
+        *out_x = region.origin.x;
+        *out_y = region.origin.y;
+        *out_width = region.size.width;
+        *out_height = region.size.height;
+    }
+}
+
+unsafe extern "C" fn warp_region_of_interest_release(context: *mut c_void) {
+    if context.is_null() {
+        return;
+    }
+    let state = unsafe { Some(Box::from_raw(context.cast::<WarpRegionOfInterestCallback>())) };
+    let _ = catch_callback_panic_with_cleanup(
+        "CIWarpKernel region-of-interest release",
+        state,
+        |_| (),
+        |state| drop(state.take()),
+    );
+}
 
 /// Built-in Core Image blend kernels.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -357,7 +423,7 @@ impl CIWarpKernel {
         Ok(Self::from_non_null(kernel, "CIWarpKernel(source:)"))
     }
 
-/// Calls the `CoreImage` framework counterpart for `apply_image_scalar`.
+/// Applies a warp using the full input extent as a conservative source ROI.
     pub fn apply_image_scalar(
         &self,
         image: &CIImage,
@@ -373,6 +439,73 @@ impl CIWarpKernel {
                 extent.origin.y,
                 extent.size.width,
                 extent.size.height,
+                false,
+            )
+        };
+        if handle.is_null() {
+            Err(CIError::NullResult(
+                "CIWarpKernel.apply returned nil".to_string(),
+            ))
+        } else {
+            Ok(unsafe { CIImage::from_raw(handle) })
+        }
+    }
+
+    /// Applies a known local warp whose source ROI equals the requested destination region.
+    pub fn apply_image_scalar_with_destination_roi(
+        &self,
+        image: &CIImage,
+        value: f64,
+        extent: CGRect,
+    ) -> Result<CIImage, CIError> {
+        let handle = unsafe {
+            ffi::ci_warp_kernel_apply_image_scalar(
+                self.ptr,
+                image.as_ptr(),
+                value,
+                extent.origin.x,
+                extent.origin.y,
+                extent.size.width,
+                extent.size.height,
+                true,
+            )
+        };
+        if handle.is_null() {
+            Err(CIError::NullResult(
+                "CIWarpKernel.apply returned nil".to_string(),
+            ))
+        } else {
+            Ok(unsafe { CIImage::from_raw(handle) })
+        }
+    }
+
+    /// Applies a warp with a caller-provided source region-of-interest callback.
+    ///
+    /// Callback-body panics use the full input extent. Captured values must implement non-panicking
+    /// `Drop`; Rust cannot recover from multiple destructor panics in one closure aggregate.
+        pub fn apply_image_scalar_with_roi(
+        &self,
+        image: &CIImage,
+        value: f64,
+        extent: CGRect,
+        callback: impl Fn(usize, CGRect) -> CGRect + Send + Sync + 'static,
+    ) -> Result<CIImage, CIError> {
+        let callback = Box::new(WarpRegionOfInterestCallback {
+            callback: Box::new(callback),
+            fallback: image.extent(),
+        });
+        let handle = unsafe {
+            ffi::ci_warp_kernel_apply_image_scalar_with_roi(
+                self.ptr,
+                image.as_ptr(),
+                value,
+                extent.origin.x,
+                extent.origin.y,
+                extent.size.width,
+                extent.size.height,
+                Box::into_raw(callback).cast(),
+                Some(warp_region_of_interest_invoke),
+                Some(warp_region_of_interest_release),
             )
         };
         if handle.is_null() {

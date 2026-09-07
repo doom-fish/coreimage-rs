@@ -1,6 +1,8 @@
 use core::ffi::{c_char, c_void};
+use std::any::Any;
 use std::ffi::{CStr, CString};
 use std::os::unix::ffi::OsStrExt;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::Path;
 
 use crate::error::CIError;
@@ -14,6 +16,87 @@ pub(crate) fn path_to_cstring(path: &Path) -> Result<CString, CIError> {
 pub(crate) fn string_to_cstring(value: &str, name: &str) -> Result<CString, CIError> {
     CString::new(value)
         .map_err(|_| CIError::InvalidArgument(format!("{name} contains an interior NUL byte")))
+}
+
+pub(crate) fn catch_callback_panic<R>(site: &str, fallback: R, callback: impl FnOnce() -> R) -> R {
+    catch_callback_panic_result(site, callback).unwrap_or(fallback)
+}
+
+pub(crate) fn catch_callback_panic_with_cleanup<S, R, F, C>(
+    site: &str,
+    mut state: S,
+    mut callback: F,
+    mut cleanup: C,
+) -> Option<R>
+where
+    F: FnMut(&mut S) -> R,
+    C: FnMut(&mut S),
+{
+    let callback_result = catch_callback_panic_result(site, || callback(&mut state));
+    let cleanup_succeeded =
+        catch_callback_panic_result(site, || cleanup(&mut state)).is_some();
+    let callback_drop_succeeded =
+        catch_callback_panic_result(site, || drop(callback)).is_some();
+    let cleanup_drop_succeeded =
+        catch_callback_panic_result(site, || drop(cleanup)).is_some();
+    let state_drop_succeeded = catch_callback_panic_result(site, || drop(state)).is_some();
+
+    if callback_drop_succeeded
+        && cleanup_succeeded
+        && cleanup_drop_succeeded
+        && state_drop_succeeded
+    {
+        callback_result
+    } else {
+        if let Some(result) = callback_result {
+            let _ = catch_callback_panic_result(site, || drop(result));
+        }
+        None
+    }
+}
+
+fn catch_callback_panic_result<R>(site: &str, callback: impl FnOnce() -> R) -> Option<R> {
+    let boundary_result = catch_unwind(AssertUnwindSafe(|| {
+        match catch_unwind(AssertUnwindSafe(callback)) {
+            Ok(result) => Some(result),
+            Err(payload) => {
+                log_callback_panic(site, payload.as_ref());
+                drop(payload);
+                None
+            }
+        }
+    }));
+
+    match boundary_result {
+        Ok(result) => result,
+        Err(payload) => {
+            log_callback_panic(site, payload.as_ref());
+            drop_payload_best_effort(payload);
+            None
+        }
+    }
+}
+
+fn log_callback_panic(site: &str, payload: &(dyn Any + Send)) {
+    if let Err(payload) = catch_unwind(AssertUnwindSafe(|| {
+        let message = payload.downcast_ref::<&'static str>().map_or_else(
+            || {
+                payload
+                    .downcast_ref::<String>()
+                    .map_or("<non-string panic payload>", String::as_str)
+            },
+            |message| *message,
+        );
+        eprintln!("coreimage: panic in {site} caught at C ABI boundary: {message}");
+    })) {
+        drop_payload_best_effort(payload);
+    }
+}
+
+fn drop_payload_best_effort(payload: Box<dyn Any + Send>) {
+    if let Err(payload) = catch_unwind(AssertUnwindSafe(|| drop(payload))) {
+        std::mem::forget(payload);
+    }
 }
 
 pub(crate) unsafe fn status_result(status: i32, error_str: *mut c_char) -> Result<(), CIError> {
