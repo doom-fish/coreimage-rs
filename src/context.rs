@@ -45,6 +45,9 @@ pub struct CIContext {
     ptr: *mut c_void,
 }
 
+unsafe impl Send for CIContext {}
+unsafe impl Sync for CIContext {}
+
 impl Drop for CIContext {
     fn drop(&mut self) {
         if !self.ptr.is_null() {

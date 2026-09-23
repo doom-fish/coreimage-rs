@@ -229,6 +229,9 @@ pub struct CIBlendKernel {
 
 macro_rules! impl_kernel_handle {
     ($name:ident) => {
+        unsafe impl Send for $name {}
+        unsafe impl Sync for $name {}
+
         impl Drop for $name {
             fn drop(&mut self) {
                 if !self.ptr.is_null() {

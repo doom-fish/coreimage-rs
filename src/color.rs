@@ -52,6 +52,9 @@ pub struct CIColor {
     ptr: *mut c_void,
 }
 
+unsafe impl Send for CIColor {}
+unsafe impl Sync for CIColor {}
+
 impl Drop for CIColor {
     fn drop(&mut self) {
         if !self.ptr.is_null() {

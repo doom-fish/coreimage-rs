@@ -12,6 +12,9 @@ pub struct CIVector {
     ptr: *mut c_void,
 }
 
+unsafe impl Send for CIVector {}
+unsafe impl Sync for CIVector {}
+
 impl Drop for CIVector {
     fn drop(&mut self) {
         if !self.ptr.is_null() {

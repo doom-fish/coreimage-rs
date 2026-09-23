@@ -18,6 +18,9 @@ pub struct CIImage {
     ptr: *mut c_void,
 }
 
+unsafe impl Send for CIImage {}
+unsafe impl Sync for CIImage {}
+
 impl Drop for CIImage {
     fn drop(&mut self) {
         if !self.ptr.is_null() {
