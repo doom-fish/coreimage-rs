@@ -82,7 +82,7 @@ impl CIFeature {
         let mut y = 0.0;
         let mut width = 0.0;
         let mut height = 0.0;
-        unsafe { ffi::ci_feature_bounds(self.ptr, &mut x, &mut y, &mut width, &mut height) };
+        unsafe { ffi::ci_feature_bounds(self.ptr, &raw mut x, &raw mut y, &raw mut width, &raw mut height) };
         CGRect::new(x, y, width, height)
     }
 

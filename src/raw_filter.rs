@@ -125,7 +125,7 @@ impl CIRAWFilter {
         let mut filter = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status =
-            unsafe { ffi::ci_raw_filter_new_from_path(path.as_ptr(), &mut filter, &mut error) };
+            unsafe { ffi::ci_raw_filter_new_from_path(path.as_ptr(), &raw mut filter, &raw mut error) };
         unsafe { status_result(status, error)? };
         Ok(Self::from_non_null(filter, "CIRAWFilter(imageURL:)"))
     }
@@ -149,8 +149,8 @@ impl CIRAWFilter {
                 identifier_hint
                     .as_ref()
                     .map_or(ptr::null(), |value| value.as_ptr()),
-                &mut filter,
-                &mut error,
+                &raw mut filter,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error)? };
@@ -174,7 +174,7 @@ impl CIRAWFilter {
     pub fn native_size(&self) -> CGSize {
         let mut width = 0.0;
         let mut height = 0.0;
-        unsafe { ffi::ci_raw_filter_native_size(self.ptr, &mut width, &mut height) };
+        unsafe { ffi::ci_raw_filter_native_size(self.ptr, &raw mut width, &raw mut height) };
         CGSize::new(width, height)
     }
 

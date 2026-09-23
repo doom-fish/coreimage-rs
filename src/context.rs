@@ -194,7 +194,7 @@ impl CIContext {
                 self.ptr,
                 image.as_ptr(),
                 buffer.as_ptr(),
-                &mut error,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error) }
@@ -211,7 +211,7 @@ impl CIContext {
                 self.ptr,
                 image.as_ptr(),
                 surface.as_ptr(),
-                &mut error,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error) }
@@ -231,8 +231,8 @@ impl CIContext {
                 self.ptr,
                 image.as_ptr(),
                 destination.as_ptr(),
-                &mut task,
-                &mut error,
+                &raw mut task,
+                &raw mut error,
             )
         };
         match unsafe { status_result(status, error) } {
@@ -261,7 +261,7 @@ impl CIContext {
                 self.ptr,
                 image.as_ptr(),
                 destination.as_ptr(),
-                &mut error,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error) }
@@ -276,7 +276,7 @@ impl CIContext {
         let mut task = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_context_start_clear_task(self.ptr, destination.as_ptr(), &mut task, &mut error)
+            ffi::ci_context_start_clear_task(self.ptr, destination.as_ptr(), &raw mut task, &raw mut error)
         };
         match unsafe { status_result(status, error) } {
             Ok(()) if task.is_null() => Err(CIError::NullResult(
@@ -311,9 +311,9 @@ impl CIContext {
         let status = unsafe {
             ffi::ci_context_input_image_maximum_size(
                 self.ptr,
-                &mut width,
-                &mut height,
-                &mut error,
+                &raw mut width,
+                &raw mut height,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error)? };
@@ -330,9 +330,9 @@ impl CIContext {
         let status = unsafe {
             ffi::ci_context_output_image_maximum_size(
                 self.ptr,
-                &mut width,
-                &mut height,
-                &mut error,
+                &raw mut width,
+                &raw mut height,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error)? };
@@ -344,7 +344,7 @@ impl CIContext {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_context_write_png(self.ptr, image.as_ptr(), path.as_ptr(), &mut error)
+            ffi::ci_context_write_png(self.ptr, image.as_ptr(), path.as_ptr(), &raw mut error)
         };
         unsafe { status_result(status, error) }
     }
@@ -359,7 +359,7 @@ impl CIContext {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_context_write_jpeg(self.ptr, image.as_ptr(), path.as_ptr(), quality, &mut error)
+            ffi::ci_context_write_jpeg(self.ptr, image.as_ptr(), path.as_ptr(), quality, &raw mut error)
         };
         unsafe { status_result(status, error) }
     }
@@ -374,7 +374,7 @@ impl CIContext {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_context_write_heif(self.ptr, image.as_ptr(), path.as_ptr(), quality, &mut error)
+            ffi::ci_context_write_heif(self.ptr, image.as_ptr(), path.as_ptr(), quality, &raw mut error)
         };
         unsafe { status_result(status, error) }
     }
@@ -394,7 +394,7 @@ impl CIContext {
                 image.as_ptr(),
                 path.as_ptr(),
                 quality,
-                &mut error,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error) }
@@ -405,7 +405,7 @@ impl CIContext {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_context_write_tiff(self.ptr, image.as_ptr(), path.as_ptr(), &mut error)
+            ffi::ci_context_write_tiff(self.ptr, image.as_ptr(), path.as_ptr(), &raw mut error)
         };
         unsafe { status_result(status, error) }
     }
@@ -415,7 +415,7 @@ impl CIContext {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_context_write_openexr(self.ptr, image.as_ptr(), path.as_ptr(), &mut error)
+            ffi::ci_context_write_openexr(self.ptr, image.as_ptr(), path.as_ptr(), &raw mut error)
         };
         unsafe { status_result(status, error) }
     }

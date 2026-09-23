@@ -73,7 +73,7 @@ impl CIImage {
         let mut error = ptr::null_mut();
         // SAFETY: `path.as_ptr()` is a valid nul-terminated C string from CString.
         // The FFI function populates `image` with a valid Objective-C handle (or null on error).
-        let status = unsafe { ffi::ci_image_from_path(path.as_ptr(), &mut image, &mut error) };
+        let status = unsafe { ffi::ci_image_from_path(path.as_ptr(), &raw mut image, &raw mut error) };
         // SAFETY: `error` is either null or a valid C string pointer allocated by the FFI layer.
         // `status_result` takes ownership and frees the error if necessary.
         unsafe { status_result(status, error)? };
@@ -92,7 +92,7 @@ impl CIImage {
         // SAFETY: `data.as_ptr()` is a valid byte slice pointer. `data.len()` is the correct length.
         // The FFI function populates `image` with a valid handle (or null on error).
         let status = unsafe {
-            ffi::ci_image_from_encoded_data(data.as_ptr(), data.len(), &mut image, &mut error)
+            ffi::ci_image_from_encoded_data(data.as_ptr(), data.len(), &raw mut image, &raw mut error)
         };
         // SAFETY: `error` is either null or a valid C string allocated by the FFI layer.
         unsafe { status_result(status, error)? };
@@ -188,8 +188,8 @@ impl CIImage {
                 format.raw_value(),
                 color_space.is_some(),
                 color_space.map_or(0, CIColorSpace::code),
-                &mut image,
-                &mut error,
+                &raw mut image,
+                &raw mut error,
             )
         };
         // SAFETY: `error` is either null or a valid C string allocated by the FFI layer.
@@ -229,7 +229,7 @@ impl CIImage {
         let mut height = 0.0;
         // SAFETY: `self.ptr` is a valid CIImage handle. The FFI function writes to the provided
         // mutable references, which are stack-allocated and valid.
-        unsafe { ffi::ci_image_extent(self.ptr, &mut x, &mut y, &mut width, &mut height) };
+        unsafe { ffi::ci_image_extent(self.ptr, &raw mut x, &raw mut y, &raw mut width, &raw mut height) };
         CGRect::new(x, y, width, height)
     }
 
@@ -459,10 +459,10 @@ impl CIImage {
                 rect.origin.y,
                 rect.size.width,
                 rect.size.height,
-                &mut x,
-                &mut y,
-                &mut width,
-                &mut height,
+                &raw mut x,
+                &raw mut y,
+                &raw mut width,
+                &raw mut height,
             );
         };
         CGRect::new(x, y, width, height)

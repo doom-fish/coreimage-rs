@@ -153,8 +153,8 @@ impl CIDetector {
                 options
                     .number_of_angles
                     .map_or(0, |value| i32::try_from(value).unwrap_or(i32::MAX)),
-                &mut detector,
-                &mut error,
+                &raw mut detector,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error)? };
@@ -181,8 +181,8 @@ impl CIDetector {
                 options.focal_length.unwrap_or(-1.0),
                 options.aspect_ratio.unwrap_or(0.0),
                 options.return_sub_features,
-                &mut features,
-                &mut error,
+                &raw mut features,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error)? };

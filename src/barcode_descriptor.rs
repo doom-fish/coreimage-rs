@@ -137,8 +137,8 @@ impl CIBarcodeDescriptor {
                 symbol_version,
                 mask_pattern,
                 error_correction_level.code(),
-                &mut descriptor,
-                &mut error,
+                &raw mut descriptor,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error)? };
@@ -161,8 +161,8 @@ impl CIBarcodeDescriptor {
                 is_compact,
                 layer_count,
                 data_codeword_count,
-                &mut descriptor,
-                &mut error,
+                &raw mut descriptor,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error)? };
@@ -185,8 +185,8 @@ impl CIBarcodeDescriptor {
                 is_compact,
                 row_count,
                 column_count,
-                &mut descriptor,
-                &mut error,
+                &raw mut descriptor,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error)? };
@@ -209,8 +209,8 @@ impl CIBarcodeDescriptor {
                 row_count,
                 column_count,
                 ecc_version.code(),
-                &mut descriptor,
-                &mut error,
+                &raw mut descriptor,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error)? };

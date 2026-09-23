@@ -75,7 +75,7 @@ impl CIFilterGenerator {
         let mut generator = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_filter_generator_from_path(path.as_ptr(), &mut generator, &mut error)
+            ffi::ci_filter_generator_from_path(path.as_ptr(), &raw mut generator, &raw mut error)
         };
         unsafe { status_result(status, error)? };
         Ok(Self::from_non_null(
@@ -225,7 +225,7 @@ impl CIFilterGenerator {
         let path = path_to_cstring(path.as_ref())?;
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_filter_generator_write_to_path(self.ptr, path.as_ptr(), atomically, &mut error)
+            ffi::ci_filter_generator_write_to_path(self.ptr, path.as_ptr(), atomically, &raw mut error)
         };
         unsafe { status_result(status, error) }
     }

@@ -319,7 +319,7 @@ impl CIColorKernel {
         let mut kernel = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status =
-            unsafe { ffi::ci_color_kernel_new_source(source.as_ptr(), &mut kernel, &mut error) };
+            unsafe { ffi::ci_color_kernel_new_source(source.as_ptr(), &raw mut kernel, &raw mut error) };
         unsafe { status_result(status, error)? };
         Ok(Self::from_non_null(kernel, "CIColorKernel(source:)"))
     }
@@ -418,7 +418,7 @@ impl CIWarpKernel {
         let mut kernel = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status =
-            unsafe { ffi::ci_warp_kernel_new_source(source.as_ptr(), &mut kernel, &mut error) };
+            unsafe { ffi::ci_warp_kernel_new_source(source.as_ptr(), &raw mut kernel, &raw mut error) };
         unsafe { status_result(status, error)? };
         Ok(Self::from_non_null(kernel, "CIWarpKernel(source:)"))
     }

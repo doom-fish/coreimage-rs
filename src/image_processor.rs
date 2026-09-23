@@ -168,7 +168,7 @@ fn read_region(
     let mut y = 0.0;
     let mut width = 0.0;
     let mut height = 0.0;
-    unsafe { read(snapshot, &mut x, &mut y, &mut width, &mut height) };
+    unsafe { read(snapshot, &raw mut x, &raw mut y, &raw mut width, &raw mut height) };
     CGRect::new(x, y, width, height)
 }
 
@@ -188,7 +188,7 @@ impl CIImageProcessor {
         let mut output = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_image_processor_apply_passthrough(image.as_ptr(), &mut output, &mut error)
+            ffi::ci_image_processor_apply_passthrough(image.as_ptr(), &raw mut output, &raw mut error)
         };
         unsafe { status_result(status, error)? };
         Ok(unsafe { CIImage::from_raw(output) })

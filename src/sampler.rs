@@ -137,7 +137,7 @@ impl CISampler {
         let mut y = 0.0;
         let mut width = 0.0;
         let mut height = 0.0;
-        unsafe { ffi::ci_sampler_extent(self.ptr, &mut x, &mut y, &mut width, &mut height) };
+        unsafe { ffi::ci_sampler_extent(self.ptr, &raw mut x, &raw mut y, &raw mut width, &raw mut height) };
         CGRect::new(x, y, width, height)
     }
 
@@ -148,7 +148,7 @@ impl CISampler {
         let mut width = 0.0;
         let mut height = 0.0;
         unsafe {
-            ffi::ci_sampler_definition_extent(self.ptr, &mut x, &mut y, &mut width, &mut height);
+            ffi::ci_sampler_definition_extent(self.ptr, &raw mut x, &raw mut y, &raw mut width, &raw mut height);
         };
         CGRect::new(x, y, width, height)
     }

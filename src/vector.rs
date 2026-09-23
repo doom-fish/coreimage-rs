@@ -155,7 +155,7 @@ impl CIVector {
     pub fn point_value(&self) -> CGPoint {
         let mut x = 0.0;
         let mut y = 0.0;
-        unsafe { ffi::ci_vector_point(self.ptr, &mut x, &mut y) };
+        unsafe { ffi::ci_vector_point(self.ptr, &raw mut x, &raw mut y) };
         CGPoint { x, y }
     }
 
@@ -165,7 +165,7 @@ impl CIVector {
         let mut y = 0.0;
         let mut width = 0.0;
         let mut height = 0.0;
-        unsafe { ffi::ci_vector_rect(self.ptr, &mut x, &mut y, &mut width, &mut height) };
+        unsafe { ffi::ci_vector_rect(self.ptr, &raw mut x, &raw mut y, &raw mut width, &raw mut height) };
         CGRect::new(x, y, width, height)
     }
 
@@ -178,7 +178,7 @@ impl CIVector {
         let mut tx = 0.0;
         let mut ty = 0.0;
         unsafe {
-            ffi::ci_vector_transform(self.ptr, &mut a, &mut b, &mut c, &mut d, &mut tx, &mut ty);
+            ffi::ci_vector_transform(self.ptr, &raw mut a, &raw mut b, &raw mut c, &raw mut d, &raw mut tx, &raw mut ty);
         };
         CGAffineTransform { a, b, c, d, tx, ty }
     }

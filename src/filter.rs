@@ -166,7 +166,7 @@ impl CIFilter {
         let key = string_to_cstring(key, "key")?;
         let mut error = ptr::null_mut();
         let status =
-            unsafe { ffi::ci_filter_set_image(self.ptr, key.as_ptr(), image.as_ptr(), &mut error) };
+            unsafe { ffi::ci_filter_set_image(self.ptr, key.as_ptr(), image.as_ptr(), &raw mut error) };
         unsafe { status_result(status, error) }
     }
 
@@ -184,7 +184,7 @@ impl CIFilter {
         let key = string_to_cstring(key, "key")?;
         let mut error = ptr::null_mut();
         let status =
-            unsafe { ffi::ci_filter_set_number(self.ptr, key.as_ptr(), value, &mut error) };
+            unsafe { ffi::ci_filter_set_number(self.ptr, key.as_ptr(), value, &raw mut error) };
         unsafe { status_result(status, error) }
     }
 
@@ -203,7 +203,7 @@ impl CIFilter {
         let value = string_to_cstring(value, "value")?;
         let mut error = ptr::null_mut();
         let status = unsafe {
-            ffi::ci_filter_set_string(self.ptr, key.as_ptr(), value.as_ptr(), &mut error)
+            ffi::ci_filter_set_string(self.ptr, key.as_ptr(), value.as_ptr(), &raw mut error)
         };
         unsafe { status_result(status, error) }
     }
@@ -227,7 +227,7 @@ impl CIFilter {
                 key.as_ptr(),
                 value.as_ptr(),
                 value.len(),
-                &mut error,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error) }
@@ -247,7 +247,7 @@ impl CIFilter {
         let key = string_to_cstring(key, "key")?;
         let mut error = ptr::null_mut();
         let status =
-            unsafe { ffi::ci_filter_set_vector(self.ptr, key.as_ptr(), value.as_ptr(), &mut error) };
+            unsafe { ffi::ci_filter_set_vector(self.ptr, key.as_ptr(), value.as_ptr(), &raw mut error) };
         unsafe { status_result(status, error) }
     }
 
@@ -265,7 +265,7 @@ impl CIFilter {
         let key = string_to_cstring(key, "key")?;
         let mut error = ptr::null_mut();
         let status =
-            unsafe { ffi::ci_filter_set_color(self.ptr, key.as_ptr(), value.as_ptr(), &mut error) };
+            unsafe { ffi::ci_filter_set_color(self.ptr, key.as_ptr(), value.as_ptr(), &raw mut error) };
         unsafe { status_result(status, error) }
     }
 
@@ -291,7 +291,7 @@ impl CIFilter {
                 self.ptr,
                 key.as_ptr(),
                 value.as_ptr(),
-                &mut error,
+                &raw mut error,
             )
         };
         unsafe { status_result(status, error) }

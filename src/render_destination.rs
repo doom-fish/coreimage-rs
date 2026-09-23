@@ -349,7 +349,7 @@ impl Drop for CIRenderTask {
         let mut info = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status =
-            unsafe { ffi::ci_render_task_wait_until_completed(self.ptr, &mut info, &mut error) };
+            unsafe { ffi::ci_render_task_wait_until_completed(self.ptr, &raw mut info, &raw mut error) };
         let _ = self.complete_wait(status, info, error);
     }
 }
@@ -405,7 +405,7 @@ impl CIRenderTask {
         let mut info = ptr::null_mut();
         let mut error = ptr::null_mut();
         let status =
-            unsafe { ffi::ci_render_task_wait_until_completed(self.ptr, &mut info, &mut error) };
+            unsafe { ffi::ci_render_task_wait_until_completed(self.ptr, &raw mut info, &raw mut error) };
         self.complete_wait(status, info, error)
     }
 }
