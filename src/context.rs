@@ -114,27 +114,31 @@ impl CIContext {
             .as_deref()
             .map(|name| string_to_cstring(name, "context name"))
             .transpose()?;
-        Ok(Self::from_non_null(
-            unsafe {
-                ffi::ci_context_new_with_options(
-                    options.cache_intermediates,
-                    options.priority_request_low,
-                    options.allow_low_power,
-                    options.output_premultiplied,
-                    options.high_quality_downsample,
-                    options.output_color_space.is_some(),
-                    options.output_color_space.map_or(0, CIColorSpace::code),
-                    options.working_color_space.is_some(),
-                    options.working_color_space.map_or(0, CIColorSpace::code),
-                    options.working_format.is_some(),
-                    options.working_format.map_or(0, CIFormat::raw_value),
-                    options.memory_limit.is_some(),
-                    options.memory_limit.unwrap_or_default(),
-                    name.as_ref().map_or(ptr::null(), |value| value.as_ptr()),
-                )
-            },
-            "CIContext(options:)",
-        ))
+        let handle = unsafe {
+            ffi::ci_context_new_with_options(
+                options.cache_intermediates,
+                options.priority_request_low,
+                options.allow_low_power,
+                options.output_premultiplied,
+                options.high_quality_downsample,
+                options.output_color_space.is_some(),
+                options.output_color_space.map_or(0, CIColorSpace::code),
+                options.working_color_space.is_some(),
+                options.working_color_space.map_or(0, CIColorSpace::code),
+                options.working_format.is_some(),
+                options.working_format.map_or(0, CIFormat::raw_value),
+                options.memory_limit.is_some(),
+                options.memory_limit.unwrap_or_default(),
+                name.as_ref().map_or(ptr::null(), |value| value.as_ptr()),
+            )
+        };
+        if handle.is_null() {
+            Err(CIError::NullResult(
+                "CIContext(options:) returned nil".to_string(),
+            ))
+        } else {
+            Ok(unsafe { Self::from_raw(handle) })
+        }
     }
 
 /// Calls the `CoreImage` framework counterpart for `new_metal`.
