@@ -9,7 +9,7 @@ description = "Safe Rust bindings for Apple's CoreImage framework — GPU-accele
 authors = ["Per Johansson <per@doom.fish>"]
 keywords = ["coreimage", "image-processing", "macos", "apple", "gpu"]
 categories = ["api-bindings", "graphics", "multimedia::images", "os::macos-apis"]
-rust-version = "1.76"
+rust-version = "1.82"
 readme = "README.md"
 build = "build.rs"
 include = [
@@ -44,8 +44,9 @@ filters = []
 metal = ["dep:apple-metal"]
 
 [dependencies]
-apple-cf = { version = ">=0.10, <0.11", default-features = false, features = ["cv", "cg", "iosurface"] }
-apple-metal = { version = ">=0.9, <0.10", optional = true }
+apple-cf = { path = "../apple-cf-rs", version = ">=0.11, <0.12", default-features = false, features = ["cv", "cg", "iosurface"] }
+apple-metal = { path = "../apple-metal-rs", version = ">=0.10, <0.11", optional = true }
+doom-fish-utils = { path = "../doom-fish-utils", version = ">=0.4.1, <0.5" }
 libc = "0.2"
 
 [package.metadata.docs.rs]
