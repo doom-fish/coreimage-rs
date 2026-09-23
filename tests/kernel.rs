@@ -32,6 +32,7 @@ fn assert_rect_eq(actual: CGRect, expected: CGRect) {
 }
 
 #[test]
+#[allow(deprecated)]
 fn warp_kernels_use_conservative_or_caller_supplied_regions() -> Result<(), Box<dyn Error>> {
     let kernel = CIWarpKernel::from_source(
         "kernel vec2 shift(float amount) { return destCoord() + vec2(amount, 0.0); }",
@@ -80,6 +81,7 @@ impl Drop for PanicOnDrop {
 }
 
 #[test]
+#[allow(deprecated)]
 fn warp_roi_panics_fall_back_to_the_full_input_extent() -> Result<(), Box<dyn Error>> {
     let kernel = CIWarpKernel::from_source(
         "kernel vec2 identityWarp(float amount) { return destCoord() + vec2(amount, 0.0); }",

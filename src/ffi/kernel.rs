@@ -1,6 +1,6 @@
 use core::ffi::{c_char, c_void};
 
-pub type RustWarpRegionOfInterestCallback = Option<
+pub type RustRegionOfInterestCallback = Option<
     unsafe extern "C" fn(
         context: *mut c_void,
         input_index: i32,
@@ -14,8 +14,7 @@ pub type RustWarpRegionOfInterestCallback = Option<
         out_height: *mut f64,
     ),
 >;
-pub type RustWarpRegionOfInterestReleaseCallback =
-    Option<unsafe extern "C" fn(context: *mut c_void)>;
+pub type RustContextReleaseCallback = Option<unsafe extern "C" fn(context: *mut c_void)>;
 
 unsafe extern "C" {
 /// Calls the `CoreImage` framework counterpart for `ci_color_kernel_new_source`.
@@ -85,8 +84,8 @@ unsafe extern "C" {
         width: f64,
         height: f64,
         context: *mut c_void,
-        callback: RustWarpRegionOfInterestCallback,
-        release_callback: RustWarpRegionOfInterestReleaseCallback,
+        callback: RustRegionOfInterestCallback,
+        release_callback: RustContextReleaseCallback,
     ) -> *mut c_void;
 /// Calls the `CoreImage` framework counterpart for `ci_blend_kernel_apply`.
     pub fn ci_blend_kernel_apply(
@@ -94,4 +93,67 @@ unsafe extern "C" {
         foreground: *mut c_void,
         background: *mut c_void,
     ) -> *mut c_void;
+    pub fn ci_kernel_new_metal_library(
+        kind: i32,
+        function_name: *const c_char,
+        data: *const u8,
+        len: usize,
+        has_output_format: bool,
+        output_format: i32,
+        out_kernel: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn ci_kernel_names_metal_library(data: *const u8, len: usize) -> *mut c_char;
+    pub fn ci_kernels_new_metal_source(
+        source: *const c_char,
+        out_kernels: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn ci_kernel_is_kind(handle: *mut c_void, kind: i32) -> bool;
+    pub fn ci_kernel_apply_arguments(
+        handle: *mut c_void,
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+        argument_kinds: *const i32,
+        argument_scalars: *const f64,
+        argument_objects: *const *mut c_void,
+        argument_count: usize,
+        context: *mut c_void,
+        callback: RustRegionOfInterestCallback,
+        release_callback: RustContextReleaseCallback,
+        out_image: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn ci_color_kernel_apply_arguments(
+        handle: *mut c_void,
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+        argument_kinds: *const i32,
+        argument_scalars: *const f64,
+        argument_objects: *const *mut c_void,
+        argument_count: usize,
+        out_image: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
+    pub fn ci_warp_kernel_apply_arguments(
+        handle: *mut c_void,
+        image: *mut c_void,
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+        argument_kinds: *const i32,
+        argument_scalars: *const f64,
+        argument_objects: *const *mut c_void,
+        argument_count: usize,
+        context: *mut c_void,
+        callback: RustRegionOfInterestCallback,
+        release_callback: RustContextReleaseCallback,
+        out_image: *mut *mut c_void,
+        out_error_message: *mut *mut c_char,
+    ) -> i32;
 }

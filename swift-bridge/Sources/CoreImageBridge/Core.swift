@@ -34,6 +34,16 @@ public func ci_borrow<T: AnyObject>(_ handle: UnsafeMutableRawPointer?) -> T? {
     return Unmanaged<T>.fromOpaque(handle).takeUnretainedValue()
 }
 
+public func ci_error_text(_ error: Error) -> String {
+    let nsError = error as NSError
+    let underlying = (nsError.userInfo[NSUnderlyingErrorKey] as? Error).map(ci_error_text)
+    guard let message = nsError.userInfo["CINonLocalizedDescriptionKey"] as? String else {
+        return nsError.localizedDescription
+    }
+    guard let underlying else { return message }
+    return "\(message): \(underlying)"
+}
+
 public enum CIBridgeError: Error, CustomStringConvertible {
     case invalidArgument(String)
     case nullResult(String)
@@ -53,7 +63,7 @@ public enum CIBridgeError: Error, CustomStringConvertible {
         case .io(let message):
             return message
         case .framework(let error):
-            return error.localizedDescription
+            return ci_error_text(error)
         case .unknown(let message):
             return message
         }
@@ -90,7 +100,7 @@ public func ci_message(from error: Error) -> String {
     if let error = error as? CIBridgeError {
         return error.description
     }
-    return (error as NSError).localizedDescription
+    return ci_error_text(error)
 }
 
 @inline(__always)

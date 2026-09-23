@@ -95,7 +95,9 @@ pub use image_processor::{
     CIImageProcessor, CIImageProcessorInput, CIImageProcessorInvocation, CIImageProcessorOutput,
 };
 /// Re-exports the `CoreImage` framework surface for this item.
-pub use kernel::{CIBlendKernel, CIBlendKernelKind, CIColorKernel, CIKernel, CIWarpKernel};
+pub use kernel::{
+    CIBlendKernel, CIBlendKernelKind, CIColorKernel, CIKernel, CIKernelArgument, CIWarpKernel,
+};
 /// Re-exports the `CoreImage` framework surface for this item.
 pub use plugin::{CIPlugIn, CIPlugInRegistration};
 /// Re-exports the `CoreImage` framework surface for this item.
@@ -138,7 +140,7 @@ pub mod prelude {
         CIFilterGeneratorExportedKey, CIFilterShape, CIFormat, CIImage, CIImageAccumulator,
         CIImageAutoAdjustmentOptionKey, CIImageOptionKey, CIImageProcessor, CIImageProcessorInput,
         CIImageProcessorInvocation, CIImageProcessorOutput, CIImageProviderOptionKey,
-        CIImageRepresentationOptionKey, CIInputKey, CIKernel, CIOutputKey, CIPlugIn,
+        CIImageRepresentationOptionKey, CIInputKey, CIKernel, CIKernelArgument, CIOutputKey, CIPlugIn,
         CIPlugInRegistration, CIQRCodeErrorCorrectionLevel, CIRAWDecoderVersion, CIRAWFilter,
         CIRenderDestination, CIRenderDestinationAlphaMode, CIRenderInfo, CIRenderTask, CISampler,
         CISamplerFilterMode, CISamplerOptionKey, CISamplerOptions, CISamplerWrapMode,

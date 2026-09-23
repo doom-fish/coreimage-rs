@@ -1,8 +1,9 @@
 import CoreGraphics
 import CoreImage
+import CoreImageObjCBridge
 import Foundation
 
-public typealias CIXWarpRegionOfInterestCallback = @convention(c) (
+public typealias CIXRegionOfInterestCallback = @convention(c) (
     UnsafeMutableRawPointer?,
     Int32,
     Double,
@@ -14,19 +15,19 @@ public typealias CIXWarpRegionOfInterestCallback = @convention(c) (
     UnsafeMutablePointer<Double>?,
     UnsafeMutablePointer<Double>?
 ) -> Void
-public typealias CIXWarpRegionOfInterestReleaseCallback = @convention(c) (
+public typealias CIXContextReleaseCallback = @convention(c) (
     UnsafeMutableRawPointer?
 ) -> Void
 
-private final class BridgeWarpRegionOfInterestCallback {
+final class BridgeRegionOfInterestCallback {
     private let context: UnsafeMutableRawPointer?
-    private let callback: CIXWarpRegionOfInterestCallback
-    private let releaseCallback: CIXWarpRegionOfInterestReleaseCallback?
+    private let callback: CIXRegionOfInterestCallback?
+    private let releaseCallback: CIXContextReleaseCallback?
 
     init(
         context: UnsafeMutableRawPointer?,
-        callback: @escaping CIXWarpRegionOfInterestCallback,
-        releaseCallback: CIXWarpRegionOfInterestReleaseCallback?
+        callback: CIXRegionOfInterestCallback?,
+        releaseCallback: CIXContextReleaseCallback?
     ) {
         self.context = context
         self.callback = callback
@@ -37,11 +38,16 @@ private final class BridgeWarpRegionOfInterestCallback {
         releaseCallback?(context)
     }
 
+    var isComplete: Bool {
+        context != nil && callback != nil && releaseCallback != nil
+    }
+
     func region(inputIndex: Int32, destination: CGRect) -> CGRect {
-        var x = 0.0
-        var y = 0.0
-        var width = 0.0
-        var height = 0.0
+        guard let callback else { return destination }
+        var x = Double(destination.origin.x)
+        var y = Double(destination.origin.y)
+        var width = Double(destination.size.width)
+        var height = Double(destination.size.height)
         callback(
             context,
             inputIndex,
@@ -61,6 +67,72 @@ private final class BridgeWarpRegionOfInterestCallback {
 private func ci_kernel_result(_ image: CIImage?, _ kind: String) -> UnsafeMutableRawPointer? {
     guard let image else { return nil }
     return ci_retain(image)
+}
+
+private func ci_kernel_class(_ kind: Int32) -> CIKernel.Type? {
+    switch kind {
+    case 0: return CIKernel.self
+    case 1: return CIColorKernel.self
+    case 2: return CIWarpKernel.self
+    case 3: return CIBlendKernel.self
+    default: return nil
+    }
+}
+
+private func ci_kernel_arguments(
+    _ kinds: UnsafePointer<Int32>?,
+    _ scalars: UnsafePointer<Double>?,
+    _ objects: UnsafePointer<UnsafeMutableRawPointer?>?,
+    _ count: Int
+) throws -> [Any] {
+    guard count > 0 else { return [] }
+    guard let kinds, let scalars, let objects else {
+        throw CIBridgeError.invalidArgument("missing kernel argument arrays")
+    }
+    var arguments: [Any] = []
+    arguments.reserveCapacity(count)
+    for index in 0 ..< count {
+        let object: AnyObject? = ci_borrow(objects[index])
+        switch kinds[index] {
+        case 0:
+            guard let image = object as? CIImage else {
+                throw CIBridgeError.invalidArgument("kernel argument \(index) is not a CIImage")
+            }
+            arguments.append(image)
+        case 1:
+            arguments.append(NSNumber(value: scalars[index]))
+        case 2:
+            guard let vector = object as? CIVector else {
+                throw CIBridgeError.invalidArgument("kernel argument \(index) is not a CIVector")
+            }
+            arguments.append(vector)
+        case 3:
+            guard let color = object as? CIColor else {
+                throw CIBridgeError.invalidArgument("kernel argument \(index) is not a CIColor")
+            }
+            arguments.append(color)
+        default:
+            throw CIBridgeError.invalidArgument("kernel argument \(index) has unknown kind \(kinds[index])")
+        }
+    }
+    return arguments
+}
+
+private func ci_kernel_output(
+    _ image: CIImage?,
+    _ error: NSError?,
+    _ method: String,
+    _ outImage: UnsafeMutablePointer<UnsafeMutableRawPointer?>
+) throws {
+    if let error {
+        throw CIBridgeError.framework(error)
+    }
+    guard let image else {
+        throw CIBridgeError.nullResult(
+            "\(method) returned nil; the arguments do not match the kernel's parameters"
+        )
+    }
+    outImage.pointee = ci_retain(image)
 }
 
 private func ci_builtin_blend_kernel(_ kind: Int32) -> CIBlendKernel? {
@@ -253,19 +325,16 @@ public func ci_warp_kernel_apply_image_scalar_with_roi(
     _ width: Double,
     _ height: Double,
     _ context: UnsafeMutableRawPointer?,
-    _ callback: CIXWarpRegionOfInterestCallback?,
-    _ releaseCallback: CIXWarpRegionOfInterestReleaseCallback?
+    _ callback: CIXRegionOfInterestCallback?,
+    _ releaseCallback: CIXContextReleaseCallback?
 ) -> UnsafeMutableRawPointer? {
-    guard let callback else {
-        releaseCallback?(context)
-        return nil
-    }
-    let callbackHolder = BridgeWarpRegionOfInterestCallback(
+    let callbackHolder = BridgeRegionOfInterestCallback(
         context: context,
         callback: callback,
         releaseCallback: releaseCallback
     )
-    guard let kernel: CIWarpKernel = ci_borrow(handle),
+    guard callbackHolder.isComplete,
+          let kernel: CIWarpKernel = ci_borrow(handle),
           let image: CIImage = ci_borrow(imageHandle)
     else {
         return nil
@@ -295,4 +364,205 @@ public func ci_blend_kernel_apply(
         return nil
     }
     return ci_kernel_result(kernel.apply(foreground: foreground, background: background), "blend")
+}
+
+@_cdecl("ci_kernel_new_metal_library")
+public func ci_kernel_new_metal_library(
+    _ kind: Int32,
+    _ functionName: UnsafePointer<CChar>?,
+    _ bytes: UnsafePointer<UInt8>?,
+    _ len: Int,
+    _ hasOutputFormat: Bool,
+    _ outputFormat: Int32,
+    _ outKernel: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let functionName, let bytes, len > 0, let outKernel,
+              let kernelClass = ci_kernel_class(kind)
+        else {
+            throw CIBridgeError.invalidArgument("missing kernel function name, library data, or output pointer")
+        }
+        let name = String(cString: functionName)
+        let data = Data(bytes: bytes, count: len)
+        let kernel: CIKernel
+        do {
+            if hasOutputFormat {
+                kernel = try kernelClass.init(
+                    functionName: name,
+                    fromMetalLibraryData: data,
+                    outputPixelFormat: CIFormat(rawValue: outputFormat)
+                )
+            } else {
+                kernel = try kernelClass.init(functionName: name, fromMetalLibraryData: data)
+            }
+        } catch {
+            throw CIBridgeError.framework(error)
+        }
+        outKernel.pointee = ci_retain(kernel)
+    }
+}
+
+@_cdecl("ci_kernel_names_metal_library")
+public func ci_kernel_names_metal_library(
+    _ bytes: UnsafePointer<UInt8>?,
+    _ len: Int
+) -> UnsafeMutablePointer<CChar>? {
+    guard let bytes, len > 0 else { return ci_string("") }
+    let names = CIKernel.kernelNames(fromMetalLibraryData: Data(bytes: bytes, count: len))
+    return ci_string(names.joined(separator: "\n"))
+}
+
+@_cdecl("ci_kernels_new_metal_source")
+public func ci_kernels_new_metal_source(
+    _ source: UnsafePointer<CChar>?,
+    _ outKernels: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let source, let outKernels else {
+            throw CIBridgeError.invalidArgument("missing Metal source or output pointer")
+        }
+        guard #available(macOS 12.0, *) else {
+            throw CIBridgeError.unsupported("CIKernel.kernels(withMetalString:) requires macOS 12.0 or later")
+        }
+        let kernels: [CIKernel]
+        do {
+            kernels = try CIKernel.kernels(withMetalString: String(cString: source))
+        } catch {
+            throw CIBridgeError.framework(error)
+        }
+        outKernels.pointee = ci_retain(kernels as NSArray)
+    }
+}
+
+@_cdecl("ci_kernel_is_kind")
+public func ci_kernel_is_kind(_ handle: UnsafeMutableRawPointer?, _ kind: Int32) -> Bool {
+    let object: AnyObject? = ci_borrow(handle)
+    switch kind {
+    case 0: return object is CIKernel
+    case 1: return object is CIColorKernel
+    case 2: return object is CIWarpKernel
+    case 3: return object is CIBlendKernel
+    default: return false
+    }
+}
+
+@_cdecl("ci_kernel_apply_arguments")
+public func ci_kernel_apply_arguments(
+    _ handle: UnsafeMutableRawPointer?,
+    _ x: Double,
+    _ y: Double,
+    _ width: Double,
+    _ height: Double,
+    _ argumentKinds: UnsafePointer<Int32>?,
+    _ argumentScalars: UnsafePointer<Double>?,
+    _ argumentObjects: UnsafePointer<UnsafeMutableRawPointer?>?,
+    _ argumentCount: Int,
+    _ context: UnsafeMutableRawPointer?,
+    _ callback: CIXRegionOfInterestCallback?,
+    _ releaseCallback: CIXContextReleaseCallback?,
+    _ outImage: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    let callbackHolder = BridgeRegionOfInterestCallback(
+        context: context,
+        callback: callback,
+        releaseCallback: releaseCallback
+    )
+    return ci_run(outError) {
+        guard callbackHolder.isComplete, let outImage,
+              let kernel: CIKernel = ci_borrow(handle)
+        else {
+            throw CIBridgeError.invalidArgument("missing kernel, region-of-interest callback, or output pointer")
+        }
+        let arguments = try ci_kernel_arguments(argumentKinds, argumentScalars, argumentObjects, argumentCount)
+        var error: NSError?
+        let output = CIXTryApplyKernel(
+            kernel,
+            CGRect(x: x, y: y, width: width, height: height),
+            { inputIndex, destination in
+                callbackHolder.region(inputIndex: inputIndex, destination: destination)
+            },
+            arguments,
+            &error
+        )
+        try ci_kernel_output(output, error, "CIKernel.apply(extent:roiCallback:arguments:)", outImage)
+    }
+}
+
+@_cdecl("ci_color_kernel_apply_arguments")
+public func ci_color_kernel_apply_arguments(
+    _ handle: UnsafeMutableRawPointer?,
+    _ x: Double,
+    _ y: Double,
+    _ width: Double,
+    _ height: Double,
+    _ argumentKinds: UnsafePointer<Int32>?,
+    _ argumentScalars: UnsafePointer<Double>?,
+    _ argumentObjects: UnsafePointer<UnsafeMutableRawPointer?>?,
+    _ argumentCount: Int,
+    _ outImage: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    ci_run(outError) {
+        guard let outImage, let kernel: CIColorKernel = ci_borrow(handle) else {
+            throw CIBridgeError.invalidArgument("missing color kernel or output pointer")
+        }
+        let arguments = try ci_kernel_arguments(argumentKinds, argumentScalars, argumentObjects, argumentCount)
+        var error: NSError?
+        let output = CIXTryApplyColorKernel(
+            kernel,
+            CGRect(x: x, y: y, width: width, height: height),
+            arguments,
+            &error
+        )
+        try ci_kernel_output(output, error, "CIColorKernel.apply(extent:arguments:)", outImage)
+    }
+}
+
+@_cdecl("ci_warp_kernel_apply_arguments")
+public func ci_warp_kernel_apply_arguments(
+    _ handle: UnsafeMutableRawPointer?,
+    _ imageHandle: UnsafeMutableRawPointer?,
+    _ x: Double,
+    _ y: Double,
+    _ width: Double,
+    _ height: Double,
+    _ argumentKinds: UnsafePointer<Int32>?,
+    _ argumentScalars: UnsafePointer<Double>?,
+    _ argumentObjects: UnsafePointer<UnsafeMutableRawPointer?>?,
+    _ argumentCount: Int,
+    _ context: UnsafeMutableRawPointer?,
+    _ callback: CIXRegionOfInterestCallback?,
+    _ releaseCallback: CIXContextReleaseCallback?,
+    _ outImage: UnsafeMutablePointer<UnsafeMutableRawPointer?>?,
+    _ outError: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>?
+) -> Int32 {
+    let callbackHolder = BridgeRegionOfInterestCallback(
+        context: context,
+        callback: callback,
+        releaseCallback: releaseCallback
+    )
+    return ci_run(outError) {
+        guard callbackHolder.isComplete, let outImage,
+              let kernel: CIWarpKernel = ci_borrow(handle),
+              let image: CIImage = ci_borrow(imageHandle)
+        else {
+            throw CIBridgeError.invalidArgument("missing warp kernel, input image, region-of-interest callback, or output pointer")
+        }
+        let arguments = try ci_kernel_arguments(argumentKinds, argumentScalars, argumentObjects, argumentCount)
+        var error: NSError?
+        let output = CIXTryApplyWarpKernel(
+            kernel,
+            CGRect(x: x, y: y, width: width, height: height),
+            { inputIndex, destination in
+                callbackHolder.region(inputIndex: inputIndex, destination: destination)
+            },
+            image,
+            arguments,
+            &error
+        )
+        try ci_kernel_output(output, error, "CIWarpKernel.apply(extent:roiCallback:image:arguments:)", outImage)
+    }
 }
