@@ -92,7 +92,9 @@ pub use image::CIImage;
 pub use image_accumulator::CIImageAccumulator;
 /// Re-exports the `CoreImage` framework surface for this item.
 pub use image_processor::{
-    CIImageProcessor, CIImageProcessorInput, CIImageProcessorInvocation, CIImageProcessorOutput,
+    CIImageProcessor, CIImageProcessorInput, CIImageProcessorInputBuffer,
+    CIImageProcessorInvocation, CIImageProcessorKernel, CIImageProcessorOutput,
+    CIImageProcessorOutputBuffer,
 };
 /// Re-exports the `CoreImage` framework surface for this item.
 pub use kernel::{
@@ -139,7 +141,8 @@ pub mod prelude {
         CIFilter, CIFilterCategory, CIFilterConstructor, CIFilterGenerator,
         CIFilterGeneratorExportedKey, CIFilterShape, CIFormat, CIImage, CIImageAccumulator,
         CIImageAutoAdjustmentOptionKey, CIImageOptionKey, CIImageProcessor, CIImageProcessorInput,
-        CIImageProcessorInvocation, CIImageProcessorOutput, CIImageProviderOptionKey,
+        CIImageProcessorInputBuffer, CIImageProcessorInvocation, CIImageProcessorKernel,
+        CIImageProcessorOutput, CIImageProcessorOutputBuffer, CIImageProviderOptionKey,
         CIImageRepresentationOptionKey, CIInputKey, CIKernel, CIKernelArgument, CIOutputKey, CIPlugIn,
         CIPlugInRegistration, CIQRCodeErrorCorrectionLevel, CIRAWDecoderVersion, CIRAWFilter,
         CIRenderDestination, CIRenderDestinationAlphaMode, CIRenderInfo, CIRenderTask, CISampler,

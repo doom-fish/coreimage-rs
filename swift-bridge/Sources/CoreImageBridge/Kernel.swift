@@ -20,7 +20,7 @@ public typealias CIXContextReleaseCallback = @convention(c) (
 ) -> Void
 
 final class BridgeRegionOfInterestCallback {
-    private let context: UnsafeMutableRawPointer?
+    let context: UnsafeMutableRawPointer?
     private let callback: CIXRegionOfInterestCallback?
     private let releaseCallback: CIXContextReleaseCallback?
 

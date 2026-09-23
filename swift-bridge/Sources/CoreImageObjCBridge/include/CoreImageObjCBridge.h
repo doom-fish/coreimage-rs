@@ -34,4 +34,12 @@ CIImage * _Nullable CIXTryApplyWarpKernel(
     NSError * _Nullable * _Nullable error
 );
 
+CIImage * _Nullable CIXTryApplyImageProcessor(
+    Class kernelClass,
+    CGRect extent,
+    NSArray<CIImage *> *inputs,
+    NSDictionary<NSString *, id> *arguments,
+    NSError * _Nullable * _Nullable error
+);
+
 NS_ASSUME_NONNULL_END

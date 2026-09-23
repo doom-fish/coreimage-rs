@@ -68,3 +68,26 @@ CIImage * _Nullable CIXTryApplyWarpKernel(
         return nil;
     }
 }
+
+CIImage * _Nullable CIXTryApplyImageProcessor(
+    Class kernelClass,
+    CGRect extent,
+    NSArray<CIImage *> *inputs,
+    NSDictionary<NSString *, id> *arguments,
+    NSError * _Nullable * _Nullable error
+) {
+    if (![kernelClass isSubclassOfClass:[CIImageProcessorKernel class]]) {
+        if (error != NULL) {
+            *error = [NSError errorWithDomain:@"CoreImageObjCBridge"
+                                         code:2
+                                     userInfo:@{NSLocalizedDescriptionKey: @"not a CIImageProcessorKernel subclass"}];
+        }
+        return nil;
+    }
+    @try {
+        return [kernelClass applyWithExtent:extent inputs:inputs arguments:arguments error:error];
+    } @catch (NSException *exception) {
+        CIXStoreException(exception, error);
+        return nil;
+    }
+}
