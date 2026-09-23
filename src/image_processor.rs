@@ -497,53 +497,38 @@ fn ranges_overlap(first: (usize, usize), second: (usize, usize)) -> bool {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
-unsafe fn run_processor(
-    context: *mut c_void,
+unsafe fn input_buffers<'a>(
     input_count: usize,
     input_bases: *const *const u8,
     input_bytes_per_row: *const usize,
     input_formats: *const i32,
     input_regions: *const f64,
-    output_base: *mut u8,
-    output_layout: BufferLayout,
-) -> Result<(), String> {
-    if output_layout.len > 0 && output_base.is_null() {
-        return Err("Core Image supplied no output memory".to_string());
+    output_range: (usize, usize),
+) -> Result<Vec<CIImageProcessorInputBuffer<'a>>, String> {
+    if input_count == 0 {
+        return Ok(Vec::new());
     }
     let region_count = input_count
         .checked_mul(4)
         .ok_or_else(|| "too many processor inputs".to_string())?;
-    if input_count > 0
-        && (input_bases.is_null()
-            || input_bytes_per_row.is_null()
-            || input_formats.is_null()
-            || input_regions.is_null())
+    if input_bases.is_null()
+        || input_bytes_per_row.is_null()
+        || input_formats.is_null()
+        || input_regions.is_null()
     {
         return Err("Core Image supplied no input descriptions".to_string());
     }
-    let (bases, strides, formats, regions): (&[*const u8], &[usize], &[i32], &[f64]) =
-        if input_count == 0 {
-            (&[], &[], &[], &[])
-        } else {
-            unsafe {
-                (
-                    slice::from_raw_parts(input_bases, input_count),
-                    slice::from_raw_parts(input_bytes_per_row, input_count),
-                    slice::from_raw_parts(input_formats, input_count),
-                    slice::from_raw_parts(input_regions, region_count),
-                )
-            }
-        };
-    let output_range = (output_base as usize, output_layout.len);
+    let (bases, strides, formats, regions) = unsafe {
+        (
+            slice::from_raw_parts(input_bases, input_count),
+            slice::from_raw_parts(input_bytes_per_row, input_count),
+            slice::from_raw_parts(input_formats, input_count),
+            slice::from_raw_parts(input_regions, region_count),
+        )
+    };
     let mut inputs = Vec::with_capacity(input_count);
-    for index in 0..input_count {
-        let region = CGRect::new(
-            regions[index * 4],
-            regions[index * 4 + 1],
-            regions[index * 4 + 2],
-            regions[index * 4 + 3],
-        );
+    for (index, region) in regions.chunks_exact(4).enumerate() {
+        let region = CGRect::new(region[0], region[1], region[2], region[3]);
         let layout = BufferLayout::new(region, formats[index], strides[index])?;
         let base = bases[index];
         if layout.len > 0 && base.is_null() {
@@ -559,6 +544,23 @@ unsafe fn run_processor(
         };
         inputs.push(CIImageProcessorInputBuffer { bytes, layout });
     }
+    Ok(inputs)
+}
+
+#[allow(clippy::too_many_arguments)]
+unsafe fn run_processor(
+    context: *mut c_void,
+    input_count: usize,
+    input_bases: *const *const u8,
+    input_bytes_per_row: *const usize,
+    input_formats: *const i32,
+    input_regions: *const f64,
+    output_base: *mut u8,
+    output_layout: BufferLayout,
+) -> Result<(), String> {
+    if output_layout.len > 0 && output_base.is_null() {
+        return Err("Core Image supplied no output memory".to_string());
+    }
     let bytes: &mut [u8] = if output_layout.len == 0 {
         Default::default()
     } else {
@@ -569,21 +571,27 @@ unsafe fn run_processor(
         layout: output_layout,
     };
     let outcome = unsafe {
-        CallbackContext::<ProcessorInvocation>::with(context, PROCESS_SITE, |invocation| {
-            (invocation.process)(&inputs, &mut output)
-        })
-    };
-    match outcome {
-        Some(Ok(())) => Ok(()),
-        Some(Err(message)) => {
-            output.bytes.fill(0);
-            Err(message)
-        }
-        None => {
-            output.bytes.fill(0);
-            Err("the image processor closure panicked".to_string())
-        }
+        input_buffers(
+            input_count,
+            input_bases,
+            input_bytes_per_row,
+            input_formats,
+            input_regions,
+            (output_base as usize, output_layout.len),
+        )
     }
+    .and_then(|inputs| {
+        unsafe {
+            CallbackContext::<ProcessorInvocation>::with(context, PROCESS_SITE, |invocation| {
+                (invocation.process)(&inputs, &mut output)
+            })
+        }
+        .unwrap_or_else(|| Err("the image processor closure panicked".to_string()))
+    });
+    if outcome.is_err() {
+        output.bytes.fill(0);
+    }
+    outcome
 }
 
 unsafe extern "C" fn processor_invoke(
@@ -889,5 +897,33 @@ mod tests {
             assert!(result.is_err());
             assert!(output.iter().all(|byte| *byte == 0));
         }
+    }
+
+    #[test]
+    fn processor_trampoline_zeroes_the_output_when_inputs_are_invalid() {
+        let context = invocation(|_, output| {
+            output.bytes_mut().fill(9);
+            Ok(())
+        });
+        let short_input = [0_u8; 4];
+        let bases = [short_input.as_ptr()];
+        let strides = [2_usize];
+        let formats = [CIFormat::Bgra8.raw_value()];
+        let regions = [0.0, 0.0, 2.0, 2.0];
+        let mut output = vec![5_u8; 16];
+        let result = unsafe {
+            run_processor(
+                context.as_ptr(),
+                1,
+                bases.as_ptr(),
+                strides.as_ptr(),
+                formats.as_ptr(),
+                regions.as_ptr(),
+                output.as_mut_ptr(),
+                layout(2.0, 2.0, CIFormat::Bgra8, 8).expect("valid layout"),
+            )
+        };
+        assert!(result.is_err());
+        assert!(output.iter().all(|byte| *byte == 0));
     }
 }
