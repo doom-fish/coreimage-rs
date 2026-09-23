@@ -99,6 +99,10 @@ public func ci_image_from_bitmap(
         else {
             throw CIBridgeError.invalidArgument("missing bitmap bytes, format, or output image pointer")
         }
+        let (requiredLength, overflow) = bytesPerRow.multipliedReportingOverflow(by: height)
+        guard !overflow, requiredLength <= len else {
+            throw CIBridgeError.invalidArgument("bitmap rows exceed the supplied bytes")
+        }
         let data = Data(bytes: bytes, count: len)
         let colorSpace = useColorSpace ? ci_color_space(from: colorSpaceCode) : nil
         let image = CIImage(

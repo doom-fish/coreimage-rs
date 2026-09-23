@@ -162,6 +162,19 @@ impl CIImage {
         format: CIFormat,
         color_space: Option<CIColorSpace>,
     ) -> Result<Self, CIError> {
+        if width == 0 || height == 0 {
+            return Err(CIError::InvalidArgument(format!(
+                "bitmap dimensions must be non-zero, got {width}x{height}"
+            )));
+        }
+        let row_len = width
+            .checked_mul(format.bytes_per_pixel())
+            .ok_or_else(|| CIError::InvalidArgument("bitmap row length overflowed".to_string()))?;
+        if bytes_per_row < row_len {
+            return Err(CIError::InvalidArgument(format!(
+                "bytes_per_row {bytes_per_row} is smaller than the {row_len} bytes a {width}-pixel {format:?} row needs"
+            )));
+        }
         let required_len = bytes_per_row
             .checked_mul(height)
             .ok_or_else(|| CIError::InvalidArgument("bitmap dimensions overflowed".to_string()))?;

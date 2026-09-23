@@ -28,3 +28,34 @@ pub fn target_path(name: &str) -> PathBuf {
     fs::create_dir_all(&dir).expect("failed to create target/coreimage-tests");
     dir.join(name)
 }
+
+pub fn render_rgba8(context: &CIContext, image: &CIImage, width: usize, height: usize) -> Vec<[u8; 4]> {
+    let mut destination =
+        CIRenderDestination::bitmap_rgba8(width, height).expect("RGBA8 destination should exist");
+    context
+        .start_render_task(image, &mut destination)
+        .expect("render task should start")
+        .wait_until_completed()
+        .expect("render task should complete");
+    let row_bytes = destination.bytes_per_row();
+    let bytes = destination
+        .bitmap_data()
+        .expect("completed destination should expose its bytes");
+    (0..height)
+        .flat_map(|row| {
+            (0..width).map(move |column| {
+                let start = row * row_bytes + column * 4;
+                [bytes[start], bytes[start + 1], bytes[start + 2], bytes[start + 3]]
+            })
+        })
+        .collect()
+}
+
+pub fn assert_pixel_near(actual: [u8; 4], expected: [u8; 4]) {
+    for (channel, (actual_value, expected_value)) in actual.iter().zip(expected).enumerate() {
+        assert!(
+            actual_value.abs_diff(expected_value) <= 2,
+            "channel {channel}: expected {expected:?}, got {actual:?}"
+        );
+    }
+}
