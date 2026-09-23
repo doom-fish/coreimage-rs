@@ -1,5 +1,42 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.5.0] - Unreleased
+
+### Security
+
+- `CIImage::from_bitmap` accepted a `bytes_per_row` shorter than `width × bytes_per_pixel`, so Core Image could read past the copied bytes when rendering (for example 4 bytes declared as a 1000-pixel RGBA8 row). It now rejects short strides using `CIFormat::bytes_per_pixel`, rejects zero width or height, keeps every size computation checked, and the Swift bridge repeats the length check.
+
+### Fixed
+
+- `CIContext::with_options` returns `CIError::NullResult` instead of panicking when Core Image returns no context.
+- The callback trampolines use the `doom-fish-utils` panic helpers instead of a private copy; panic diagnostics now come from `doom-fish-utils`.
+- Framework errors carry Core Image's own description (`CINonLocalizedDescriptionKey` and its underlying errors) instead of "The operation couldn't be completed".
+- README, COVERAGE and the audit tables no longer count `CIImageProcessorKernel` as covered by the hard-coded passthrough test kernel, state that the audit counts symbols from the macOS 26.2 SDK rather than methods, and list what `CIKernel.h` and `CIImageProcessor.h` still leave unwrapped. The README now states the macOS 11 minimum and how later APIs behave on older systems.
+
+### Changed
+
+- **Breaking:** requires `apple-cf >=0.11, <0.12` and, for the `metal` feature, `apple-metal >=0.10, <0.11`; both appear in the public API (`CGImage`, `CGRect`, `CVPixelBuffer`, `IOSurface`, `MetalDevice`, `CommandQueue`).
+- **Breaking:** `rust-version` is 1.82 (was 1.76); `doom-fish-utils >=0.4.1, <0.5` is a new dependency.
+- The warp region-of-interest callback of `CIWarpKernel::apply_image_scalar_with_roi` is now owned by a reference-counted callback context shared with the new kernel and processor APIs; behaviour is unchanged.
+
+### Deprecated
+
+- `CIColorKernel::from_source` and `CIWarpKernel::from_source`: the Core Image Kernel Language has been deprecated since macOS 10.14. Use `from_metal_library_data`.
+
+### Added
+
+- Metal kernels: `from_metal_library_data(function_name, data, output_format)` on `CIKernel`, `CIColorKernel`, `CIWarpKernel` and `CIBlendKernel` (`kernelWithFunctionName:fromMetalLibraryData:` and its `outputPixelFormat:` variant), `CIKernel::kernel_names_from_metal_library_data`, and `CIKernel::kernels_from_metal_source` (macOS 12+, `CIError::Unsupported` before).
+- `CIKernel::as_color_kernel`, `as_warp_kernel` and `as_blend_kernel`, because loading through `CIKernel` can return a subclass.
+- General kernel application with `CIKernelArgument` lists of images, scalars, vectors and colors: `CIKernel::apply(extent, arguments, region_of_interest)`, `CIColorKernel::apply(extent, arguments)` and `CIWarpKernel::apply(extent, image, arguments, region_of_interest)`. They run behind the Objective-C exception boundary; mismatched arguments return `CIError::NullResult`. Region-of-interest closures are `Send + Sync + 'static`, panic-contained (a panic falls back to that input's extent) and released with the image.
+- `CIImageProcessorKernel`: user processing in a `Send + Sync` closure over `CIImageProcessorInputBuffer` and `CIImageProcessorOutputBuffer` views, with `with_format` (Bgra8, RgbaH, RgbaF, R8, RH, RF) and `with_region_of_interest`. The views are bounds-checked against each region, format and stride, input memory overlapping the output is refused, and an `Err` or panic zeroes the output tile and fails the render with the closure's message.
+- `CIImage`, `CIContext`, `CIColor`, `CIVector`, `CIKernel`, `CIColorKernel`, `CIWarpKernel` and `CIBlendKernel` implement `Send` and `Sync`, as Core Image documents them as immutable and thread-safe (`NS_SWIFT_SENDABLE`). Mutable types stay single-threaded.
+- A compiled Core Image Metal library fixture (`tests/fixtures`) with its source and build script, used by the tests and `examples/08_kernel.rs`.
+
 ## [0.4.0] - 2026-09-07
 
 ### Changed (breaking)
