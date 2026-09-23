@@ -3,14 +3,12 @@ use core::fmt;
 use core::ptr;
 
 use apple_cf::cg::CGRect;
+use doom_fish_utils::panic_safe::{catch_user_panic_result, catch_user_panic_result_with_cleanup};
 
 use crate::color::CIColor;
 use crate::ffi;
 use crate::image::CIImage;
-use crate::util::{
-    catch_callback_panic, catch_callback_panic_with_cleanup, status_result, string_to_cstring,
-    take_owned_string,
-};
+use crate::util::{status_result, string_to_cstring, take_owned_string};
 use crate::vector::CIVector;
 use crate::CIError;
 
@@ -48,14 +46,11 @@ unsafe extern "C" fn warp_region_of_interest_invoke(
         destination_width,
         destination_height,
     );
-    let region = catch_callback_panic(
-        "CIWarpKernel region-of-interest callback",
-        context.fallback,
-        || {
-            let input_index = usize::try_from(input_index).unwrap_or_default();
-            (context.callback)(input_index, destination)
-        },
-    );
+    let region = catch_user_panic_result("CIWarpKernel region-of-interest callback", || {
+        let input_index = usize::try_from(input_index).unwrap_or_default();
+        (context.callback)(input_index, destination)
+    })
+    .unwrap_or(context.fallback);
     unsafe {
         *out_x = region.origin.x;
         *out_y = region.origin.y;
@@ -69,7 +64,7 @@ unsafe extern "C" fn warp_region_of_interest_release(context: *mut c_void) {
         return;
     }
     let state = unsafe { Some(Box::from_raw(context.cast::<WarpRegionOfInterestCallback>())) };
-    let _ = catch_callback_panic_with_cleanup(
+    let _ = catch_user_panic_result_with_cleanup(
         "CIWarpKernel region-of-interest release",
         state,
         |_| (),

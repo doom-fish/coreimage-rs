@@ -4,11 +4,11 @@ use core::ptr;
 use std::ffi::CStr;
 use std::mem;
 
+use doom_fish_utils::panic_safe::{catch_user_panic_result, catch_user_panic_result_with_cleanup};
+
 use crate::ffi;
 use crate::filter::CIFilter;
-use crate::util::{
-    catch_callback_panic, catch_callback_panic_with_cleanup, string_to_cstring,
-};
+use crate::util::string_to_cstring;
 use crate::CIError;
 
 type FilterConstructorFn = dyn Fn(&str) -> Option<CIFilter> + Send + Sync;
@@ -25,7 +25,7 @@ unsafe extern "C" fn filter_constructor_invoke(
         return ptr::null_mut();
     }
 
-    catch_callback_panic("CIFilterConstructor callback", ptr::null_mut(), || {
+    catch_user_panic_result("CIFilterConstructor callback", || {
         let context = unsafe { &*context.cast::<FilterConstructorCallback>() };
         let name = unsafe { CStr::from_ptr(name) }.to_string_lossy();
         (context.callback)(name.as_ref()).map_or(ptr::null_mut(), |filter| {
@@ -34,6 +34,7 @@ unsafe extern "C" fn filter_constructor_invoke(
             handle
         })
     })
+    .unwrap_or(ptr::null_mut())
 }
 
 unsafe extern "C" fn filter_constructor_release(context: *mut c_void) {
@@ -41,7 +42,7 @@ unsafe extern "C" fn filter_constructor_release(context: *mut c_void) {
         return;
     }
     let state = unsafe { Some(Box::from_raw(context.cast::<FilterConstructorCallback>())) };
-    let _ = catch_callback_panic_with_cleanup(
+    let _ = catch_user_panic_result_with_cleanup(
         "CIFilterConstructor release",
         state,
         |_| (),

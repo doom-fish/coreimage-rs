@@ -3,10 +3,10 @@ use core::fmt;
 use core::ptr::{self, NonNull};
 use std::path::Path;
 
+use doom_fish_utils::panic_safe::{catch_user_panic_result, catch_user_panic_result_with_cleanup};
+
 use crate::ffi;
-use crate::util::{
-    catch_callback_panic, catch_callback_panic_with_cleanup, path_to_cstring,
-};
+use crate::util::path_to_cstring;
 use crate::CIError;
 
 type PlugInRegistrationFn = dyn Fn(*mut c_void) -> bool + Send + Sync;
@@ -20,10 +20,11 @@ unsafe extern "C" fn plugin_registration_invoke(context: *mut c_void, host: *mut
         return false;
     }
 
-    catch_callback_panic("CIPlugInRegistration callback", false, || {
+    catch_user_panic_result("CIPlugInRegistration callback", || {
         let context = unsafe { &*context.cast::<PlugInRegistrationCallback>() };
         (context.callback)(host)
     })
+    .unwrap_or(false)
 }
 
 unsafe extern "C" fn plugin_registration_release(context: *mut c_void) {
@@ -31,7 +32,7 @@ unsafe extern "C" fn plugin_registration_release(context: *mut c_void) {
         return;
     }
     let state = unsafe { Some(Box::from_raw(context.cast::<PlugInRegistrationCallback>())) };
-    let _ = catch_callback_panic_with_cleanup(
+    let _ = catch_user_panic_result_with_cleanup(
         "CIPlugInRegistration release",
         state,
         |_| (),
