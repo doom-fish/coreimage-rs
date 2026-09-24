@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** `CIPlugIn::load_all_plugins` and `CIPlugIn::load_plugin` are `unsafe`, because they can load executable Image Units, which runs the plug-in's native code inside the process. `load_non_executable_plugins` and `load_non_executable_plugin` stay safe.
 - **Breaking:** requires `apple-cf >=0.11, <0.12` and, for the `metal` feature, `apple-metal >=0.10, <0.11`; both appear in the public API (`CGImage`, `CGRect`, `CVPixelBuffer`, `IOSurface`, `MetalDevice`, `CommandQueue`).
 - **Breaking:** `rust-version` is 1.82 (was 1.76); `doom-fish-utils >=0.4.1, <0.5` is a new dependency.
 - The warp region-of-interest callback of `CIWarpKernel::apply_image_scalar_with_roi` is now owned by a reference-counted callback context shared with the new kernel and processor APIs; behaviour is unchanged.
@@ -30,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 
 - `CIColorKernel::from_source` and `CIWarpKernel::from_source`: the Core Image Kernel Language has been deprecated since macOS 10.14. Use `from_metal_library_data`.
+- `CIPlugIn::load_all_plugins` and `CIPlugIn::load_plugin`: loading executable plug-ins has been deprecated since macOS 10.15. Use `load_non_executable_plugins` and `load_non_executable_plugin`.
 
 ### Added
 

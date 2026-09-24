@@ -68,7 +68,7 @@ Audit-complete here means every non-exempt public symbol from the header audit h
 | `CIImageProvider.h` | Implemented | Typed `CIImageProviderOptionKey` coverage for the audited symbols in this header; a direct provider callback bridge would be future ergonomic work. |
 | `CIKernel.h` | Implemented | Metal library kernels (`kernelWithFunctionName:fromMetalLibraryData:` with optional output format, `kernelNamesFromMetalLibraryData:`), Metal source kernels (`kernelsWithMetalString:`, macOS 12+), general `apply` for kernel, color and warp kernels, class checks, built-in blend kernels, and the deprecated Core Image Kernel Language constructors. Not wrapped: `setROISelector:` and the blend `colorSpace:` variant. |
 | `CIKernelMetalLib.h` | N/A | Metal-side header that kernel sources include (see `tests/fixtures/kernels.metal`); it declares nothing a Rust binding can call. |
-| `CIPlugIn.h` | Implemented | `CIPlugIn` loading helpers are wrapped. |
+| `CIPlugIn.h` | Implemented | `CIPlugIn` loading helpers are wrapped. The loaders that can run executable Image Units (`loadAllPlugIns`, `loadPlugIn:allowExecutableCode:`) are `unsafe` and deprecated, as in the SDK since macOS 10.15. |
 | `CIPlugInInterface.h` | Implemented | `CIPlugInRegistration` callback bridge is wrapped. |
 | `CIRAWFilter_Deprecated.h` | Exempt | Deprecated RAW filter constants remain intentionally excluded from the audit. |
 | `CIRAWFilter.h` | Implemented | Practical RAW construction, decoder-version discovery, preview/output access, and common adjustment helpers cover every non-exempt audited symbol. |

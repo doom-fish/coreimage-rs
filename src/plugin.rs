@@ -119,7 +119,12 @@ pub struct CIPlugIn;
 
 impl CIPlugIn {
 /// Calls the `CoreImage` framework counterpart for `load_all_plugins`.
-    pub fn load_all_plugins() {
+    #[deprecated(
+        since = "0.5.0",
+        note = "loads and runs executable Image Units, deprecated since macOS 10.15; use load_non_executable_plugins"
+    )]
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn load_all_plugins() {
         unsafe { ffi::ci_plugin_load_all_plugins() };
     }
 
@@ -129,7 +134,15 @@ impl CIPlugIn {
     }
 
 /// Calls the `CoreImage` framework counterpart for `load_plugin`.
-    pub fn load_plugin(path: impl AsRef<Path>, allow_executable_code: bool) -> Result<(), CIError> {
+    #[deprecated(
+        since = "0.5.0",
+        note = "can load and run executable Image Units, deprecated since macOS 10.15; use load_non_executable_plugin"
+    )]
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn load_plugin(
+        path: impl AsRef<Path>,
+        allow_executable_code: bool,
+    ) -> Result<(), CIError> {
         let path = path_to_cstring(path.as_ref())?;
         unsafe { ffi::ci_plugin_load_plugin(path.as_ptr(), allow_executable_code) };
         Ok(())
