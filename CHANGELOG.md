@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The callback trampolines use the `doom-fish-utils` panic helpers instead of a private copy; panic diagnostics now come from `doom-fish-utils`.
 - Framework errors carry Core Image's own description (`CINonLocalizedDescriptionKey` and its underlying errors) instead of "The operation couldn't be completed".
 - README, COVERAGE and the audit tables no longer count `CIImageProcessorKernel` as covered by the hard-coded passthrough test kernel, state that the audit counts symbols from the macOS 26.2 SDK rather than methods, and list what `CIKernel.h` and `CIImageProcessor.h` still leave unwrapped. The README now states the macOS 11 minimum and how later APIs behave on older systems.
+- The Swift bridge checks the class of every handle it borrows. A handle of the wrong class gets the call's empty or error result instead of messages sent to an object of another class, which aborted the process with an uncaught Objective-C exception.
+- Rendering to a `CVPixelBuffer` or `IOSurface` and writing image files return `CIError::NullResult` if the sRGB color space can't be created, instead of trapping on a force unwrap.
+- The Swift bridge no longer contains `ci_block_on_async`, an unused helper whose status was written from its `Task` without synchronization and whose timeout returned while the `Task` kept running, nor the error case that only it produced.
 
 ### Changed
 

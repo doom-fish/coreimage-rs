@@ -252,4 +252,21 @@ mod tests {
             assert_close(*expected, *actual);
         }
     }
+
+    #[test]
+    fn bridge_refuses_handles_of_another_class() {
+        let color = CIColor::rgba(0.1, 0.2, 0.3, 0.4);
+        let vector = crate::CIVector::new4(1.0, 2.0, 3.0, 4.0);
+
+        assert_eq!(unsafe { ffi::ci_vector_count(color.as_ptr()) }, 0);
+        assert_eq!(
+            unsafe { ffi::ci_color_number_of_components(vector.as_ptr()) },
+            0
+        );
+        assert_eq!(unsafe { ffi::ci_vector_count(vector.as_ptr()) }, 4);
+        assert_eq!(
+            unsafe { ffi::ci_color_number_of_components(color.as_ptr()) },
+            4
+        );
+    }
 }

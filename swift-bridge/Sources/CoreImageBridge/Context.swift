@@ -117,7 +117,7 @@ public func ci_context_render_to_cv_pixel_buffer(
         else {
             throw CIBridgeError.invalidArgument("missing CIContext, CIImage, or CVPixelBuffer handle")
         }
-        context.render(image, to: buffer, bounds: image.extent, colorSpace: ci_srgb_color_space())
+        try context.render(image, to: buffer, bounds: image.extent, colorSpace: ci_srgb_color_space())
     }
 }
 
@@ -135,7 +135,7 @@ public func ci_context_render_to_iosurface(
         else {
             throw CIBridgeError.invalidArgument("missing CIContext, CIImage, or IOSurface handle")
         }
-        context.render(image, to: surface, bounds: image.extent, colorSpace: ci_srgb_color_space())
+        try context.render(image, to: surface, bounds: image.extent, colorSpace: ci_srgb_color_space())
     }
 }
 

@@ -1,6 +1,5 @@
 import CoreGraphics
 import CoreImage
-import Dispatch
 import Foundation
 import Metal
 
@@ -10,7 +9,6 @@ public let CIX_NULL_RESULT: Int32 = -2
 public let CIX_FRAMEWORK: Int32 = -3
 public let CIX_IO: Int32 = -4
 public let CIX_UNSUPPORTED: Int32 = -5
-public let CIX_UNKNOWN: Int32 = -99
 
 @inline(__always)
 public func ci_string(_ string: String) -> UnsafeMutablePointer<CChar>? {
@@ -31,7 +29,7 @@ public func ci_release(_ handle: UnsafeMutableRawPointer?) {
 @inline(__always)
 public func ci_borrow<T: AnyObject>(_ handle: UnsafeMutableRawPointer?) -> T? {
     guard let handle else { return nil }
-    return Unmanaged<T>.fromOpaque(handle).takeUnretainedValue()
+    return Unmanaged<AnyObject>.fromOpaque(handle).takeUnretainedValue() as? T
 }
 
 public func ci_error_text(_ error: Error) -> String {
@@ -50,7 +48,6 @@ public enum CIBridgeError: Error, CustomStringConvertible {
     case unsupported(String)
     case io(String)
     case framework(Error)
-    case unknown(String)
 
     public var description: String {
         switch self {
@@ -64,8 +61,6 @@ public enum CIBridgeError: Error, CustomStringConvertible {
             return message
         case .framework(let error):
             return ci_error_text(error)
-        case .unknown(let message):
-            return message
         }
     }
 
@@ -81,8 +76,6 @@ public enum CIBridgeError: Error, CustomStringConvertible {
             return CIX_IO
         case .framework:
             return CIX_FRAMEWORK
-        case .unknown:
-            return CIX_UNKNOWN
         }
     }
 }
@@ -130,32 +123,11 @@ public func ci_run(
     }
 }
 
-public func ci_block_on_async<T>(
-    timeoutSeconds: Int = 30,
-    work: @escaping () async throws -> T,
-    onSuccess: @escaping (T) -> Void
-) -> Int32 {
-    let semaphore = DispatchSemaphore(value: 0)
-    var status = CIX_OK
-    Task {
-        do {
-            let result = try await work()
-            onSuccess(result)
-        } catch {
-            status = ci_status(from: error)
-        }
-        semaphore.signal()
+public func ci_srgb_color_space() throws -> CGColorSpace {
+    guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB) else {
+        throw CIBridgeError.nullResult("CGColorSpace(name: sRGB) returned nil")
     }
-
-    let waitResult = semaphore.wait(timeout: .now() + .seconds(timeoutSeconds))
-    if waitResult == .timedOut {
-        return CIX_UNKNOWN
-    }
-    return status
-}
-
-public func ci_srgb_color_space() -> CGColorSpace {
-    CGColorSpace(name: CGColorSpace.sRGB)!
+    return colorSpace
 }
 
 public func ci_normalize_json(_ value: Any) -> Any {
