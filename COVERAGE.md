@@ -9,7 +9,7 @@ This document tracks the public CoreImage framework headers against the surfaces
 - Exempt: 33
 - Coverage: 100.00%
 
-Audit-complete here means every non-exempt public symbol from the header audit has a typed Rust surface. It does **not** imply that every Objective-C method overload has a one-for-one ergonomic wrapper; some headers are represented by umbrella handles, typed constant families, or invocation snapshots. The audit tables were generated against MacOSX26.2.sdk and have not been regenerated against the 26.5 or 27.0 SDKs. Before 0.5.0, `CIImageProcessorKernel` was counted through a hard-coded passthrough test kernel that users could not replace; it is now backed by user closures.
+Audit-complete here means every non-exempt public symbol from the header audit has a typed Rust surface. It does **not** imply that every Objective-C method overload has a one-for-one ergonomic wrapper; some headers are represented by umbrella handles or typed constant families. The audit tables were generated against MacOSX26.2.sdk and have not been regenerated against the 26.5 or 27.0 SDKs. Before 0.5.0, `CIImageProcessorKernel` was counted through a hard-coded passthrough test kernel that users could not replace; it is now backed by user closures, and the passthrough is removed.
 
 ## Semantic correctness notes
 
@@ -18,7 +18,6 @@ Audit-complete here means every non-exempt public symbol from the header audit h
 - Synchronous `CVPixelBuffer` and `IOSurface` rendering is documented as a native write that must not overlap unsafe CPU views or retained/foreign aliases accessing the same storage.
 - Dynamic filter inputs are checked against `inputKeys` and `kCIAttributeClass`; Objective-C KVC exceptions are converted to `CIError`.
 - `CIImageProcessorKernel` closures see bounds-checked byte views derived from each region, format and stride; overlapping input and output memory, fractional or non-finite regions and short strides are refused. An `Err` or a panic zeroes the output tile and fails the render.
-- The passthrough processor's invocation fields are transferred from one synchronized retained snapshot.
 - Kernels load from compiled Core Image Metal libraries or, on macOS 12+, from Metal source, and apply to any list of image, scalar, vector and color arguments behind an Objective-C exception boundary. Region-of-interest closures are owned by a reference-counted callback context that Core Image releases with the image; a panicking closure falls back to the input's extent.
 - Warp kernels' scalar helpers default to the full source extent, with explicit destination-rect and custom ROI callback variants.
 - `CIImage`, `CIContext`, `CIColor`, `CIVector` and the kernel types are `Send + Sync` (CIContext.h documents contexts and images as immutable and thread-safe; the others are `NS_SWIFT_SENDABLE`). Mutable wrappers stay single-threaded.
@@ -37,7 +36,7 @@ Audit-complete here means every non-exempt public symbol from the header audit h
 | `CIVector` | Implemented | `CIVector` | `07_vector` | `tests/vector.rs` |
 | `CIKernel` | Implemented | `CIColorKernel`, `CIWarpKernel`, `CIBlendKernel`, `CIKernel`, `CIKernelArgument` | `08_kernel` | `tests/kernel.rs`, `tests/metal_kernel.rs` |
 | `CIBarcodeDescriptor` | Implemented | `CIBarcodeDescriptor`, `CIQRCodeErrorCorrectionLevel`, `CIDataMatrixCodeECCVersion` | `09_barcode_descriptor` | `tests/barcode_descriptor.rs` |
-| `CIImageProcessor` | Implemented | `CIImageProcessorKernel`, `CIImageProcessorInputBuffer`, `CIImageProcessorOutputBuffer`; diagnostic `CIImageProcessor` passthrough with `CIImageProcessorInput`, `CIImageProcessorOutput`, `CIImageProcessorInvocation` | `10_image_processor` | `tests/image_processor.rs` |
+| `CIImageProcessor` | Implemented | `CIImageProcessorKernel`, `CIImageProcessorInputBuffer`, `CIImageProcessorOutputBuffer` | `10_image_processor` | `tests/image_processor.rs` |
 | `CIFeature` | Implemented | `CIFeature`, `CIFeatureKind` | `11_feature` | `tests/feature.rs` |
 | `CIFilterGenerator` | Implemented | `CIFilterGenerator`, `CIFilterGeneratorExportedKey` | `12_filter_generator` | `tests/filter_generator.rs` |
 | `CISampler` | Implemented | `CISampler`, `CISamplerOptions`, `CISamplerOptionKey` | `13_sampler` | `tests/sampler.rs` |
@@ -64,7 +63,7 @@ Audit-complete here means every non-exempt public symbol from the header audit h
 | `CIFilterShape.h` | Implemented | Extent, transform, inset, union, and intersection helpers are wrapped. |
 | `CIImage.h` | Implemented | File/data/color/bitmap creation, typed format/color-space constants, transforms, compositing, ROI helpers, and gain-map/headroom entry points with runtime availability checks. |
 | `CIImageAccumulator.h` | Implemented | Creation, extent/format/image access, mutation, dirty-rect updates, and clear are wrapped. |
-| `CIImageProcessor.h` | Implemented | Closure-backed `CIImageProcessorKernel` with CPU input/output buffers, region-of-interest closures and the six processor formats, plus the diagnostic passthrough and its invocation snapshots. Not wrapped: Metal texture and command-buffer access, `roiTileArrayForInput:`, and the multiple-output methods. |
+| `CIImageProcessor.h` | Implemented | Closure-backed `CIImageProcessorKernel` with CPU input/output buffers, region-of-interest closures and the six processor formats. Not wrapped: Metal texture and command-buffer access, `roiTileArrayForInput:`, and the multiple-output methods. |
 | `CIImageProvider.h` | Implemented | Typed `CIImageProviderOptionKey` coverage for the audited symbols in this header; a direct provider callback bridge would be future ergonomic work. |
 | `CIKernel.h` | Implemented | Metal library kernels (`kernelWithFunctionName:fromMetalLibraryData:` with optional output format, `kernelNamesFromMetalLibraryData:`), Metal source kernels (`kernelsWithMetalString:`, macOS 12+), general `apply` for kernel, color and warp kernels, class checks, built-in blend kernels, and the deprecated Core Image Kernel Language constructors. Not wrapped: `setROISelector:` and the blend `colorSpace:` variant. |
 | `CIKernelMetalLib.h` | N/A | Metal-side header that kernel sources include (see `tests/fixtures/kernels.metal`); it declares nothing a Rust binding can call. |
@@ -80,7 +79,7 @@ Audit-complete here means every non-exempt public symbol from the header audit h
 ## Notes
 
 - The audit counts dedicated typed Rust surfaces for SDK symbols. Generic stringly-typed escape hatches such as `CIFilter::new(name)` do not count unless a matching typed wrapper exists.
-- The `CIImageProcessorInput` and `CIImageProcessorOutput` protocols are surfaced as the borrowed `CIImageProcessorInputBuffer` / `CIImageProcessorOutputBuffer` views passed to processor closures, and as the passthrough's typed invocation snapshots, rather than as long-lived opaque protocol objects.
+- The `CIImageProcessorInput` and `CIImageProcessorOutput` protocols are surfaced as the borrowed `CIImageProcessorInputBuffer` / `CIImageProcessorOutputBuffer` views passed to processor closures rather than as long-lived opaque protocol objects.
 - `CIImageProvider.h` is audit-complete via typed provider-option constants; a direct callback bridge remains optional ergonomic follow-up work outside the non-exempt symbol audit.
 
 ## Verification

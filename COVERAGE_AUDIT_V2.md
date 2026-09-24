@@ -10,7 +10,7 @@ COVERAGE_PCT: 100.00%
 
 > Correctness note: current wrappers also retain bitmap render storage through task completion, validate dynamic filter KVC inputs behind an Objective-C exception boundary, transfer processor data as one synchronized snapshot, expose explicit warp ROI contracts, use the native sampler affine-array representation, and report unavailable context maximum-size methods as errors.
 
-> Scope note (0.5.0): this table was generated against MacOSX26.2.sdk and has not been regenerated against the 26.5 or 27.0 SDKs. `VERIFIED` means the symbol has a typed Rust surface, not that every method of a class is wrapped. Until 0.5.0 `CIImageProcessorKernel` was counted through a hard-coded passthrough test kernel; it now maps to the closure-backed `CIImageProcessorKernel`. `CIKernel.h` rows now include Metal library and Metal source kernels and general `apply`; `setROISelector:`, `roiTileArrayForInput:` and the multiple-output processor methods remain unwrapped.
+> Scope note (0.5.0): this table was generated against MacOSX26.2.sdk and has not been regenerated against the 26.5 or 27.0 SDKs. `VERIFIED` means the symbol has a typed Rust surface, not that every method of a class is wrapped. Until 0.5.0 `CIImageProcessorKernel` was counted through a hard-coded passthrough test kernel; it now maps to the closure-backed `CIImageProcessorKernel`, and the passthrough is removed. `CIKernel.h` rows now include Metal library and Metal source kernels and general `apply`; `setROISelector:`, `roiTileArrayForInput:` and the multiple-output processor methods remain unwrapped.
 
 ## 🟢 VERIFIED
 | Symbol | Kind | Header | Wrapped by |
@@ -474,8 +474,8 @@ COVERAGE_PCT: 100.00%
 | kCIFilterGeneratorExportedKey | const | CIFilterGenerator.h | CIFilterGeneratorExportedKey |
 | kCIFilterGeneratorExportedKeyName | const | CIFilterGenerator.h | CIFilterGeneratorExportedKey |
 | kCIFilterGeneratorExportedKeyTargetObject | const | CIFilterGenerator.h | CIFilterGeneratorExportedKey |
-| CIImageProcessorInput | protocol | CIImageProcessor.h | CIImageProcessorInputBuffer, CIImageProcessorInput |
-| CIImageProcessorOutput | protocol | CIImageProcessor.h | CIImageProcessorOutputBuffer, CIImageProcessorOutput |
+| CIImageProcessorInput | protocol | CIImageProcessor.h | CIImageProcessorInputBuffer |
+| CIImageProcessorOutput | protocol | CIImageProcessor.h | CIImageProcessorOutputBuffer |
 | kCIImageProviderTileSize | const | CIImageProvider.h | CIImageProviderOptionKey |
 | kCIImageProviderUserInfo | const | CIImageProvider.h | CIImageProviderOptionKey |
 | CIKernel | interface | CIKernel.h | CIKernel |

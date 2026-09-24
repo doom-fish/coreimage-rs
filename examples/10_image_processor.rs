@@ -24,15 +24,5 @@ fn main() -> Result<(), Box<dyn Error>> {
     let inverted = invert.apply(source.extent(), &[&source])?;
     let rendered = CIContext::new_default().render_to_cg_image(&inverted)?;
     println!("inverted image: {}x{}", rendered.width(), rendered.height());
-
-    let output = CIImageProcessor::apply_passthrough(&source)?;
-    let extent = output.extent();
-    let invocation = CIImageProcessor::last_invocation();
-    println!("passthrough extent: {}x{}", extent.size.width, extent.size.height);
-    println!("passthrough input count: {}", invocation.input_count());
-    println!(
-        "passthrough snapshot: {}",
-        CIImageProcessor::last_invocation_json()
-    );
     Ok(())
 }

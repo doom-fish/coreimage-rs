@@ -61,7 +61,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 - `CIFilterConstructor`, `CIPlugInRegistration`, kernel region-of-interest closures, and `CIImageProcessorKernel` closures require `Send + Sync + 'static` captures, because Core Image may call them on its render threads for as long as an image built from them exists. Kernel and processor closures are owned by a reference-counted callback context that Core Image releases together with the image. Callback-body and caught panic-payload destruction are contained; a panicking region-of-interest closure falls back to that input's full extent. User closure state must still implement non-panicking `Drop`; safe Rust cannot recover from multiple destructor panics in one opaque aggregate.
 - Kernel `apply` methods run behind the Objective-C exception boundary. Arguments that don't match the kernel's parameters return `CIError::NullResult`. Kernels compiled from Metal source only run on Metal-backed contexts whose device supports dynamic libraries. The Core Image Kernel Language constructors (`CIColorKernel::from_source`, `CIWarpKernel::from_source`) are deprecated, as they are in the SDK since macOS 10.14.
 - `CIImageProcessorKernel` closures get byte views built from the region, pixel format, and stride Core Image reports: each view covers exactly `bytes_per_row × (height − 1) + width × bytes_per_pixel` bytes, `row(y)` returns `None` past the region, regions must be whole pixels, and input memory overlapping the output is refused. Returning `Err` or panicking zeroes the output tile and fails the render; render tasks report the closure's message, while `CIContext::render_to_cg_image` can still return the (transparent) image. Processors run on CPU memory; Metal textures and command buffers aren't exposed.
-- `CIImageProcessor::apply_passthrough` is a diagnostic passthrough processor, and `CIImageProcessor::last_invocation` reads every field of its most recent call from one locked, retained snapshot.
 - `CIPlugIn::load_all_plugins` and `CIPlugIn::load_plugin` can load executable Image Units, which runs their native code inside the process, so they are `unsafe`. They are also deprecated, as they are in the SDK since macOS 10.15. `load_non_executable_plugins` and `load_non_executable_plugin` stay safe.
 - `CIWarpKernel::apply_image_scalar` uses the full input extent as a conservative ROI. Use `apply_image_scalar_with_destination_roi` for known local kernels, `apply_image_scalar_with_roi` for an explicit callback, or `CIWarpKernel::apply` for other argument lists.
 - EXIF orientation methods return `Result` and accept only values 1 through 8. Context maximum-size queries return `Unsupported` on macOS rather than reporting fabricated zero dimensions.
@@ -77,7 +76,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 - `CIColor` + `CIVector`: structured value wrappers for graph inputs, geometry, and transform round-tripping
 - `CIBarcodeDescriptor`: QR/Aztec/PDF417/Data Matrix descriptor construction and inspection
 - `CIColorKernel`, `CIWarpKernel`, `CIBlendKernel`, `CIKernel`: Metal library and Metal source kernels, general `apply` with `CIKernelArgument` lists and region-of-interest closures, class checks (`as_color_kernel`, `as_warp_kernel`, `as_blend_kernel`), built-in blend kernels, and the deprecated Core Image Kernel Language constructors
-- `CIImageProcessorKernel`: closure-backed processors with `CIImageProcessorInputBuffer` / `CIImageProcessorOutputBuffer` views, optional region-of-interest closures and processor pixel formats; `CIImageProcessor` keeps the diagnostic passthrough with `CIImageProcessorInput` / `CIImageProcessorOutput` invocation snapshots
+- `CIImageProcessorKernel`: closure-backed processors with `CIImageProcessorInputBuffer` / `CIImageProcessorOutputBuffer` views, optional region-of-interest closures and processor pixel formats
 - `CIFilterGenerator`, `CIFilterConstructor`, `CIPlugIn`, `CISampler`: graph composition/export helpers, thread-safe custom filter registration, plug-in loading, exported-key constants, and native affine-matrix sampler configuration
 
 ## Examples
@@ -115,7 +114,7 @@ See [COVERAGE.md](COVERAGE.md) for the framework-header audit: 466/466 non-exemp
 
 - [x] `CIImage`, `CIFilter`, `CIContext`, `CIVector`, `CIColor`
 - [x] `CIDetector`, `CIFeature`, QR feature/message inspection
-- [x] `CIBarcodeDescriptor`, `CISampler`, `CIFilterGenerator`, `CIImageProcessor`
+- [x] `CIBarcodeDescriptor`, `CISampler`, `CIFilterGenerator`
 - [x] Core kernel coverage (`CIColorKernel`, `CIWarpKernel`, `CIBlendKernel`, `CIKernel`), including Metal kernels and general argument lists
 - [x] Closure-backed `CIImageProcessorKernel`
 - [x] Builtin filter constructors + typed constant families (`CIFormat`, `CIColorSpace`, filter/input/output/apply/UI/exported/image-provider/sampler keys)
