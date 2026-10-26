@@ -10,14 +10,27 @@ use coreimage::prelude::*;
 const LIBRARY: &[u8] = include_bytes!("fixtures/kernels.metallib");
 
 fn solid(red: f64, green: f64, blue: f64, width: f64, height: f64) -> CIImage {
-    CIImage::from_color(&CIColor::rgb(red, green, blue)).cropped_to(CGRect::new(0.0, 0.0, width, height))
+    CIImage::from_color(&CIColor::rgb(red, green, blue))
+        .cropped_to(CGRect::new(0.0, 0.0, width, height))
 }
 
 fn assert_rect_eq(actual: CGRect, expected: CGRect) {
-    assert!((actual.origin.x - expected.origin.x).abs() < 1e-9, "{actual:?} != {expected:?}");
-    assert!((actual.origin.y - expected.origin.y).abs() < 1e-9, "{actual:?} != {expected:?}");
-    assert!((actual.size.width - expected.size.width).abs() < 1e-9, "{actual:?} != {expected:?}");
-    assert!((actual.size.height - expected.size.height).abs() < 1e-9, "{actual:?} != {expected:?}");
+    assert!(
+        (actual.origin.x - expected.origin.x).abs() < 1e-9,
+        "{actual:?} != {expected:?}"
+    );
+    assert!(
+        (actual.origin.y - expected.origin.y).abs() < 1e-9,
+        "{actual:?} != {expected:?}"
+    );
+    assert!(
+        (actual.size.width - expected.size.width).abs() < 1e-9,
+        "{actual:?} != {expected:?}"
+    );
+    assert!(
+        (actual.size.height - expected.size.height).abs() < 1e-9,
+        "{actual:?} != {expected:?}"
+    );
 }
 
 #[test]
@@ -25,8 +38,14 @@ fn metal_library_lists_every_kernel_function() {
     let mut names = CIKernel::kernel_names_from_metal_library_data(LIBRARY);
     names.sort();
     assert_eq!(names, ["addBlend", "mixTwo", "shiftRight", "tintTowards"]);
-    assert!(CIKernel::kernel_names_from_metal_library_data(&[]).is_empty());
-    assert!(CIKernel::kernel_names_from_metal_library_data(&[1, 2, 3]).is_empty());
+    assert_eq!(
+        CIKernel::kernel_names_from_metal_library_data(&[]),
+        [] as [std::string::String; 0]
+    );
+    assert_eq!(
+        CIKernel::kernel_names_from_metal_library_data(&[1, 2, 3]),
+        [] as [std::string::String; 0]
+    );
 }
 
 #[test]
@@ -47,7 +66,13 @@ fn metal_kernels_load_as_their_declared_class() -> Result<(), Box<dyn Error>> {
     assert!(general.as_color_kernel().is_none());
     assert!(general.as_warp_kernel().is_none());
     let loaded_warp = CIKernel::from_metal_library_data("shiftRight", LIBRARY, None)?;
-    assert_eq!(loaded_warp.as_warp_kernel().map(|kernel| kernel.name()).as_deref(), Some("shiftRight"));
+    assert_eq!(
+        loaded_warp
+            .as_warp_kernel()
+            .map(|kernel| kernel.name())
+            .as_deref(),
+        Some("shiftRight")
+    );
     assert!(loaded_warp.as_color_kernel().is_none());
     let loaded_blend = blend.as_kernel();
     assert!(loaded_blend.as_blend_kernel().is_some());
@@ -60,11 +85,15 @@ fn metal_kernels_load_as_their_declared_class() -> Result<(), Box<dyn Error>> {
 fn metal_kernel_loading_reports_errors() {
     let missing = CIKernel::from_metal_library_data("noSuchKernel", LIBRARY, None)
         .expect_err("an unknown function must not load");
-    assert!(matches!(missing, CIError::Framework(ref message) if message.contains("does not exist")));
+    assert!(
+        matches!(missing, CIError::Framework(ref message) if message.contains("does not exist"))
+    );
 
     let wrong_class = CIWarpKernel::from_metal_library_data("tintTowards", LIBRARY, None)
         .expect_err("a color kernel is not a warp kernel");
-    assert!(matches!(wrong_class, CIError::Framework(ref message) if message.contains("CIWarpKernel")));
+    assert!(
+        matches!(wrong_class, CIError::Framework(ref message) if message.contains("CIWarpKernel"))
+    );
 
     assert!(matches!(
         CIColorKernel::from_metal_library_data("mixTwo", LIBRARY, None),
@@ -96,11 +125,21 @@ fn color_kernel_binds_scalars_vectors_and_colors() -> Result<(), Box<dyn Error>>
 
     let untouched = kernel.apply(
         extent,
-        &[(&source).into(), 0.0.into(), (&no_offset).into(), (&red).into()],
+        &[
+            (&source).into(),
+            0.0.into(),
+            (&no_offset).into(),
+            (&red).into(),
+        ],
     )?;
     let tinted = kernel.apply(
         extent,
-        &[(&source).into(), 1.0.into(), (&blue_offset).into(), (&red).into()],
+        &[
+            (&source).into(),
+            1.0.into(),
+            (&blue_offset).into(),
+            (&red).into(),
+        ],
     )?;
 
     for pixel in common::render_rgba8(&context, &untouched, 4, 4) {
@@ -175,7 +214,12 @@ fn general_kernel_samples_every_image_through_its_region_callback() -> Result<()
         &[(&large_red).into(), (&large_blue).into(), 0.5.into()],
         |index, rect| {
             let offset = if index == 0 { 10.0 } else { 20.0 };
-            CGRect::new(rect.origin.x + offset, rect.origin.y, rect.size.width, rect.size.height)
+            CGRect::new(
+                rect.origin.x + offset,
+                rect.origin.y,
+                rect.size.width,
+                rect.size.height,
+            )
         },
     )?;
     let rect = CGRect::new(1.0, 1.0, 2.0, 2.0);
@@ -201,8 +245,14 @@ fn general_kernel_region_panics_fall_back_to_each_input_extent() -> Result<(), B
         |_, _| panic!("region callback panic"),
     )?;
     let rect = CGRect::new(1.0, 1.0, 1.0, 1.0);
-    assert_rect_eq(output.region_of_interest_for_image(&small, rect), small.extent());
-    assert_rect_eq(output.region_of_interest_for_image(&large, rect), large.extent());
+    assert_rect_eq(
+        output.region_of_interest_for_image(&small, rect),
+        small.extent(),
+    );
+    assert_rect_eq(
+        output.region_of_interest_for_image(&large, rect),
+        large.extent(),
+    );
     Ok(())
 }
 
@@ -232,13 +282,20 @@ fn general_kernel_errors_instead_of_crashing_on_bad_arguments() -> Result<(), Bo
 fn warp_kernel_moves_pixels_and_reports_its_region() -> Result<(), Box<dyn Error>> {
     let kernel = CIWarpKernel::from_metal_library_data("shiftRight", LIBRARY, None)?;
     let context = CIContext::new_default();
-    let pixels = [255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 255, 255];
+    let pixels = [
+        255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 255, 255, 255,
+    ];
     let input = CIImage::from_bitmap(&pixels, 4, 1, 16, CIFormat::Rgba8, Some(CIColorSpace::Srgb))?;
     let calls = Arc::new(AtomicUsize::new(0));
     let counted = Arc::clone(&calls);
     let output = kernel.apply(input.extent(), &input, &[1.0.into()], move |_, rect| {
         counted.fetch_add(1, Ordering::SeqCst);
-        CGRect::new(rect.origin.x - 1.0, rect.origin.y, rect.size.width, rect.size.height)
+        CGRect::new(
+            rect.origin.x - 1.0,
+            rect.origin.y,
+            rect.size.width,
+            rect.size.height,
+        )
     })?;
 
     let rendered = common::render_rgba8(&context, &output, 4, 1);
@@ -261,7 +318,10 @@ fn warp_kernel_moves_pixels_and_reports_its_region() -> Result<(), Box<dyn Error
 #[test]
 fn blend_kernel_from_a_metal_library_blends() -> Result<(), Box<dyn Error>> {
     let kernel = CIBlendKernel::from_metal_library_data("addBlend", LIBRARY, None)?;
-    let output = kernel.apply(&solid(1.0, 0.0, 0.0, 4.0, 4.0), &solid(0.0, 0.0, 1.0, 4.0, 4.0))?;
+    let output = kernel.apply(
+        &solid(1.0, 0.0, 0.0, 4.0, 4.0),
+        &solid(0.0, 0.0, 1.0, 4.0, 4.0),
+    )?;
     for pixel in common::render_rgba8(&CIContext::new_default(), &output, 4, 4) {
         common::assert_pixel_near(pixel, [255, 0, 255, 255]);
     }
@@ -288,7 +348,11 @@ fn region_closures_are_released_with_their_images() -> Result<(), Box<dyn Error>
     let worker = thread::spawn(move || {
         let rect = CGRect::new(0.0, 0.0, 2.0, 2.0);
         let mixed = general
-            .apply(image.extent(), &[(&image).into(), (&image).into(), 0.5.into()], mixed_roi)
+            .apply(
+                image.extent(),
+                &[(&image).into(), (&image).into(), 0.5.into()],
+                mixed_roi,
+            )
             .expect("mixTwo should apply");
         let _ = mixed.region_of_interest_for_image(&image, rect);
         let warped = warp
@@ -296,7 +360,9 @@ fn region_closures_are_released_with_their_images() -> Result<(), Box<dyn Error>
             .expect("shiftRight should apply");
         let _ = warped.region_of_interest_for_image(&image, rect);
         assert!(general.apply(image.extent(), &[], rejected_roi).is_err());
-        assert!(warp.apply(image.extent(), &image, &[], rejected_warp_roi).is_err());
+        assert!(warp
+            .apply(image.extent(), &image, &[], rejected_warp_roi)
+            .is_err());
         let copy = mixed.clone();
         drop(mixed);
         assert!((copy.extent().size.width - 4.0).abs() < f64::EPSILON);

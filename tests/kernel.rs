@@ -19,7 +19,7 @@ fn blend_kernel_applies_to_images() -> Result<(), Box<dyn Error>> {
     let generic = kernel.as_kernel();
 
     assert!((output.extent().size.width - 64.0).abs() < f64::EPSILON);
-    assert!(!kernel.name().is_empty());
+    assert_ne!(kernel.name(), "");
     assert_eq!(generic.name(), kernel.name());
     Ok(())
 }

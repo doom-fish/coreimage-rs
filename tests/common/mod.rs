@@ -29,7 +29,12 @@ pub fn target_path(name: &str) -> PathBuf {
     dir.join(name)
 }
 
-pub fn render_rgba8(context: &CIContext, image: &CIImage, width: usize, height: usize) -> Vec<[u8; 4]> {
+pub fn render_rgba8(
+    context: &CIContext,
+    image: &CIImage,
+    width: usize,
+    height: usize,
+) -> Vec<[u8; 4]> {
     let mut destination =
         CIRenderDestination::bitmap_rgba8(width, height).expect("RGBA8 destination should exist");
     context
@@ -45,7 +50,12 @@ pub fn render_rgba8(context: &CIContext, image: &CIImage, width: usize, height: 
         .flat_map(|row| {
             (0..width).map(move |column| {
                 let start = row * row_bytes + column * 4;
-                [bytes[start], bytes[start + 1], bytes[start + 2], bytes[start + 3]]
+                [
+                    bytes[start],
+                    bytes[start + 1],
+                    bytes[start + 2],
+                    bytes[start + 3],
+                ]
             })
         })
         .collect()

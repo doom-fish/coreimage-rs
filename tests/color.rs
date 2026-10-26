@@ -8,5 +8,5 @@ fn colors_expose_components() {
     assert_eq!(color.number_of_components(), 4);
     assert!((color.alpha() - 0.4).abs() < 1e-6);
     assert!(named.red() > 0.9);
-    assert!(!named.string_representation().is_empty());
+    assert_ne!(named.string_representation(), "");
 }
