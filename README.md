@@ -8,7 +8,7 @@ Safe Rust bindings for Apple's [CoreImage](https://developer.apple.com/documenta
 
 ```toml
 [dependencies]
-coreimage = "0.5"
+coreimage = "0.5.2"
 ```
 
 Features: `filters` (default) adds the typed built-in filter constructors in `coreimage::filters`; `metal` adds Metal-backed contexts through [`apple-metal`](https://github.com/doom-fish/apple-metal-rs).
@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 - `CIImage`, `CIContext`, `CIColor`, `CIVector`, and the kernel types are `Send + Sync`: Core Image documents contexts and images as immutable and shareable between threads, and marks the value and kernel classes `NS_SWIFT_SENDABLE`. Mutable types such as `CIFilter`, `CIImageAccumulator`, `CIRenderDestination`, `CIRAWFilter`, and `CIFilterGenerator` stay on one thread.
 - `CIFilterConstructor`, `CIPlugInRegistration`, kernel region-of-interest closures, and `CIImageProcessorKernel` closures require `Send + Sync + 'static` captures, because Core Image may call them on its render threads for as long as an image built from them exists. Kernel and processor closures are owned by a reference-counted callback context that Core Image releases together with the image. Callback-body and caught panic-payload destruction are contained; a panicking region-of-interest closure falls back to that input's full extent. User closure state must still implement non-panicking `Drop`; safe Rust cannot recover from multiple destructor panics in one opaque aggregate.
 - Kernel `apply` methods run behind the Objective-C exception boundary. Arguments that don't match the kernel's parameters return `CIError::NullResult`. Kernels compiled from Metal source only run on Metal-backed contexts whose device supports dynamic libraries. The Core Image Kernel Language constructors (`CIColorKernel::from_source`, `CIWarpKernel::from_source`) are deprecated, as they are in the SDK since macOS 10.14.
-- `CIImageProcessorKernel` closures get byte views built from the region, pixel format, and stride Core Image reports: each view covers exactly `bytes_per_row × (height − 1) + width × bytes_per_pixel` bytes, `row(y)` returns `None` past the region, regions must be whole pixels, and input memory overlapping the output is refused. Returning `Err` or panicking zeroes the output tile and fails the render; render tasks report the closure's message, while `CIContext::render_to_cg_image` can still return the (transparent) image. Processors run on CPU memory; Metal textures and command buffers aren't exposed.
+- `CIImageProcessorKernel` processes whole-pixel regions in CPU memory. `row(y)` returns `None` outside the region. Render tasks report errors from the closure.
 - `CIPlugIn::load_all_plugins` and `CIPlugIn::load_plugin` can load executable Image Units, which runs their native code inside the process, so they are `unsafe`. They are also deprecated, as they are in the SDK since macOS 10.15. `load_non_executable_plugins` and `load_non_executable_plugin` stay safe.
 - `CIWarpKernel::apply_image_scalar` uses the full input extent as a conservative ROI. Use `apply_image_scalar_with_destination_roi` for known local kernels, `apply_image_scalar_with_roi` for an explicit callback, or `CIWarpKernel::apply` for other argument lists.
 - EXIF orientation methods return `Result` and accept only values 1 through 8. Context maximum-size queries return `Unsupported` on macOS rather than reporting fabricated zero dimensions.
@@ -78,6 +78,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 - `CIColorKernel`, `CIWarpKernel`, `CIBlendKernel`, `CIKernel`: Metal library and Metal source kernels, general `apply` with `CIKernelArgument` lists and region-of-interest closures, class checks (`as_color_kernel`, `as_warp_kernel`, `as_blend_kernel`), built-in blend kernels, and the deprecated Core Image Kernel Language constructors
 - `CIImageProcessorKernel`: closure-backed processors with `CIImageProcessorInputBuffer` / `CIImageProcessorOutputBuffer` views, optional region-of-interest closures and processor pixel formats
 - `CIFilterGenerator`, `CIFilterConstructor`, `CIPlugIn`, `CISampler`: graph composition/export helpers, thread-safe custom filter registration, plug-in loading, exported-key constants, and native affine-matrix sampler configuration
+
+**On `main`, after version 0.5.2:** Use `row(y)` and `row_mut(y)` in place of the whole-tile `bytes()` and `bytes_mut()` methods.
+Rows contain pixel bytes only. `bytes_per_row()` reports the native stride, which can include padding.
+Each output row starts at zero. If the processor returns an error, Core Image receives zeroes for disjoint output pixels only.
+If the output overlaps input pixels, the processor returns an error without a write to native memory.
 
 ## Examples
 

@@ -43,6 +43,12 @@ fn pixel_count(extent: f64) -> Result<usize, String> {
 
 impl BufferLayout {
     fn new(region: CGRect, format_raw: i32, bytes_per_row: usize) -> Result<Self, String> {
+        let layout = Self::describe(region, format_raw, bytes_per_row)?;
+        layout.validate_stride()?;
+        Ok(layout)
+    }
+
+    fn describe(region: CGRect, format_raw: i32, bytes_per_row: usize) -> Result<Self, String> {
         let format = CIFormat::from_raw(format_raw)
             .ok_or_else(|| format!("Core Image supplied unknown pixel format {format_raw}"))?;
         let width = pixel_count(region.size.width)?;
@@ -50,12 +56,7 @@ impl BufferLayout {
         let row_len = width
             .checked_mul(format.bytes_per_pixel())
             .ok_or_else(|| "processor row length overflowed".to_string())?;
-        if bytes_per_row < row_len {
-            return Err(format!(
-                "processor rows of {bytes_per_row} bytes cannot hold {width} {format:?} pixels"
-            ));
-        }
-        let len = if width == 0 || height == 0 {
+        let len = if row_len == 0 || height == 0 {
             0
         } else {
             bytes_per_row
@@ -75,9 +76,22 @@ impl BufferLayout {
         })
     }
 
+    fn validate_stride(&self) -> Result<(), String> {
+        if self.bytes_per_row < self.row_len {
+            return Err(format!(
+                "processor rows of {} bytes cannot hold {} {:?} pixels",
+                self.bytes_per_row, self.width, self.format
+            ));
+        }
+        Ok(())
+    }
+
     fn row_range(&self, y: usize) -> Option<core::ops::Range<usize>> {
         if y >= self.height {
             return None;
+        }
+        if self.row_len == 0 {
+            return Some(0..0);
         }
         let start = y.checked_mul(self.bytes_per_row)?;
         Some(start..start.checked_add(self.row_len)?)
@@ -97,48 +111,47 @@ impl fmt::Debug for BufferLayout {
 }
 
 pub struct CIImageProcessorInputBuffer<'a> {
-    bytes: &'a [u8],
-    layout: BufferLayout,
+    tile: &'a InputTile,
 }
 
 impl<'a> CIImageProcessorInputBuffer<'a> {
     pub const fn region(&self) -> CGRect {
-        self.layout.region
+        self.tile.layout.region
     }
 
     pub const fn format(&self) -> CIFormat {
-        self.layout.format
+        self.tile.layout.format
     }
 
     pub const fn bytes_per_row(&self) -> usize {
-        self.layout.bytes_per_row
+        self.tile.layout.bytes_per_row
     }
 
     pub const fn width(&self) -> usize {
-        self.layout.width
+        self.tile.layout.width
     }
 
     pub const fn height(&self) -> usize {
-        self.layout.height
-    }
-
-    pub const fn bytes(&self) -> &'a [u8] {
-        self.bytes
+        self.tile.layout.height
     }
 
     pub fn row(&self, y: usize) -> Option<&'a [u8]> {
-        self.bytes.get(self.layout.row_range(y)?)
+        let range = self.tile.layout.row_range(y)?;
+        if range.is_empty() {
+            return Some(&[]);
+        }
+        Some(unsafe { slice::from_raw_parts(self.tile.base.as_ptr().add(range.start), range.len()) })
     }
 }
 
 impl fmt::Debug for CIImageProcessorInputBuffer<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.layout.fmt(f)
+        self.tile.layout.fmt(f)
     }
 }
 
 pub struct CIImageProcessorOutputBuffer<'a> {
-    bytes: &'a mut [u8],
+    pixels: &'a mut [u8],
     layout: BufferLayout,
 }
 
@@ -163,21 +176,21 @@ impl CIImageProcessorOutputBuffer<'_> {
         self.layout.height
     }
 
-    pub fn bytes(&self) -> &[u8] {
-        self.bytes
-    }
-
-    pub fn bytes_mut(&mut self) -> &mut [u8] {
-        self.bytes
-    }
-
     pub fn row(&self, y: usize) -> Option<&[u8]> {
-        self.bytes.get(self.layout.row_range(y)?)
+        self.pixels.get(self.pixel_range(y)?)
     }
 
     pub fn row_mut(&mut self, y: usize) -> Option<&mut [u8]> {
-        let range = self.layout.row_range(y)?;
-        self.bytes.get_mut(range)
+        let range = self.pixel_range(y)?;
+        self.pixels.get_mut(range)
+    }
+
+    fn pixel_range(&self, y: usize) -> Option<core::ops::Range<usize>> {
+        if y >= self.height() {
+            return None;
+        }
+        let start = y * self.layout.row_len;
+        Some(start..start + self.layout.row_len)
     }
 }
 
@@ -225,19 +238,61 @@ fn ranges_overlap(first: (usize, usize), second: (usize, usize)) -> bool {
     }
 }
 
-unsafe fn input_buffers<'a>(
+fn tile_rows_overlap(first: (usize, BufferLayout), second: (usize, BufferLayout)) -> bool {
+    let (first_base, first_layout) = first;
+    let (second_base, second_layout) = second;
+    if !ranges_overlap(
+        (first_base, first_layout.len),
+        (second_base, second_layout.len),
+    ) {
+        return false;
+    }
+    if first_base.checked_add(first_layout.len).is_none()
+        || second_base.checked_add(second_layout.len).is_none()
+        || first_layout.bytes_per_row < first_layout.row_len
+        || second_layout.bytes_per_row < second_layout.row_len
+    {
+        return true;
+    }
+    let (mut first_row, mut second_row) = (0, 0);
+    while let (Some(first), Some(second)) = (
+        first_layout.row_range(first_row),
+        second_layout.row_range(second_row),
+    ) {
+        if first_base + first.end <= second_base + second.start {
+            first_row += 1;
+        } else if second_base + second.end <= first_base + first.start {
+            second_row += 1;
+        } else {
+            return true;
+        }
+    }
+    false
+}
+
+struct InputTile {
+    base: ptr::NonNull<u8>,
+    layout: BufferLayout,
+}
+
+unsafe impl Sync for InputTile {}
+
+#[allow(clippy::too_many_arguments)]
+unsafe fn input_tiles(
     input_count: usize,
     input_bases: *const *const u8,
     input_bytes_per_row: *const usize,
     input_formats: *const i32,
     input_regions: *const f64,
-    output_range: (usize, usize),
-) -> Result<Vec<CIImageProcessorInputBuffer<'a>>, String> {
+    output: (usize, BufferLayout),
+    error: &mut Option<String>,
+) -> Result<Vec<InputTile>, String> {
     if input_count == 0 {
         return Ok(Vec::new());
     }
     let region_count = input_count
         .checked_mul(4)
+        .filter(|&count| count <= isize::MAX as usize / core::mem::size_of::<f64>())
         .ok_or_else(|| "too many processor inputs".to_string())?;
     if input_bases.is_null()
         || input_bytes_per_row.is_null()
@@ -254,25 +309,43 @@ unsafe fn input_buffers<'a>(
             slice::from_raw_parts(input_regions, region_count),
         )
     };
-    let mut inputs = Vec::with_capacity(input_count);
+    let mut tiles = Vec::new();
+    tiles
+        .try_reserve_exact(input_count)
+        .map_err(|error| format!("cannot allocate input layouts: {error}"))?;
     for (index, region) in regions.chunks_exact(4).enumerate() {
         let region = CGRect::new(region[0], region[1], region[2], region[3]);
-        let layout = BufferLayout::new(region, formats[index], strides[index])?;
-        let base = bases[index];
-        if layout.len > 0 && base.is_null() {
-            return Err(format!("Core Image supplied no memory for input {index}"));
+        let base = ptr::NonNull::new(bases[index].cast_mut());
+        let layout = match BufferLayout::describe(region, formats[index], strides[index]) {
+            Ok(layout) => layout,
+            Err(message) if base.is_none() => {
+                error.get_or_insert(message);
+                continue;
+            }
+            Err(message) => return Err(message),
+        };
+        let base = if let Some(base) = base {
+            base
+        } else if layout.row_len == 0 || layout.height == 0 {
+            ptr::NonNull::dangling()
+        } else {
+            error.get_or_insert_with(|| format!("Core Image supplied no memory for input {index}"));
+            continue;
+        };
+        let start = base.as_ptr() as usize;
+        if start.checked_add(layout.len).is_none() {
+            return Err(format!("the address range for input {index} overflowed"));
         }
-        if ranges_overlap((base as usize, layout.len), output_range) {
+        if tile_rows_overlap((start, layout), output) {
             return Err(format!("input {index} overlaps the output memory"));
         }
-        let bytes: &[u8] = if layout.len == 0 {
-            &[]
-        } else {
-            unsafe { slice::from_raw_parts(base, layout.len) }
-        };
-        inputs.push(CIImageProcessorInputBuffer { bytes, layout });
+        if let Err(message) = layout.validate_stride() {
+            error.get_or_insert(message);
+            continue;
+        }
+        tiles.push(InputTile { base, layout });
     }
-    Ok(inputs)
+    Ok(tiles)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -289,35 +362,57 @@ unsafe fn run_processor(
     if output_layout.len > 0 && output_base.is_null() {
         return Err("Core Image supplied no output memory".to_string());
     }
-    let bytes: &mut [u8] = if output_layout.len == 0 {
-        Default::default()
-    } else {
-        unsafe { slice::from_raw_parts_mut(output_base, output_layout.len) }
-    };
-    let mut output = CIImageProcessorOutputBuffer {
-        bytes,
-        layout: output_layout,
-    };
-    let outcome = unsafe {
-        input_buffers(
+    let output_address = output_base as usize;
+    if output_address.checked_add(output_layout.len).is_none() {
+        return Err("the output address range overflowed".to_string());
+    }
+    let mut input_error = None;
+    let tiles = unsafe {
+        input_tiles(
             input_count,
             input_bases,
             input_bytes_per_row,
             input_formats,
             input_regions,
-            (output_base as usize, output_layout.len),
+            (output_address, output_layout),
+            &mut input_error,
         )
-    }
-    .and_then(|inputs| {
+    }?;
+    let row_len = output_layout.row_len;
+    let pixel_count = row_len * output_layout.height;
+    let mut pixels = Vec::new();
+    let outcome = (|| {
+        if let Some(error) = input_error {
+            return Err(error);
+        }
+        let inputs = tiles
+            .iter()
+            .map(|tile| CIImageProcessorInputBuffer { tile })
+            .collect::<Vec<_>>();
+        pixels
+            .try_reserve_exact(pixel_count)
+            .map_err(|error| format!("cannot allocate output pixels: {error}"))?;
+        pixels.resize(pixel_count, 0);
+        let mut output = CIImageProcessorOutputBuffer {
+            pixels: &mut pixels,
+            layout: output_layout,
+        };
         unsafe {
             CallbackContext::<ProcessorInvocation>::with(context, PROCESS_SITE, |invocation| {
                 (invocation.process)(&inputs, &mut output)
             })
         }
         .unwrap_or_else(|| Err("the image processor closure panicked".to_string()))
-    });
-    if outcome.is_err() {
-        output.bytes.fill(0);
+    })();
+    if output_layout.len > 0 {
+        for y in 0..output_layout.height {
+            let row = unsafe { output_base.add(y * output_layout.bytes_per_row) };
+            if outcome.is_ok() {
+                unsafe { ptr::copy_nonoverlapping(pixels.as_ptr().add(y * row_len), row, row_len) };
+            } else {
+                unsafe { row.write_bytes(0, row_len) };
+            }
+        }
     }
     outcome
 }
@@ -523,7 +618,9 @@ mod tests {
         let mut output = [0_u8; 28];
         let context = invocation(|inputs, output| {
             let input = inputs.first().ok_or("missing input")?;
-            if input.bytes().len() != 28 || input.row(1).map(<[u8]>::len) != Some(12) {
+            if input.row(0).map(<[u8]>::len) != Some(12)
+                || input.row(1).map(<[u8]>::len) != Some(12)
+            {
                 return Err("unexpected input view".to_string());
             }
             for y in 0..output.height() {
@@ -600,11 +697,15 @@ mod tests {
     fn processor_trampoline_zeroes_the_output_after_errors_and_panics() {
         let failing = [
             invocation(|_, output| {
-                output.bytes_mut().fill(9);
+                for y in 0..output.height() {
+                    output.row_mut(y).expect("output row").fill(9);
+                }
                 Err("refused".to_string())
             }),
             invocation(|_, output| {
-                output.bytes_mut().fill(9);
+                for y in 0..output.height() {
+                    output.row_mut(y).expect("output row").fill(9);
+                }
                 panic!("processor closure panic")
             }),
         ];
@@ -630,7 +731,9 @@ mod tests {
     #[test]
     fn processor_trampoline_zeroes_the_output_when_inputs_are_invalid() {
         let context = invocation(|_, output| {
-            output.bytes_mut().fill(9);
+            for y in 0..output.height() {
+                output.row_mut(y).expect("output row").fill(9);
+            }
             Ok(())
         });
         let short_input = [0_u8; 4];

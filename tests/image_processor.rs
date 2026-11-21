@@ -42,7 +42,9 @@ fn closure_processor_rewrites_every_output_row() -> Result<(), Box<dyn Error>> {
             input_height: input.height(),
             output_width: output.width(),
             output_height: output.height(),
-            input_len: input.bytes().len(),
+            input_len: (0..input.height())
+                .map(|y| input.row(y).map_or(0, <[u8]>::len))
+                .sum(),
             input_bytes_per_row: input.bytes_per_row(),
         });
         if input.row(input.height()).is_some() || output.row(output.height()).is_some() {
@@ -70,10 +72,7 @@ fn closure_processor_rewrites_every_output_row() -> Result<(), Box<dyn Error>> {
         assert_eq!(call.format, CIFormat::Bgra8);
         assert_eq!((call.input_width, call.input_height), (call.output_width, call.output_height));
         assert!(call.input_bytes_per_row >= call.input_width * 4);
-        assert_eq!(
-            call.input_len,
-            call.input_bytes_per_row * (call.input_height - 1) + call.input_width * 4
-        );
+        assert_eq!(call.input_len, call.input_width * call.input_height * 4);
     }
     Ok(())
 }
@@ -92,14 +91,18 @@ fn closure_errors_and_panics_fail_the_render_and_clear_the_tile() -> Result<(), 
     let failing = [
         (
             CIImageProcessorKernel::new(|_, output| {
-                output.bytes_mut().fill(0xff);
+                for y in 0..output.height() {
+                    output.row_mut(y).expect("output row").fill(0xff);
+                }
                 Err("refused by the closure".to_string())
             }),
             "refused by the closure",
         ),
         (
             CIImageProcessorKernel::new(|_, output| {
-                output.bytes_mut().fill(0xff);
+                for y in 0..output.height() {
+                    output.row_mut(y).expect("output row").fill(0xff);
+                }
                 panic!("processor closure panic")
             }),
             "panicked",
